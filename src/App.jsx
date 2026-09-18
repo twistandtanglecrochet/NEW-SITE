@@ -508,10 +508,15 @@ export default function App() {
     const unsub = onSnapshot(
       q,
       (snap) => {
-        // Always keep the built-in catalog, and add anything from the admin
-        // portal on top of it — never replace the existing products.
+        // Keep the built-in starter catalog, plus anything from the admin
+        // portal on top of it — except a starter product that's been
+        // imported into the admin database (it carries a matching
+        // `seedId`), which is dropped here so it isn't shown twice once
+        // it's editable from the admin portal instead.
         const fromFirestore = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        setProducts([...fromFirestore, ...SEED_PRODUCTS]);
+        const importedSeedIds = new Set(fromFirestore.map((p) => p.seedId).filter(Boolean));
+        const remainingSeed = SEED_PRODUCTS.filter((p) => !importedSeedIds.has(p.id));
+        setProducts([...fromFirestore, ...remainingSeed]);
       },
       () => {
         // If Firestore can't be reached, fall back to the built-in catalog.
