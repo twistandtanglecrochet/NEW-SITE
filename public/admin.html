@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TTC Admin — Manage Products</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  :root {
+    --maroon: #6E1E36;
+    --maroon-dark: #3F1220;
+    --cream: #FBF6F0;
+    --bg: #F3E9E2;
+    --bg-soft: #EDE0D8;
+    --charcoal: #2B2420;
+    --gold: #B98A2E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--charcoal);
+  }
+  header {
+    background: var(--maroon-dark);
+    color: var(--cream);
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 { font-size: 18px; margin: 0; }
+  header button {
+    background: var(--maroon);
+    color: var(--cream);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
+  .card {
+    background: var(--cream);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .card h2 { margin-top: 0; font-size: 16px; color: var(--maroon-dark); }
+  label { display: block; font-size: 12.5px; font-weight: 600; margin: 12px 0 4px; color: #7A6E64; }
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--bg-soft);
+    background: var(--bg);
+    font-size: 14px;
+    font-family: inherit;
+  }
+  textarea { resize: vertical; min-height: 70px; }
+  input[type="file"] { margin-top: 4px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn {
+    background: var(--maroon);
+    color: var(--cream);
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 16px;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.secondary { background: var(--bg-soft); color: var(--charcoal); }
+  .btn.danger { background: #C0392B; }
+  .thumbs { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+  .thumb-item { position: relative; width: 60px; height: 60px; }
+  .thumb-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--bg-soft); display: block; }
+  .thumb-item.is-main img { border: 2px solid var(--gold); }
+  .thumb-item .star-btn {
+    position: absolute; top: -7px; left: -7px; width: 20px; height: 20px; border-radius: 50%;
+    border: none; background: #fff; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.35); padding: 0;
+  }
+  .thumb-item .remove-btn {
+    position: absolute; top: -7px; right: -7px; width: 18px; height: 18px; border-radius: 50%;
+    border: none; background: #C0392B; color: #fff; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    line-height: 1; padding: 0;
+  }
+  .thumb-item .item-label { position: absolute; bottom: -16px; left: -10px; right: -10px; text-align: center; font-size: 9px; color: #7A6E64; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .thumb-item .item-label.main { color: var(--gold); font-weight: 700; }
+  .product-list { display: flex; flex-direction: column; gap: 12px; }
+  .product-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .product-row img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+  .product-row .info { flex: 1; min-width: 0; }
+  .product-row .info .name { font-weight: 600; font-size: 14px; }
+  .product-row .info .meta { font-size: 12px; color: #7A6E64; }
+  .product-row .actions { display: flex; gap: 6px; }
+  .product-row .actions button {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .center { text-align: center; padding: 60px 20px; }
+  .center h2 { color: var(--maroon-dark); }
+  .msg { font-size: 13px; margin-top: 10px; }
+  .msg.error { color: #C0392B; }
+  .msg.success { color: #2E7D32; }
+  .hidden { display: none !important; }
+  .swatchrow { display: flex; gap: 10px; align-items: center; }
+  .swatchrow input[type="color"] { width: 44px; height: 36px; border: none; padding: 0; border-radius: 6px; background: none; }
+</style>
+</head>
+<body>
+
+<div id="signedOut" class="center hidden">
+  <h2>Twist &amp; Tangle Crochet — Admin</h2>
+  <p>Sign in with the store's Google account to manage products.</p>
+  <button class="btn" id="signInBtn">Sign in with Google</button>
+  <div class="msg error" id="authMsg"></div>
+</div>
+
+<div id="notAllowed" class="center hidden">
+  <h2>Not authorized</h2>
+  <p>This Google account isn't allowed to manage products.</p>
+  <button class="btn secondary" id="signOutBtn2">Sign out</button>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>TTC Admin — Manage Products</h1>
+    <button id="signOutBtn">Sign out</button>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <h2 id="formTitle">Add a new product</h2>
+      <form id="productForm">
+        <input type="hidden" id="editId" value="" />
+        <label>Product name</label>
+        <input type="text" id="f_name" required />
+
+        <div class="row2">
+          <div>
+            <label>Price (PKR)</label>
+            <input type="number" id="f_price" required min="0" />
+          </div>
+          <div>
+            <label>Category</label>
+            <select id="f_category_select"></select>
+            <input type="text" id="f_category_new" placeholder="New category name" style="margin-top:8px;" class="hidden" />
+          </div>
+        </div>
+
+        <label>Tag (optional, e.g. "New")</label>
+        <input type="text" id="f_tag" placeholder="New" />
+
+        <label>Description</label>
+        <textarea id="f_desc" required></textarea>
+
+        <label>Swatch colors (used as the little color dots)</label>
+        <div class="swatchrow">
+          <input type="color" id="f_swatch1" value="#6E1E36" />
+          <input type="color" id="f_swatch2" value="#B98A2E" />
+        </div>
+
+        <label>Photos</label>
+        <input type="file" id="f_photos" accept="image/*" multiple />
+        <div class="thumbs" id="photoThumbs"></div>
+        <div style="font-size:11.5px;color:#7A6E64;margin-top:14px;">Click ☆ on any photo to make it the main image shown on the site.</div>
+
+        <label>Variants (optional — e.g. different colors, each with its own photo)</label>
+        <div class="thumbs" id="variantThumbs"></div>
+        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center;">
+          <input type="text" id="f_variant_name" placeholder="Variant name (e.g. Red)" style="width:auto; flex:1; min-width:140px;" />
+          <input type="file" id="f_variant_photo" accept="image/*" style="width:auto;" />
+          <button type="button" class="btn secondary" id="addVariantBtn" style="margin-top:0;">Add variant</button>
+        </div>
+        <div style="font-size:11.5px;color:#7A6E64;margin-top:4px;">If you add variants, they replace the plain photo gallery on the site — customers tap a variant to switch its photo.</div>
+
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button type="submit" class="btn" id="submitBtn">Add product</button>
+          <button type="button" class="btn secondary hidden" id="cancelEditBtn">Cancel edit</button>
+        </div>
+        <div class="msg" id="formMsg"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Current products (<span id="countLabel">0</span>)</h2>
+      <div class="msg error hidden" id="listError"></div>
+      <div class="product-list" id="productList"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+    onSnapshot, query, orderBy, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDWU7UDR7Q0s9k1ZAfdiqmoupKoOAVHuC8",
+    authDomain: "ttc1-e7b35.firebaseapp.com",
+    projectId: "ttc1-e7b35",
+    storageBucket: "ttc1-e7b35.firebasestorage.app",
+    messagingSenderId: "351259501918",
+    appId: "1:351259501918:web:e1dc45ea924f71e5a31bcf",
+    measurementId: "G-J3C8GHWQ1X",
+  };
+
+  // Cloudinary — used for photo uploads instead of Firebase Storage (no billing card needed)
+  const CLOUDINARY_CLOUD_NAME = "kqcnm3ge";
+  const CLOUDINARY_UPLOAD_PRESET = "TTC SITE";
+
+  async function uploadToCloudinary(file) {
+    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    const res = await fetch(url, { method: "POST", body: formData });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error("Cloudinary upload failed: " + errText);
+    }
+    const data = await res.json();
+    return data.secure_url;
+  }
+
+  const ADMIN_EMAIL = "twistanddtanglecrochet@gmail.com";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const db = getFirestore(app);
+
+  const $ = (id) => document.getElementById(id);
+  const signedOutEl = $("signedOut");
+  const notAllowedEl = $("notAllowed");
+  const appEl = $("app");
+
+  function showOnly(el) {
+    [signedOutEl, notAllowedEl, appEl].forEach((e) => e.classList.add("hidden"));
+    el.classList.remove("hidden");
+  }
+
+  $("signInBtn").addEventListener("click", async () => {
+    $("authMsg").textContent = "";
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      $("authMsg").textContent = e.message;
+    }
+  });
+  $("signOutBtn").addEventListener("click", () => signOut(auth));
+  $("signOutBtn2").addEventListener("click", () => signOut(auth));
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      showOnly(signedOutEl);
+      return;
+    }
+    if (user.email !== ADMIN_EMAIL) {
+      showOnly(notAllowedEl);
+      return;
+    }
+    showOnly(appEl);
+    startProductListener();
+  });
+
+  // ---- product list ----
+  let unsub = null;
+  let currentProducts = [];
+
+  function startProductListener() {
+    if (unsub) return;
+    const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+    unsub = onSnapshot(
+      q,
+      (snap) => {
+        $("listError").classList.add("hidden");
+        $("listError").textContent = "";
+        currentProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        renderList();
+      },
+      (err) => {
+        // Don't fail silently — an empty list here could otherwise look like
+        // "no products yet" when it's actually a permissions/connection problem.
+        $("listError").classList.remove("hidden");
+        $("listError").textContent =
+          "Couldn't load products (" + err.message + "). Try refreshing the page — if this keeps happening, send a screenshot of this message.";
+      }
+    );
+  }
+
+  function renderList() {
+    $("countLabel").textContent = currentProducts.length;
+    const preserveCategory = $("f_category_select").value === "__new__" ? $("f_category_new").value : $("f_category_select").value;
+    populateCategorySelect(preserveCategory);
+    const list = $("productList");
+    list.innerHTML = "";
+    if (currentProducts.length === 0) {
+      list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No products added yet. The site is currently showing its built-in starter catalog — once you add a product here, this list becomes the live catalog.</p>';
+      return;
+    }
+    currentProducts.forEach((p) => {
+      const row = document.createElement("div");
+      row.className = "product-row";
+      const img = (p.photos && p.photos[0]) || "";
+      row.innerHTML = `
+        <img src="${img}" alt="" />
+        <div class="info">
+          <div class="name">${escapeHtml(p.name)} ${p.tag ? `<span style="color:#B98A2E;">• ${escapeHtml(p.tag)}</span>` : ""}</div>
+          <div class="meta">Rs${p.price} — ${escapeHtml(p.category)}</div>
+        </div>
+        <div class="actions">
+          <button class="secondary" data-edit="${p.id}">Edit</button>
+          <button class="danger" data-delete="${p.id}" style="color:#fff;">Delete</button>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+    list.querySelectorAll("[data-edit]").forEach((btn) =>
+      btn.addEventListener("click", () => startEdit(btn.getAttribute("data-edit")))
+    );
+    list.querySelectorAll("[data-delete]").forEach((btn) =>
+      btn.addEventListener("click", () => handleDelete(btn.getAttribute("data-delete")))
+    );
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[c]));
+  }
+
+  // ---- category dropdown ----
+  function populateCategorySelect(selected) {
+    const sel = $("f_category_select");
+    const cats = Array.from(new Set(currentProducts.map((p) => p.category).filter(Boolean))).sort();
+    sel.innerHTML = "";
+    cats.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = c;
+      sel.appendChild(opt);
+    });
+    const newOpt = document.createElement("option");
+    newOpt.value = "__new__";
+    newOpt.textContent = "+ Add new category";
+    sel.appendChild(newOpt);
+
+    if (selected && cats.includes(selected)) {
+      sel.value = selected;
+      $("f_category_new").classList.add("hidden");
+    } else if (selected) {
+      sel.value = "__new__";
+      $("f_category_new").classList.remove("hidden");
+      $("f_category_new").value = selected;
+    } else {
+      sel.value = cats.length ? cats[0] : "__new__";
+      $("f_category_new").classList.toggle("hidden", sel.value !== "__new__");
+    }
+  }
+
+  $("f_category_select").addEventListener("change", () => {
+    const isNew = $("f_category_select").value === "__new__";
+    $("f_category_new").classList.toggle("hidden", !isNew);
+    if (isNew) $("f_category_new").focus();
+  });
+
+  // ---- photo & variant item management ----
+  let itemSeq = 0;
+  let photoItems = []; // { id, kind: 'existing'|'new', url, file, previewUrl }
+  let variantItems = []; // { id, kind: 'existing'|'new', name, url, file, previewUrl }
+
+  function renderPhotoThumbs() {
+    const wrap = $("photoThumbs");
+    wrap.innerHTML = "";
+    photoItems.forEach((item, i) => {
+      const src = item.kind === "existing" ? item.url : item.previewUrl;
+      const div = document.createElement("div");
+      div.className = "thumb-item" + (i === 0 ? " is-main" : "");
+      div.innerHTML = `
+        <img src="${src}" alt="" />
+        <button type="button" class="star-btn" title="Make main photo">${i === 0 ? "★" : "☆"}</button>
+        <button type="button" class="remove-btn" title="Remove">×</button>
+        <div class="item-label${i === 0 ? " main" : ""}">${i === 0 ? "Main" : ""}</div>
+      `;
+      div.querySelector(".star-btn").addEventListener("click", () => {
+        const [moved] = photoItems.splice(i, 1);
+        photoItems.unshift(moved);
+        renderPhotoThumbs();
+      });
+      div.querySelector(".remove-btn").addEventListener("click", () => {
+        const [removed] = photoItems.splice(i, 1);
+        if (removed.kind === "new" && removed.previewUrl) URL.revokeObjectURL(removed.previewUrl);
+        renderPhotoThumbs();
+      });
+      wrap.appendChild(div);
+    });
+  }
+
+  const MAX_PHOTO_BYTES = 8 * 1024 * 1024; // 8MB — generous for a phone photo, keeps uploads fast
+
+  function validatePhotoFile(file) {
+    if (!file.type || !file.type.startsWith("image/")) {
+      return "That doesn't look like an image file.";
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      return "That photo is larger than 8MB — please use a smaller photo (most phone cameras can save a smaller/compressed size).";
+    }
+    return null;
+  }
+
+  $("f_photos").addEventListener("change", () => {
+    const files = Array.from($("f_photos").files || []);
+    const problems = [];
+    files.forEach((file) => {
+      const problem = validatePhotoFile(file);
+      if (problem) {
+        problems.push(`${file.name}: ${problem}`);
+        return;
+      }
+      photoItems.push({ id: ++itemSeq, kind: "new", file, previewUrl: URL.createObjectURL(file) });
+    });
+    if (problems.length) alert(problems.join("\n"));
+    $("f_photos").value = "";
+    renderPhotoThumbs();
+  });
+
+  function renderVariantThumbs() {
+    const wrap = $("variantThumbs");
+    wrap.innerHTML = "";
+    variantItems.forEach((item, i) => {
+      const src = item.kind === "existing" ? item.url : item.previewUrl;
+      const div = document.createElement("div");
+      div.className = "thumb-item";
+      div.innerHTML = `
+        <img src="${src}" alt="" />
+        <button type="button" class="remove-btn" title="Remove">×</button>
+        <div class="item-label">${escapeHtml(item.name)}</div>
+      `;
+      div.querySelector(".remove-btn").addEventListener("click", () => {
+        const [removed] = variantItems.splice(i, 1);
+        if (removed.kind === "new" && removed.previewUrl) URL.revokeObjectURL(removed.previewUrl);
+        renderVariantThumbs();
+      });
+      wrap.appendChild(div);
+    });
+  }
+
+  $("addVariantBtn").addEventListener("click", () => {
+    const name = $("f_variant_name").value.trim();
+    const file = $("f_variant_photo").files[0];
+    if (!name || !file) {
+      alert("Give the variant a name and choose a photo for it.");
+      return;
+    }
+    const problem = validatePhotoFile(file);
+    if (problem) {
+      alert(problem);
+      return;
+    }
+    variantItems.push({ id: ++itemSeq, kind: "new", name, file, previewUrl: URL.createObjectURL(file) });
+    $("f_variant_name").value = "";
+    $("f_variant_photo").value = "";
+    renderVariantThumbs();
+  });
+
+  // ---- form: add / edit ----
+  function resetForm() {
+    $("productForm").reset();
+    $("editId").value = "";
+    $("f_swatch1").value = "#6E1E36";
+    $("f_swatch2").value = "#B98A2E";
+    photoItems.forEach((it) => { if (it.kind === "new" && it.previewUrl) URL.revokeObjectURL(it.previewUrl); });
+    photoItems = [];
+    renderPhotoThumbs();
+    variantItems.forEach((it) => { if (it.kind === "new" && it.previewUrl) URL.revokeObjectURL(it.previewUrl); });
+    variantItems = [];
+    renderVariantThumbs();
+    populateCategorySelect();
+    $("formTitle").textContent = "Add a new product";
+    $("submitBtn").textContent = "Add product";
+    $("cancelEditBtn").classList.add("hidden");
+    $("formMsg").textContent = "";
+  }
+
+  function startEdit(id) {
+    const p = currentProducts.find((x) => x.id === id);
+    if (!p) return;
+    $("editId").value = id;
+    $("f_name").value = p.name || "";
+    $("f_price").value = p.price || "";
+    $("f_tag").value = p.tag || "";
+    $("f_desc").value = p.desc || "";
+    $("f_swatch1").value = (p.swatch && p.swatch[0]) || "#6E1E36";
+    $("f_swatch2").value = (p.swatch && p.swatch[1]) || "#B98A2E";
+
+    populateCategorySelect(p.category);
+
+    photoItems = (p.photos || []).map((url) => ({ id: ++itemSeq, kind: "existing", url }));
+    renderPhotoThumbs();
+
+    variantItems = (p.variants || []).map((v) => ({ id: ++itemSeq, kind: "existing", name: v.name, url: v.photo }));
+    renderVariantThumbs();
+
+    $("formTitle").textContent = "Edit product";
+    $("submitBtn").textContent = "Save changes";
+    $("cancelEditBtn").classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  $("cancelEditBtn").addEventListener("click", resetForm);
+
+  async function handleDelete(id) {
+    if (!confirm("Delete this product? This can't be undone.")) return;
+    try {
+      await deleteDoc(doc(db, "products", id));
+    } catch (e) {
+      alert("Couldn't delete: " + e.message);
+    }
+  }
+
+  $("productForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const msg = $("formMsg");
+    msg.className = "msg";
+    msg.textContent = "Saving...";
+    $("submitBtn").disabled = true;
+
+    try {
+      const id = $("editId").value;
+
+      if (photoItems.length === 0) {
+        msg.className = "msg error";
+        msg.textContent = "Please add at least one photo.";
+        $("submitBtn").disabled = false;
+        return;
+      }
+
+      const categorySelectVal = $("f_category_select").value;
+      const category = categorySelectVal === "__new__"
+        ? $("f_category_new").value.trim()
+        : categorySelectVal;
+      if (!category) {
+        msg.className = "msg error";
+        msg.textContent = "Please choose or type a category.";
+        $("submitBtn").disabled = false;
+        return;
+      }
+
+      // Upload any newly chosen photo files — order is kept, so index 0 (marked "Main") stays first.
+      const newUploadCount =
+        photoItems.filter((it) => it.kind === "new").length + variantItems.filter((it) => it.kind === "new").length;
+      let uploadedSoFar = 0;
+      function reportUploadProgress() {
+        if (newUploadCount === 0) return;
+        uploadedSoFar++;
+        msg.className = "msg";
+        msg.textContent = `Uploading photo ${uploadedSoFar} of ${newUploadCount}...`;
+      }
+
+      const photos = [];
+      for (const item of photoItems) {
+        if (item.kind === "existing") {
+          photos.push(item.url);
+        } else {
+          photos.push(await uploadToCloudinary(item.file));
+          reportUploadProgress();
+        }
+      }
+
+      // Upload any newly chosen variant photos.
+      let variants = null;
+      if (variantItems.length > 0) {
+        variants = [];
+        for (const item of variantItems) {
+          let url;
+          if (item.kind === "existing") {
+            url = item.url;
+          } else {
+            url = await uploadToCloudinary(item.file);
+            reportUploadProgress();
+          }
+          variants.push({ name: item.name, photo: url });
+        }
+      }
+
+      msg.className = "msg";
+      msg.textContent = "Saving...";
+
+      const data = {
+        name: $("f_name").value.trim(),
+        price: Number($("f_price").value),
+        category,
+        tag: $("f_tag").value.trim() || null,
+        desc: $("f_desc").value.trim(),
+        swatch: [$("f_swatch1").value, $("f_swatch2").value],
+        photos,
+        variants,
+        real: true,
+      };
+
+      if (id) {
+        await updateDoc(doc(db, "products", id), data);
+      } else {
+        await addDoc(collection(db, "products"), { ...data, createdAt: serverTimestamp() });
+      }
+
+      msg.className = "msg success";
+      msg.textContent = "Saved! It'll appear on the site within a few seconds.";
+      resetForm();
+    } catch (err) {
+      msg.className = "msg error";
+      msg.textContent = "Something went wrong: " + err.message;
+    } finally {
+      $("submitBtn").disabled = false;
+    }
+  });
+
+  populateCategorySelect();
+  renderPhotoThumbs();
+  renderVariantThumbs();
+  showOnly(signedOutEl);
+</script>
+</body>
+</html>
