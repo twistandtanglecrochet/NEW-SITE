@@ -145,6 +145,12 @@
   </header>
 
   <div class="wrap">
+    <div class="card" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+      <div style="font-size:13px; color:#5A5048; max-width:480px;">
+        Your 13 original starter products aren't editable here yet — they still live in the site's code.
+        <a href="/import-starter-catalog.html" style="color:var(--maroon); font-weight:600;">Import them once</a> to manage them here too.
+      </div>
+    </div>
     <div class="card">
       <h2 id="formTitle">Add a new product</h2>
       <form id="productForm">
@@ -164,8 +170,14 @@
           </div>
         </div>
 
-        <label>Tag (optional, e.g. "New")</label>
-        <input type="text" id="f_tag" placeholder="New" />
+        <label>Tag (optional — shown as a small badge on the product)</label>
+        <select id="f_tag">
+          <option value="">None</option>
+          <option value="New">New</option>
+          <option value="Bestseller">Bestseller</option>
+          <option value="Limited Stock">Limited Stock</option>
+          <option value="Sold Out">Sold Out</option>
+        </select>
 
         <label>Description</label>
         <textarea id="f_desc" required></textarea>
@@ -317,7 +329,7 @@
     const list = $("productList");
     list.innerHTML = "";
     if (currentProducts.length === 0) {
-      list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No products added yet. The site is currently showing its built-in starter catalog — once you add a product here, this list becomes the live catalog.</p>';
+      list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No products added here yet. This list is separate from the site\'s built-in starter catalog (the original 13 products) — anything you add here shows up on the site alongside them.</p>';
       return;
     }
     currentProducts.forEach((p) => {
@@ -352,9 +364,25 @@
   }
 
   // ---- category dropdown ----
+  // These are the categories already used by the site's starter catalog. They're
+  // included here so the dropdown always has real choices to pick from — even
+  // before any product has been added through this admin portal — and so new
+  // products can be filed under the same categories without retyping them
+  // (which risks a typo creating a duplicate, near-identical category).
+  const KNOWN_CATEGORIES = [
+    "Crochet Keychains",
+    "Hair Clips",
+    "Crochet Purses",
+    "Crochet Earrings",
+    "Bag & Phone Charms",
+    "Hair Ties",
+  ];
+
   function populateCategorySelect(selected) {
     const sel = $("f_category_select");
-    const cats = Array.from(new Set(currentProducts.map((p) => p.category).filter(Boolean))).sort();
+    const cats = Array.from(
+      new Set([...KNOWN_CATEGORIES, ...currentProducts.map((p) => p.category).filter(Boolean)])
+    ).sort();
     sel.innerHTML = "";
     cats.forEach((c) => {
       const opt = document.createElement("option");
