@@ -113,6 +113,20 @@
     cursor: pointer;
     font-size: 12px;
   }
+  .move-col { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  .move-btn {
+    border: 1px solid var(--bg-soft);
+    background: #fff;
+    color: var(--maroon-dark);
+    width: 26px;
+    height: 22px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 10px;
+    line-height: 1;
+    padding: 0;
+  }
+  .move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
   .review-list { display: flex; flex-direction: column; gap: 12px; }
   .review-row { background: var(--bg); border-radius: 10px; padding: 12px; }
   .review-row .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
@@ -370,14 +384,28 @@
 
   function startProductListener() {
     if (unsub) return;
-    const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+    // No orderBy here on purpose — Firestore's orderBy would silently hide any
+    // product missing the "order" field, which would be every product created
+    // before the reordering feature existed. We sort client-side instead.
+    const q = query(collection(db, "products"));
     unsub = onSnapshot(
       q,
       (snap) => {
         $("listError").classList.add("hidden");
         $("listError").textContent = "";
         currentProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        currentProducts.sort((a, b) => {
+          const aHas = typeof a.order === "number";
+          const bHas = typeof b.order === "number";
+          if (aHas && bHas) return a.order - b.order;
+          if (aHas) return -1;
+          if (bHas) return 1;
+          const aTime = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+          const bTime = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          return bTime - aTime;
+        });
         renderList();
+        backfillOrderIfNeeded(currentProducts);
       },
       (err) => {
         // Don't fail silently — an empty list here could otherwise look like
@@ -387,6 +415,36 @@
           "Couldn't load products (" + err.message + "). Try refreshing the page — if this keeps happening, send a screenshot of this message.";
       }
     );
+  }
+
+  // Gives every product that doesn't have an "order" number yet one, so the
+  // move up/down buttons have something to work with. Runs automatically
+  // after every product list update, but does nothing once every product
+  // already has an order (which is the normal case after the first run).
+  let backfillInFlight = false;
+  async function backfillOrderIfNeeded(list) {
+    if (backfillInFlight) return;
+    const missing = list.filter((p) => typeof p.order !== "number");
+    if (missing.length === 0) return;
+    backfillInFlight = true;
+    try {
+      let nextOrder = list.reduce(
+        (max, p) => (typeof p.order === "number" ? Math.max(max, p.order) : max),
+        -1
+      ) + 1;
+      // `missing` is already in the list's current (createdAt-desc-first) order,
+      // so this preserves what the admin currently sees while filling the gaps.
+      for (const p of missing) {
+        await updateDoc(doc(db, "products", p.id), { order: nextOrder });
+        nextOrder++;
+      }
+    } catch (e) {
+      // Non-fatal — the list still works without order values, it just can't
+      // be reordered yet. It'll retry next time the list updates.
+      console.warn("Order backfill failed:", e.message);
+    } finally {
+      backfillInFlight = false;
+    }
   }
 
   function renderList() {
@@ -400,11 +458,17 @@
       list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No products added here yet. This list is separate from the site\'s built-in starter catalog (the original 13 products) — anything you add here shows up on the site alongside them.</p>';
       return;
     }
-    currentProducts.forEach((p) => {
+    currentProducts.forEach((p, idx) => {
       const row = document.createElement("div");
       row.className = "product-row";
       const img = (p.photos && p.photos[0]) || "";
+      const isFirst = idx === 0;
+      const isLast = idx === currentProducts.length - 1;
       row.innerHTML = `
+        <div class="move-col">
+          <button class="move-btn" data-move-up="${p.id}" title="Move up" ${isFirst ? "disabled" : ""}>▲</button>
+          <button class="move-btn" data-move-down="${p.id}" title="Move down" ${isLast ? "disabled" : ""}>▼</button>
+        </div>
         <img src="${img}" alt="" />
         <div class="info">
           <div class="name">${escapeHtml(p.name)} ${p.tag ? `<span style="color:#B98A2E;">• ${escapeHtml(p.tag)}</span>` : ""}</div>
@@ -423,6 +487,39 @@
     list.querySelectorAll("[data-delete]").forEach((btn) =>
       btn.addEventListener("click", () => handleDelete(btn.getAttribute("data-delete")))
     );
+    list.querySelectorAll("[data-move-up]").forEach((btn) =>
+      btn.addEventListener("click", () => moveProduct(btn.getAttribute("data-move-up"), "up"))
+    );
+    list.querySelectorAll("[data-move-down]").forEach((btn) =>
+      btn.addEventListener("click", () => moveProduct(btn.getAttribute("data-move-down"), "down"))
+    );
+  }
+
+  // Swaps this product's position with the one above/below it in the current
+  // list by swapping their "order" values. The onSnapshot listener picks up
+  // the change and re-renders in the new order automatically.
+  async function moveProduct(id, direction) {
+    const idx = currentProducts.findIndex((p) => p.id === id);
+    if (idx === -1) return;
+    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= currentProducts.length) return;
+
+    const current = currentProducts[idx];
+    const target = currentProducts[targetIdx];
+
+    // Both should already have numeric orders (the backfill routine ensures
+    // that), but guard against a race right after a brand-new product is added.
+    const currentOrder = typeof current.order === "number" ? current.order : idx;
+    const targetOrder = typeof target.order === "number" ? target.order : targetIdx;
+
+    try {
+      await Promise.all([
+        updateDoc(doc(db, "products", current.id), { order: targetOrder }),
+        updateDoc(doc(db, "products", target.id), { order: currentOrder }),
+      ]);
+    } catch (e) {
+      alert("Couldn't reorder: " + e.message);
+    }
   }
 
   function escapeHtml(str) {
@@ -887,9 +984,17 @@
       };
 
       if (id) {
+        // Editing an existing product shouldn't move it in the list, so its
+        // order is left untouched here.
         await updateDoc(doc(db, "products", id), data);
       } else {
-        await addDoc(collection(db, "products"), { ...data, createdAt: serverTimestamp() });
+        // New products go to the end of the list by default — the admin can
+        // then use the move up/down buttons to reposition it.
+        const maxOrder = currentProducts.reduce(
+          (max, p) => (typeof p.order === "number" ? Math.max(max, p.order) : max),
+          -1
+        );
+        await addDoc(collection(db, "products"), { ...data, order: maxOrder + 1, createdAt: serverTimestamp() });
       }
 
       msg.className = "msg success";
