@@ -695,7 +695,7 @@ export default function App() {
   }, [quickViewId, activeCategory, products]);
 
   useEffect(() => {
-    const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+    const q = query(collection(db, "products"));
     const unsub = onSnapshot(
       q,
       (snap) => {
@@ -705,6 +705,20 @@ export default function App() {
         // `seedId`), which is dropped here so it isn't shown twice once
         // it's editable from the admin portal instead.
         const fromFirestore = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        // Sort by the admin portal's custom "order" field (set via the
+        // up/down arrows there) so shop owners can control display order.
+        // Anything without an order yet (not migrated) falls back to
+        // newest-first, matching the site's old default.
+        fromFirestore.sort((a, b) => {
+          const aHas = typeof a.order === "number";
+          const bHas = typeof b.order === "number";
+          if (aHas && bHas) return a.order - b.order;
+          if (aHas) return -1;
+          if (bHas) return 1;
+          const aTime = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+          const bTime = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          return bTime - aTime;
+        });
         const importedSeedIds = new Set(fromFirestore.map((p) => p.seedId).filter(Boolean));
         const remainingSeed = SEED_PRODUCTS.filter((p) => !importedSeedIds.has(p.id));
         setProducts([...fromFirestore, ...remainingSeed]);
