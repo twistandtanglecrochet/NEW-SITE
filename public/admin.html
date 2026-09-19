@@ -113,6 +113,19 @@
     cursor: pointer;
     font-size: 12px;
   }
+  .seq-num {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--maroon-dark);
+    color: var(--cream);
+    font-size: 11.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .move-col { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
   .move-btn {
     border: 1px solid var(--bg-soft);
@@ -188,7 +201,7 @@
   <div class="wrap">
     <div class="card" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
       <div style="font-size:13px; color:#5A5048; max-width:480px;">
-        Your 13 original starter products aren't editable here yet — they still live in the site's code.
+        Your 16 starter-catalog products aren't editable here yet — they still live in the site's code.
         <a href="/import-starter-catalog.html" style="color:var(--maroon); font-weight:600;">Import them once</a> to manage them here too.
       </div>
     </div>
@@ -465,6 +478,7 @@
       const isFirst = idx === 0;
       const isLast = idx === currentProducts.length - 1;
       row.innerHTML = `
+        <div class="seq-num">${idx + 1}</div>
         <div class="move-col">
           <button class="move-btn" data-move-up="${p.id}" title="Move up" ${isFirst ? "disabled" : ""}>▲</button>
           <button class="move-btn" data-move-down="${p.id}" title="Move down" ${isLast ? "disabled" : ""}>▼</button>
