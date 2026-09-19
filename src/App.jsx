@@ -138,14 +138,14 @@ function VariantPicker({ variants, name, onImageClick }) {
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
       </div>
-      <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 8 }}>
         {variants.map((v, i) => (
           <button
             key={v.name}
             onClick={(e) => { e.stopPropagation(); setIndex(i); }}
             aria-label={v.name}
             style={{
-              flex: 1, aspectRatio: "1", borderRadius: 8, overflow: "hidden", padding: 0,
+              aspectRatio: "1", borderRadius: 8, overflow: "hidden", padding: 0,
               border: i === index ? `2px solid ${COLORS.navy}` : "2px solid transparent",
               background: "none",
             }}
