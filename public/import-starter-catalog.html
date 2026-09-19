@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TTC Admin — Import Starter Catalog</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  :root {
+    --maroon: #6E1E36;
+    --maroon-dark: #3F1220;
+    --cream: #FBF6F0;
+    --bg: #F3E9E2;
+    --bg-soft: #EDE0D8;
+    --charcoal: #2B2420;
+    --gold: #B98A2E;
+    --green: #2E7D32;
+    --red: #C0392B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--charcoal);
+  }
+  header {
+    background: var(--maroon-dark);
+    color: var(--cream);
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 { font-size: 18px; margin: 0; }
+  header button {
+    background: var(--maroon);
+    color: var(--cream);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 80px; }
+  .card {
+    background: var(--cream);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .card h2 { margin-top: 0; font-size: 16px; color: var(--maroon-dark); }
+  .card p { font-size: 13.5px; line-height: 1.5; color: #5A5048; }
+  .btn {
+    background: var(--maroon);
+    color: var(--cream);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.secondary { background: var(--bg-soft); color: var(--charcoal); }
+  .center { text-align: center; padding: 60px 20px; }
+  .center h2 { color: var(--maroon-dark); }
+  .msg { font-size: 13px; margin-top: 10px; }
+  .msg.error { color: var(--red); }
+  .msg.success { color: var(--green); }
+  .hidden { display: none !important; }
+  .progress { font-size: 13.5px; font-weight: 600; margin-top: 14px; color: var(--maroon-dark); }
+  .plist { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .prow {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg); border-radius: 10px; padding: 8px 10px;
+  }
+  .prow img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+  .prow .name { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; }
+  .prow .status { font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .status.pending { color: #7A6E64; }
+  .status.working { color: var(--gold); }
+  .status.done { color: var(--green); }
+  .status.failed { color: var(--red); }
+</style>
+</head>
+<body>
+
+<div id="signedOut" class="center hidden">
+  <h2>Twist &amp; Tangle Crochet — Admin</h2>
+  <p>Sign in with the store's Google account to continue.</p>
+  <button class="btn" id="signInBtn">Sign in with Google</button>
+  <div class="msg error" id="authMsg"></div>
+</div>
+
+<div id="notAllowed" class="center hidden">
+  <h2>Not authorized</h2>
+  <p>This Google account isn't allowed to manage products.</p>
+  <button class="btn secondary" id="signOutBtn2">Sign out</button>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>Import Starter Catalog</h1>
+    <button id="signOutBtn">Sign out</button>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>What this does</h2>
+      <p>
+        Your 13 original starter products currently live directly in the site's code, not in the
+        same database the admin portal manages — so you can't edit or delete them from
+        <strong>admin.html</strong>. This one-time tool copies each one into that database.
+        Once a product is imported, it'll show up in the admin portal's "Current products" list,
+        fully editable and deletable there, just like anything you add yourself.
+      </p>
+      <p>
+        Your live site won't change in any visible way — the products will look exactly the
+        same to customers. This is safe to run more than once: anything already imported is
+        automatically skipped, so you can't create duplicates by clicking twice.
+      </p>
+      <button class="btn" id="importBtn">Import remaining products</button>
+      <div class="progress hidden" id="progress"></div>
+      <div class="msg" id="formMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2>Starter products (<span id="countLabel">0</span>)</h2>
+      <div class="plist" id="productList"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { SEED_PRODUCTS_FOR_IMPORT } from "./import-starter-catalog-data.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDWU7UDR7Q0s9k1ZAfdiqmoupKoOAVHuC8",
+    authDomain: "ttc1-e7b35.firebaseapp.com",
+    projectId: "ttc1-e7b35",
+    storageBucket: "ttc1-e7b35.firebasestorage.app",
+    messagingSenderId: "351259501918",
+    appId: "1:351259501918:web:e1dc45ea924f71e5a31bcf",
+    measurementId: "G-J3C8GHWQ1X",
+  };
+
+  const CLOUDINARY_CLOUD_NAME = "kqcnm3ge";
+  const CLOUDINARY_UPLOAD_PRESET = "TTC SITE";
+
+  function dataUriToBlob(dataUri) {
+    const [header, base64] = dataUri.split(",");
+    const mimeMatch = header.match(/data:(.*?);base64/);
+    const mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+
+  async function uploadToCloudinary(blob, filename) {
+    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+    const formData = new FormData();
+    formData.append("file", blob, filename || "photo.jpg");
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    const res = await fetch(url, { method: "POST", body: formData });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error("Cloudinary upload failed: " + errText);
+    }
+    const data = await res.json();
+    return data.secure_url;
+  }
+
+  const ADMIN_EMAIL = "twistanddtanglecrochet@gmail.com";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const db = getFirestore(app);
+
+  const $ = (id) => document.getElementById(id);
+  const signedOutEl = $("signedOut");
+  const notAllowedEl = $("notAllowed");
+  const appEl = $("app");
+
+  function showOnly(el) {
+    [signedOutEl, notAllowedEl, appEl].forEach((e) => e.classList.add("hidden"));
+    el.classList.remove("hidden");
+  }
+
+  $("signInBtn").addEventListener("click", async () => {
+    $("authMsg").textContent = "";
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      $("authMsg").textContent = e.message;
+    }
+  });
+  $("signOutBtn").addEventListener("click", () => signOut(auth));
+  $("signOutBtn2").addEventListener("click", () => signOut(auth));
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      showOnly(signedOutEl);
+      return;
+    }
+    if (user.email !== ADMIN_EMAIL) {
+      showOnly(notAllowedEl);
+      return;
+    }
+    showOnly(appEl);
+    init();
+  });
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[c]));
+  }
+
+  function firstPreviewImage(p) {
+    if (p.photos && p.photos[0]) return p.photos[0];
+    if (p.variants && p.variants[0]) return p.variants[0].photo;
+    return "";
+  }
+
+  const importedSeedIds = new Set();
+  let initialized = false;
+
+  async function init() {
+    if (initialized) return;
+    initialized = true;
+    $("countLabel").textContent = SEED_PRODUCTS_FOR_IMPORT.length;
+
+    try {
+      const snap = await getDocs(collection(db, "products"));
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        if (data.seedId) importedSeedIds.add(data.seedId);
+      });
+    } catch (e) {
+      $("formMsg").className = "msg error";
+      $("formMsg").textContent = "Couldn't check which products are already imported: " + e.message;
+    }
+
+    renderList();
+  }
+
+  function renderList() {
+    const list = $("productList");
+    list.innerHTML = "";
+    SEED_PRODUCTS_FOR_IMPORT.forEach((p) => {
+      const row = document.createElement("div");
+      row.className = "prow";
+      row.id = "prow-" + p.id;
+      const done = importedSeedIds.has(p.id);
+      row.innerHTML = `
+        <img src="${firstPreviewImage(p)}" alt="" />
+        <div class="name">${escapeHtml(p.name)}</div>
+        <div class="status ${done ? "done" : "pending"}" id="status-${p.id}">${done ? "Imported ✓" : "Not imported yet"}</div>
+      `;
+      list.appendChild(row);
+    });
+    updateImportButton();
+  }
+
+  function updateImportButton() {
+    const remaining = SEED_PRODUCTS_FOR_IMPORT.filter((p) => !importedSeedIds.has(p.id));
+    const btn = $("importBtn");
+    if (remaining.length === 0) {
+      btn.textContent = "All products imported";
+      btn.disabled = true;
+    } else {
+      btn.textContent = `Import remaining products (${remaining.length} left)`;
+      btn.disabled = false;
+    }
+  }
+
+  function setStatus(id, text, cls) {
+    const el = $("status-" + id);
+    if (el) {
+      el.textContent = text;
+      el.className = "status " + cls;
+    }
+  }
+
+  async function importProduct(p) {
+    const photos = [];
+    for (let i = 0; i < (p.photos || []).length; i++) {
+      const blob = dataUriToBlob(p.photos[i]);
+      photos.push(await uploadToCloudinary(blob, `${p.id}-${i}.jpg`));
+    }
+    let variants = null;
+    if (p.variants && p.variants.length) {
+      variants = [];
+      for (let i = 0; i < p.variants.length; i++) {
+        const v = p.variants[i];
+        const blob = dataUriToBlob(v.photo);
+        const url = await uploadToCloudinary(blob, `${p.id}-variant-${i}.jpg`);
+        variants.push({ name: v.name, photo: url });
+      }
+    }
+    const data = {
+      name: p.name,
+      price: p.price,
+      category: p.category,
+      tag: p.tag || null,
+      desc: p.desc,
+      swatch: p.swatch || null,
+      photos,
+      variants,
+      real: true,
+      seedId: p.id,
+      createdAt: serverTimestamp(),
+    };
+    await addDoc(collection(db, "products"), data);
+  }
+
+  $("importBtn").addEventListener("click", async () => {
+    const btn = $("importBtn");
+    const progress = $("progress");
+    const msg = $("formMsg");
+    btn.disabled = true;
+    progress.classList.remove("hidden");
+    msg.textContent = "";
+
+    const remaining = SEED_PRODUCTS_FOR_IMPORT.filter((p) => !importedSeedIds.has(p.id));
+    let ok = 0;
+    let failed = 0;
+
+    for (let i = 0; i < remaining.length; i++) {
+      const p = remaining[i];
+      progress.textContent = `Importing ${i + 1} of ${remaining.length}: ${p.name}...`;
+      setStatus(p.id, "Importing...", "working");
+      try {
+        await importProduct(p);
+        importedSeedIds.add(p.id);
+        setStatus(p.id, "Imported ✓", "done");
+        ok++;
+      } catch (e) {
+        setStatus(p.id, "Failed — will retry", "failed");
+        failed++;
+      }
+    }
+
+    progress.classList.add("hidden");
+    if (failed === 0) {
+      msg.className = "msg success";
+      msg.textContent = `Done — imported ${ok} product(s). They now appear in the admin portal's product list, editable and deletable there.`;
+    } else {
+      msg.className = "msg error";
+      msg.textContent = `Imported ${ok} product(s), but ${failed} failed (likely a connection hiccup). Click "Import remaining products" again to retry just those.`;
+    }
+    updateImportButton();
+  });
+
+  showOnly(signedOutEl);
+</script>
+</body>
+</html>

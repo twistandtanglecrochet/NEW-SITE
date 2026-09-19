@@ -113,6 +113,24 @@
     cursor: pointer;
     font-size: 12px;
   }
+  .review-list { display: flex; flex-direction: column; gap: 12px; }
+  .review-row { background: var(--bg); border-radius: 10px; padding: 12px; }
+  .review-row .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+  .review-row .stars { color: var(--gold); font-size: 13px; letter-spacing: 1px; }
+  .review-row .who { font-weight: 600; font-size: 13.5px; }
+  .review-row .on { font-size: 11.5px; color: #7A6E64; margin-bottom: 6px; }
+  .review-row .comment { font-size: 13px; line-height: 1.5; margin-bottom: 10px; }
+  .review-row .status { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 3px 8px; border-radius: 999px; }
+  .review-row .status.pending { background: #FCE9C6; color: #8A5A00; }
+  .review-row .status.approved { background: #DCEFE0; color: #1E6B33; }
+  .review-row .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .review-row .actions button {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
   .center { text-align: center; padding: 60px 20px; }
   .center h2 { color: var(--maroon-dark); }
   .msg { font-size: 13px; margin-top: 10px; }
@@ -121,6 +139,15 @@
   .hidden { display: none !important; }
   .swatchrow { display: flex; gap: 10px; align-items: center; }
   .swatchrow input[type="color"] { width: 44px; height: 36px; border: none; padding: 0; border-radius: 6px; background: none; }
+  .qr-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; margin-top: 14px; }
+  .qr-box { background: #fff; border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: center; width: 168px; height: 168px; flex-shrink: 0; }
+  .qr-box img { width: 148px; height: 148px; display: block; }
+  .qr-links { flex: 1; min-width: 220px; }
+  .qr-link-row { display: flex; gap: 8px; margin-top: 6px; }
+  .qr-link-row input[type="text"] { flex: 1; font-size: 12px; }
+  .qr-link-row .btn { margin-top: 0; white-space: nowrap; }
+  .qr-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .qr-actions .btn { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -215,6 +242,41 @@
       <div class="msg error hidden" id="listError"></div>
       <div class="product-list" id="productList"></div>
     </div>
+
+    <div class="card">
+      <h2>Get a QR code to share</h2>
+      <p style="font-size:13px; color:#5A5048; margin-top:-6px;">
+        Send this to customers who order from Instagram or Facebook so they can view the product and leave a review.
+        Pick "Whole shop" for one QR code you reuse for every order, or pick a specific product for a QR that opens straight to that item's photos and review box.
+        (Only products added here show up in the list below — a starter-catalog product will appear once you import it.)
+      </p>
+      <label>What should it open?</label>
+      <select id="qr_target"></select>
+      <div class="qr-row">
+        <div class="qr-box"><img id="qr_image" alt="QR code" /></div>
+        <div class="qr-links">
+          <label style="margin-top:0;">Link</label>
+          <div class="qr-link-row">
+            <input type="text" id="qr_link" readonly />
+            <button type="button" class="btn secondary" id="qr_copy_link_btn">Copy link</button>
+          </div>
+          <div class="qr-actions">
+            <a id="qr_download_link" class="btn" href="#" style="text-decoration:none; display:inline-block;">Download QR image</a>
+            <button type="button" class="btn secondary" id="qr_copy_image_btn">Copy QR image</button>
+          </div>
+          <div class="msg" id="qr_msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Reviews (<span id="reviewPendingLabel">0</span> waiting for approval)</h2>
+      <p style="font-size:12.5px;color:#7A6E64;margin-top:-8px;">
+        A review a customer submits doesn't show on the site until you approve it here — so nothing appears without you seeing it first.
+      </p>
+      <div class="msg error hidden" id="reviewListError"></div>
+      <div class="review-list" id="reviewList"></div>
+    </div>
   </div>
 </div>
 
@@ -258,6 +320,10 @@
 
   const ADMIN_EMAIL = "twistanddtanglecrochet@gmail.com";
 
+  // Your site's live web address — used to build the links behind the QR codes below.
+  // If you ever move to your own domain (like twistandtangle.com), change this one line.
+  const SITE_DOMAIN = "https://ttcshop.vercel.app";
+
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
@@ -295,6 +361,7 @@
     }
     showOnly(appEl);
     startProductListener();
+    startReviewListener();
   });
 
   // ---- product list ----
@@ -326,6 +393,7 @@
     $("countLabel").textContent = currentProducts.length;
     const preserveCategory = $("f_category_select").value === "__new__" ? $("f_category_new").value : $("f_category_select").value;
     populateCategorySelect(preserveCategory);
+    populateQrTargetSelect();
     const list = $("productList");
     list.innerHTML = "";
     if (currentProducts.length === 0) {
@@ -361,6 +429,96 @@
     return String(str || "").replace(/[&<>"']/g, (c) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
     }[c]));
+  }
+
+  // ---- reviews ----
+  let reviewUnsub = null;
+  let currentReviews = [];
+
+  function startReviewListener() {
+    if (reviewUnsub) return;
+    const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+    reviewUnsub = onSnapshot(
+      q,
+      (snap) => {
+        $("reviewListError").classList.add("hidden");
+        $("reviewListError").textContent = "";
+        currentReviews = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        renderReviewList();
+      },
+      (err) => {
+        $("reviewListError").classList.remove("hidden");
+        $("reviewListError").textContent =
+          "Couldn't load reviews (" + err.message + "). Try refreshing the page — if this keeps happening, send a screenshot of this message.";
+      }
+    );
+  }
+
+  function renderReviewList() {
+    const pendingCount = currentReviews.filter((r) => !r.approved).length;
+    $("reviewPendingLabel").textContent = pendingCount;
+
+    const list = $("reviewList");
+    list.innerHTML = "";
+    if (currentReviews.length === 0) {
+      list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No reviews yet — they\'ll show up here as customers leave them.</p>';
+      return;
+    }
+
+    // Pending ones first, so they're never buried under older approved reviews.
+    const sorted = [...currentReviews].sort((a, b) => (a.approved === b.approved ? 0 : a.approved ? 1 : -1));
+
+    sorted.forEach((r) => {
+      const row = document.createElement("div");
+      row.className = "review-row";
+      const stars = "★".repeat(r.rating || 0) + "☆".repeat(5 - (r.rating || 0));
+      row.innerHTML = `
+        <div class="top">
+          <div>
+            <span class="stars">${stars}</span>
+            <span class="who">${escapeHtml(r.name)}</span>
+          </div>
+          <span class="status ${r.approved ? "approved" : "pending"}">${r.approved ? "Approved" : "Pending"}</span>
+        </div>
+        <div class="on">on ${escapeHtml(r.productName || "a product")}</div>
+        <div class="comment">${escapeHtml(r.comment)}</div>
+        <div class="actions">
+          ${r.approved
+            ? `<button class="secondary" data-unapprove="${r.id}">Remove from site</button>`
+            : `<button class="btn" style="margin:0;padding:6px 10px;" data-approve="${r.id}">Approve</button>`
+          }
+          <button class="danger" style="color:#fff;" data-delete-review="${r.id}">Delete</button>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+
+    list.querySelectorAll("[data-approve]").forEach((btn) =>
+      btn.addEventListener("click", () => setReviewApproved(btn.getAttribute("data-approve"), true))
+    );
+    list.querySelectorAll("[data-unapprove]").forEach((btn) =>
+      btn.addEventListener("click", () => setReviewApproved(btn.getAttribute("data-unapprove"), false))
+    );
+    list.querySelectorAll("[data-delete-review]").forEach((btn) =>
+      btn.addEventListener("click", () => handleDeleteReview(btn.getAttribute("data-delete-review")))
+    );
+  }
+
+  async function setReviewApproved(id, approved) {
+    try {
+      await updateDoc(doc(db, "reviews", id), { approved });
+    } catch (e) {
+      alert("Couldn't update this review: " + e.message);
+    }
+  }
+
+  async function handleDeleteReview(id) {
+    if (!confirm("Delete this review? This can't be undone.")) return;
+    try {
+      await deleteDoc(doc(db, "reviews", id));
+    } catch (e) {
+      alert("Couldn't delete: " + e.message);
+    }
   }
 
   // ---- category dropdown ----
@@ -412,6 +570,86 @@
     const isNew = $("f_category_select").value === "__new__";
     $("f_category_new").classList.toggle("hidden", !isNew);
     if (isNew) $("f_category_new").focus();
+  });
+
+  // ---- QR code for sharing/reviews ----
+  function populateQrTargetSelect() {
+    const sel = $("qr_target");
+    const prev = sel.value;
+    sel.innerHTML = "";
+    const wholeOpt = document.createElement("option");
+    wholeOpt.value = "";
+    wholeOpt.textContent = "Whole shop (homepage)";
+    sel.appendChild(wholeOpt);
+    currentProducts.forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+    if (prev && Array.from(sel.options).some((o) => o.value === prev)) {
+      sel.value = prev;
+    }
+    updateQrCode();
+  }
+
+  function updateQrCode() {
+    const id = $("qr_target").value;
+    const link = id ? `${SITE_DOMAIN}/product/${encodeURIComponent(id)}` : `${SITE_DOMAIN}/`;
+    $("qr_link").value = link;
+    const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(link)}`;
+    $("qr_image").src = qrImgUrl;
+    $("qr_download_link").href = qrImgUrl;
+    $("qr_msg").textContent = "";
+    $("qr_msg").className = "msg";
+  }
+
+  $("qr_target").addEventListener("change", updateQrCode);
+
+  $("qr_copy_link_btn").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText($("qr_link").value);
+      $("qr_msg").textContent = "Link copied!";
+      $("qr_msg").className = "msg success";
+    } catch (e) {
+      $("qr_msg").textContent = "Couldn't copy automatically — tap the link box above and copy it manually.";
+      $("qr_msg").className = "msg error";
+    }
+  });
+
+  $("qr_download_link").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const url = $("qr_image").src;
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = "ttc-review-qr.png";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+      $("qr_msg").textContent = "";
+      $("qr_msg").className = "msg";
+    } catch (err) {
+      $("qr_msg").textContent = 'Couldn\'t download automatically — press and hold (or right-click) the QR code above and choose "Save image".';
+      $("qr_msg").className = "msg error";
+    }
+  });
+
+  $("qr_copy_image_btn").addEventListener("click", async () => {
+    try {
+      const res = await fetch($("qr_image").src);
+      const blob = await res.blob();
+      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+      $("qr_msg").textContent = "QR image copied — you can paste it straight into an Instagram DM or WhatsApp chat.";
+      $("qr_msg").className = "msg success";
+    } catch (err) {
+      $("qr_msg").textContent = 'Copying the image isn\'t supported on this device — use "Download QR image" instead, or press and hold the QR code to save it.';
+      $("qr_msg").className = "msg error";
+    }
   });
 
   // ---- photo & variant item management ----

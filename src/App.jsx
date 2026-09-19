@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Link2, Check } from "lucide-react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star } from "lucide-react";
+import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { COLORS } from "./data/colors.js";
 import { LOGO_SRC, BG_SRC } from "./data/siteImages.js";
@@ -134,6 +134,7 @@ function VariantPicker({ variants, name, onImageClick }) {
         <img
           src={variants[index].photo}
           alt={`${name} — ${variants[index].name}`}
+          loading="lazy"
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
       </div>
@@ -149,7 +150,7 @@ function VariantPicker({ variants, name, onImageClick }) {
               background: "none",
             }}
           >
-            <img src={v.photo} alt={v.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={v.photo} alt={v.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </button>
         ))}
       </div>
@@ -170,6 +171,7 @@ function ProductPhotoGallery({ photos, name }) {
         <img
           src={photos[index]}
           alt={`${name} — handmade crochet, Twist & Tangle Crochet`}
+          loading="lazy"
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
       </div>
@@ -247,6 +249,166 @@ function ProductSwatch({ colors, real }) {
         >
           add your photo here
         </div>
+      )}
+    </div>
+  );
+}
+
+// Filled/empty star row for one review's rating (1-5, whole stars only).
+function StarRating({ rating, size = 13 }) {
+  return (
+    <div style={{ display: "flex", gap: 1 }}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star
+          key={n}
+          size={size}
+          fill={n <= rating ? COLORS.gold : "none"}
+          color={COLORS.gold}
+          strokeWidth={1.5}
+        />
+      ))}
+    </div>
+  );
+}
+
+// Compact "★ 4.8 (12)" summary used on product cards and the quick view.
+// Returns null (renders nothing) when a product has no approved reviews yet —
+// a "0 reviews" badge on every product would look worse than no badge at all.
+function RatingSummary({ reviews, size = 13, style }) {
+  if (!reviews || reviews.length === 0) return null;
+  const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 5, margin: "5px 0", ...style }}>
+      <Star size={size} fill={COLORS.gold} color={COLORS.gold} strokeWidth={1.5} />
+      <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.charcoal }}>{avg.toFixed(1)}</span>
+      <span style={{ fontSize: 12, color: "#7A6E64" }}>({reviews.length})</span>
+    </div>
+  );
+}
+
+// The reviews block shown inside the quick view / product detail: the
+// existing approved reviews for this one product, plus a form to leave a
+// new one. New reviews are NOT shown immediately — they're saved with
+// approved:false and only appear once approved from the admin portal, so a
+// spam or inappropriate submission never reaches other customers.
+function ReviewsSection({ productId, productName, reviews }) {
+  const [name, setName] = useState("");
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!name.trim() || !comment.trim() || rating < 1) {
+      setError("Please add your name, a star rating, and a short comment.");
+      return;
+    }
+    setError("");
+    setSubmitting(true);
+    try {
+      await addDoc(collection(db, "reviews"), {
+        productId,
+        productName,
+        name: name.trim(),
+        rating,
+        comment: comment.trim(),
+        approved: false,
+        createdAt: serverTimestamp(),
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setError("Couldn't submit your review — please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div style={{ marginTop: 28, borderTop: `1px solid ${COLORS.bgSoft}`, paddingTop: 20 }}>
+      <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 16, color: COLORS.maroonDark, marginBottom: 12 }}>
+        Reviews {reviews.length > 0 && `(${reviews.length})`}
+      </div>
+
+      {reviews.length > 0 ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 20 }}>
+          {reviews.map((r) => (
+            <div key={r.id}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                <StarRating rating={r.rating} />
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.charcoal }}>{r.name}</span>
+              </div>
+              <p style={{ fontSize: 13, color: "#5A4E46", lineHeight: 1.5, margin: 0 }}>{r.comment}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p style={{ fontSize: 13, color: "#7A6E64", marginBottom: 18 }}>
+          No reviews yet — be the first to share what you think.
+        </p>
+      )}
+
+      {submitted ? (
+        <p style={{ fontSize: 13, color: "#2E7D32", fontWeight: 600 }}>
+          Thanks! Your review will appear here once it's been approved.
+        </p>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal, marginBottom: 8 }}>Write a review</div>
+          <div style={{ display: "flex", gap: 3, marginBottom: 10 }}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setRating(n)}
+                onMouseEnter={() => setHoverRating(n)}
+                onMouseLeave={() => setHoverRating(0)}
+                aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                style={{ background: "none", border: "none", padding: 2, display: "flex" }}
+              >
+                <Star
+                  size={22}
+                  fill={n <= (hoverRating || rating) ? COLORS.gold : "none"}
+                  color={COLORS.gold}
+                  strokeWidth={1.5}
+                />
+              </button>
+            ))}
+          </div>
+          <input
+            placeholder="Your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={{
+              width: "100%", padding: "9px 12px", marginBottom: 8, borderRadius: 10,
+              border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg,
+            }}
+          />
+          <textarea
+            placeholder="What did you think?"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            rows={3}
+            style={{
+              width: "100%", padding: "9px 12px", marginBottom: 8, borderRadius: 10,
+              border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg,
+              resize: "vertical", fontFamily: "inherit",
+            }}
+          />
+          {error && <div style={{ fontSize: 12, color: "#C0392B", marginBottom: 8 }}>{error}</div>}
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              background: COLORS.navy, color: COLORS.cream, border: "none", borderRadius: 999,
+              padding: "9px 18px", fontSize: 13, fontWeight: 700, opacity: submitting ? 0.6 : 1,
+            }}
+          >
+            {submitting ? "Submitting..." : "Submit review"}
+          </button>
+        </form>
       )}
     </div>
   );
@@ -362,13 +524,41 @@ export default function App() {
   const [quickViewQty, setQuickViewQty] = useState(1);
   const [quickViewSize, setQuickViewSize] = useState(null);
   const [instaCopied, setInstaCopied] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
   const [promoInput, setPromoInput] = useState("");
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [promoError, setPromoError] = useState("");
   const [products, setProducts] = useState(SEED_PRODUCTS);
+  // True once the products listener has responded at least once (success or
+  // failure) — used so a bad /product/xyz or /category/xyz link isn't
+  // declared "not found" before Firestore's admin-added products have even
+  // had a chance to arrive.
+  const [productsLoaded, setProductsLoaded] = useState(false);
+  // Set when a direct link points at a product or category that genuinely
+  // doesn't exist (deleted, mistyped, or an old ad link) — shown as a small
+  // dismissible notice instead of leaving the visitor looking at what seems
+  // like a blank/broken page.
+  const [routeNotice, setRouteNotice] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const routeAppliedRef = React.useRef(false);
-  const [copiedCardId, setCopiedCardId] = useState(null);
+
+  // Approved reviews, grouped by product id — used for the star rating shown
+  // on product cards/quick view, and the "no reviews yet" fallback.
+  const reviewsByProduct = useMemo(() => {
+    const map = {};
+    reviews.forEach((r) => {
+      if (!r.approved) return;
+      (map[r.productId] = map[r.productId] || []).push(r);
+    });
+    return map;
+  }, [reviews]);
+
+  // Most recent approved reviews across every product, for the homepage
+  // "What customers say" section — reviews are already newest-first from the
+  // Firestore query below, so this is just "take the approved ones".
+  const homepageReviews = useMemo(
+    () => reviews.filter((r) => r.approved).slice(0, 6),
+    [reviews]
+  );
 
   function urlForCategory(cat) {
     return cat === "All" ? "/" : `/category/${categorySlug(cat)}`;
@@ -387,7 +577,12 @@ export default function App() {
   }
 
   // Apply a deep link from the URL (a specific product or category) once the
-  // relevant data has loaded — this is what makes ad links work.
+  // relevant data has loaded — this is what makes ad links work. Also
+  // handles the case where the link points at something that no longer
+  // exists (a deleted product, an old/mistyped ad link): rather than
+  // silently doing nothing — which just looks like a blank or broken page —
+  // it falls back to the normal homepage with a small "we couldn't find
+  // that" notice.
   useEffect(() => {
     if (routeAppliedRef.current) return;
     const path = window.location.pathname;
@@ -399,6 +594,13 @@ export default function App() {
       if (found) {
         openQuickView(id, false);
         routeAppliedRef.current = true;
+      } else if (productsLoaded) {
+        // Only give up once we've actually heard back from Firestore at
+        // least once — otherwise an admin-added product's link could be
+        // wrongly declared "not found" while that data is still loading.
+        setRouteNotice({ type: "product" });
+        window.history.replaceState({}, "", "/");
+        routeAppliedRef.current = true;
       }
     } else if (categoryMatch) {
       const slug = categoryMatch[1];
@@ -407,11 +609,15 @@ export default function App() {
       if (found) {
         setActiveCategory(found);
         routeAppliedRef.current = true;
+      } else if (productsLoaded) {
+        setRouteNotice({ type: "category" });
+        window.history.replaceState({}, "", "/");
+        routeAppliedRef.current = true;
       }
     } else {
       routeAppliedRef.current = true;
     }
-  }, [products]);
+  }, [products, productsLoaded]);
 
   // Support the browser's back/forward buttons between category & product URLs.
   useEffect(() => {
@@ -488,21 +694,6 @@ export default function App() {
     }
   }, [quickViewId, activeCategory, products]);
 
-  function copyProductLink(id) {
-    const url = SITE_URL + urlForProduct(id);
-    navigator.clipboard
-      .writeText(url)
-      .then(() => {
-        setCopiedCardId(id);
-        setTimeout(() => setCopiedCardId((c) => (c === id ? null : c)), 1800);
-      })
-      .catch(() => {
-        // Clipboard unavailable — open the product instead so they can use
-        // the "Copy link" button in the quick view as a fallback.
-        openQuickView(id);
-      });
-  }
-
   useEffect(() => {
     const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(
@@ -517,11 +708,29 @@ export default function App() {
         const importedSeedIds = new Set(fromFirestore.map((p) => p.seedId).filter(Boolean));
         const remainingSeed = SEED_PRODUCTS.filter((p) => !importedSeedIds.has(p.id));
         setProducts([...fromFirestore, ...remainingSeed]);
+        setProductsLoaded(true);
       },
       () => {
         // If Firestore can't be reached, fall back to the built-in catalog.
         setProducts(SEED_PRODUCTS);
+        setProductsLoaded(true);
       }
+    );
+    return () => unsub();
+  }, []);
+
+  // Reviews — a single listener for all of them (approved and pending),
+  // filtered/sorted in memory (see reviewsByProduct/homepageReviews above).
+  // Deliberately not filtering by `approved` in the query itself: a
+  // compound Firestore query (equality filter + orderBy on a different
+  // field) needs a manually-created index, which would otherwise silently
+  // break this the first time it ran in production.
+  useEffect(() => {
+    const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(
+      q,
+      (snap) => setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+      () => setReviews([])
     );
     return () => unsub();
   }, []);
@@ -720,7 +929,9 @@ export default function App() {
         .ttc-hero-h1 { font-size: 46px; }
         .ttc-hero-section { padding: 40px 20px 40px; }
         .ttc-hero-panel { padding: 32px 28px; }
+        .ttc-shop-section { padding: 48px 20px 20px; }
         .ttc-shop-panel { padding: 26px 24px; }
+        .ttc-product-card { padding: 14px; }
         @media (max-width: 1024px) {
           .ttc-header-desktop { display: none; }
           .ttc-header-mobile { display: flex; }
@@ -733,8 +944,16 @@ export default function App() {
           .ttc-hero-h1 { font-size: 32px; }
           .ttc-hero-section { padding: 24px 14px 28px; }
           .ttc-hero-panel { padding: 20px 16px; }
-          .ttc-shop-panel { padding: 18px 14px; }
-          .ttc-product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 14px !important; }
+          /* Products were feeling cramped on phones: the section, the panel,
+             and each card were all adding their own left/right padding on
+             top of each other, leaving very little width for the actual
+             product photo. Cut down to a small edge margin (not zero — a
+             sliver of space keeps photos from butting right against the
+             phone's bezel) so products use close to the full screen width. */
+          .ttc-shop-section { padding: 24px 6px 14px; }
+          .ttc-shop-panel { padding: 14px 4px; }
+          .ttc-product-card { padding: 6px; }
+          .ttc-product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
           .ttc-qv-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
@@ -968,6 +1187,31 @@ export default function App() {
         </div>
       </header>
 
+      {routeNotice && (
+        <div style={{
+          maxWidth: 1000, margin: "16px auto 0", padding: "0 20px",
+        }}>
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+            background: COLORS.blushSoft, color: COLORS.maroonDark, borderRadius: 12,
+            padding: "10px 16px", fontSize: 13,
+          }}>
+            <span>
+              {routeNotice.type === "product"
+                ? "That product isn't available anymore — but here's the current collection."
+                : "That category doesn't exist — showing everything instead."}
+            </span>
+            <button
+              onClick={() => setRouteNotice(null)}
+              aria-label="Dismiss"
+              style={{ background: "none", border: "none", color: COLORS.maroonDark, flexShrink: 0, display: "flex" }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hero */}
       <section className="ttc-hero-section" style={{ maxWidth: 1000, margin: "0 auto", position: "relative" }}>
         <div className="ttc-hero-panel" style={{
@@ -1023,7 +1267,7 @@ export default function App() {
       <StitchDivider />
 
       {/* Shop grid */}
-      <section id="shop" style={{ padding: "48px 20px 20px", maxWidth: 1000, margin: "0 auto" }}>
+      <section id="shop" className="ttc-shop-section" style={{ maxWidth: 1000, margin: "0 auto" }}>
         <div className="ttc-shop-panel" style={{ background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)", borderRadius: 24 }}>
           <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, color: COLORS.maroonDark, marginBottom: 22 }}>
             The collection
@@ -1033,30 +1277,15 @@ export default function App() {
             {visibleProducts.length === 0 ? (
               <p style={{ color: "#7A6E64", fontSize: 14, gridColumn: "1/-1" }}>No items match your search.</p>
             ) : visibleProducts.map((p) => (
-              <div key={p.id} style={{ background: COLORS.cream, borderRadius: 18, padding: 14 }}>
-                <div style={{ position: "relative" }}>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); copyProductLink(p.id); }}
-                    aria-label="Copy link to this product — handy for ads or DMs"
-                    title="Copy link to this product"
-                    style={{
-                      position: "absolute", top: 8, right: 8, zIndex: 3,
-                      background: "rgba(251,246,240,0.9)", border: "none", borderRadius: "50%",
-                      width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center",
-                      color: COLORS.navy,
-                    }}
-                  >
-                    {copiedCardId === p.id ? <Check size={13} /> : <Link2 size={13} />}
-                  </button>
-                  <div onClick={p.variants ? undefined : () => openQuickView(p.id)} style={{ cursor: p.variants ? "default" : "pointer" }}>
-                    {p.variants ? (
-                      <VariantPicker variants={p.variants} name={p.name} onImageClick={() => openQuickView(p.id)} />
-                    ) : p.photos ? (
-                      <ProductPhotoGallery photos={p.photos} name={p.name} />
-                    ) : (
-                      <ProductSwatch colors={p.swatch} real={p.real} />
-                    )}
-                  </div>
+              <div key={p.id} className="ttc-product-card" style={{ background: COLORS.cream, borderRadius: 18 }}>
+                <div onClick={p.variants ? undefined : () => openQuickView(p.id)} style={{ cursor: p.variants ? "default" : "pointer" }}>
+                  {p.variants ? (
+                    <VariantPicker variants={p.variants} name={p.name} onImageClick={() => openQuickView(p.id)} />
+                  ) : p.photos ? (
+                    <ProductPhotoGallery photos={p.photos} name={p.name} />
+                  ) : (
+                    <ProductSwatch colors={p.swatch} real={p.real} />
+                  )}
                 </div>
                 <div style={{ marginTop: 12 }}>
                   {p.real && (
@@ -1079,6 +1308,7 @@ export default function App() {
                   >
                     {p.name}
                   </a>
+                  <RatingSummary reviews={reviewsByProduct[p.id]} />
                   <div style={{ fontSize: 13, color: "#7A6E64", margin: "6px 0 10px", lineHeight: 1.4 }}>
                     {p.desc}
                   </div>
@@ -1112,6 +1342,32 @@ export default function App() {
           </div>
         </div>
       </section>
+
+      {homepageReviews.length > 0 && (
+        <>
+          <StitchDivider />
+          {/* What customers say — the most recent approved reviews across every
+              product. Hidden entirely (not shown as an empty section) until
+              at least one review has been approved. */}
+          <section style={{ padding: "20px 20px 20px", maxWidth: 1000, margin: "0 auto" }}>
+            <div className="ttc-shop-panel" style={{ background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)", borderRadius: 24 }}>
+              <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, color: COLORS.maroonDark, marginBottom: 22 }}>
+                What customers say
+              </h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
+                {homepageReviews.map((r) => (
+                  <div key={r.id} style={{ background: COLORS.cream, borderRadius: 16, padding: 16 }}>
+                    <StarRating rating={r.rating} />
+                    <p style={{ fontSize: 13, color: "#5A4E46", lineHeight: 1.5, margin: "8px 0" }}>{r.comment}</p>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal }}>{r.name}</div>
+                    <div style={{ fontSize: 11.5, color: "#7A6E64" }}>on {r.productName}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </>
+      )}
 
       <StitchDivider />
 
@@ -1354,26 +1610,10 @@ export default function App() {
                   <h3 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 22, color: COLORS.maroonDark, margin: "0 0 8px" }}>
                     {p.name}
                   </h3>
+                  <RatingSummary reviews={reviewsByProduct[p.id]} style={{ marginBottom: 10 }} />
                   <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 21, color: COLORS.maroon, marginBottom: 14 }}>
                     Rs{p.price}
                   </div>
-                  <button
-                    onClick={() => {
-                      const url = window.location.origin + urlForProduct(p.id);
-                      navigator.clipboard.writeText(url).then(() => {
-                        setLinkCopied(true);
-                        setTimeout(() => setLinkCopied(false), 2000);
-                      });
-                    }}
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: 6,
-                      background: "none", border: `1px solid ${COLORS.bgSoft}`, borderRadius: 999,
-                      padding: "5px 12px", fontSize: 11.5, fontWeight: 600, color: "#7A6E64",
-                      marginBottom: 16, cursor: "pointer",
-                    }}
-                  >
-                    {linkCopied ? "Link copied!" : "Copy link to this product"}
-                  </button>
                   <p style={{ fontSize: 13.5, color: "#5A4E46", lineHeight: 1.6, marginBottom: 20 }}>
                     {p.desc}
                   </p>
@@ -1444,6 +1684,10 @@ export default function App() {
                     </button>
                   </div>
                 </div>
+              </div>
+
+              <div style={{ padding: "0 24px 26px" }}>
+                <ReviewsSection productId={p.id} productName={p.name} reviews={reviewsByProduct[p.id] || []} />
               </div>
             </div>
           </div>
