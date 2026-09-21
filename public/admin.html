@@ -158,6 +158,15 @@
     cursor: pointer;
     font-size: 12px;
   }
+  .star-toggle {
+    border: 1px solid var(--gold) !important;
+    background: #fff;
+    color: var(--gold);
+  }
+  .star-toggle.is-featured {
+    background: var(--gold);
+    color: #fff;
+  }
   .center { text-align: center; padding: 60px 20px; }
   .center h2 { color: var(--maroon-dark); }
   .msg { font-size: 13px; margin-top: 10px; }
@@ -300,6 +309,7 @@
       <h2>Reviews (<span id="reviewPendingLabel">0</span> waiting for approval)</h2>
       <p style="font-size:12.5px;color:#7A6E64;margin-top:-8px;">
         A review a customer submits doesn't show on the site until you approve it here — so nothing appears without you seeing it first.
+        Once approved, a review shows under its own product; use the star button to also feature it in "What customers say" on the homepage.
       </p>
       <div class="msg error hidden" id="reviewListError"></div>
       <div class="review-list" id="reviewList"></div>
@@ -345,7 +355,14 @@
     return data.secure_url;
   }
 
-  const ADMIN_EMAIL = "twistanddtanglecrochet@gmail.com";
+  // Every Google account allowed to sign in here. To give someone else access,
+  // add their Gmail address below as its own quoted line ending with a comma —
+  // matching this exactly, including the [ ] brackets, is what allows more
+  // than one person in.
+  const ADMIN_EMAILS = [
+    "twistanddtanglecrochet@gmail.com",
+    "adhanaan1050@gmail.com",
+  ];
 
   // Your site's live web address — used to build the links behind the QR codes below.
   // If you ever move to your own domain (like twistandtangle.com), change this one line.
@@ -382,7 +399,7 @@
       showOnly(signedOutEl);
       return;
     }
-    if (user.email !== ADMIN_EMAIL) {
+    if (!ADMIN_EMAILS.includes(user.email)) {
       showOnly(notAllowedEl);
       return;
     }
@@ -598,6 +615,12 @@
             ? `<button class="secondary" data-unapprove="${r.id}">Remove from site</button>`
             : `<button class="btn" style="margin:0;padding:6px 10px;" data-approve="${r.id}">Approve</button>`
           }
+          ${r.approved
+            ? `<button class="star-toggle${r.featured ? " is-featured" : ""}" data-toggle-featured="${r.id}" data-currently-featured="${r.featured ? "1" : "0"}">
+                 ${r.featured ? "★ On homepage" : "☆ Feature on homepage"}
+               </button>`
+            : ""
+          }
           <button class="danger" style="color:#fff;" data-delete-review="${r.id}">Delete</button>
         </div>
       `;
@@ -610,6 +633,11 @@
     list.querySelectorAll("[data-unapprove]").forEach((btn) =>
       btn.addEventListener("click", () => setReviewApproved(btn.getAttribute("data-unapprove"), false))
     );
+    list.querySelectorAll("[data-toggle-featured]").forEach((btn) =>
+      btn.addEventListener("click", () =>
+        setReviewFeatured(btn.getAttribute("data-toggle-featured"), btn.getAttribute("data-currently-featured") !== "1")
+      )
+    );
     list.querySelectorAll("[data-delete-review]").forEach((btn) =>
       btn.addEventListener("click", () => handleDeleteReview(btn.getAttribute("data-delete-review")))
     );
@@ -617,7 +645,19 @@
 
   async function setReviewApproved(id, approved) {
     try {
-      await updateDoc(doc(db, "reviews", id), { approved });
+      // Un-approving also un-features a review — a review that's no longer
+      // shown on its own product page shouldn't be able to keep showing on
+      // the homepage.
+      const data = approved ? { approved } : { approved, featured: false };
+      await updateDoc(doc(db, "reviews", id), data);
+    } catch (e) {
+      alert("Couldn't update this review: " + e.message);
+    }
+  }
+
+  async function setReviewFeatured(id, featured) {
+    try {
+      await updateDoc(doc(db, "reviews", id), { featured });
     } catch (e) {
       alert("Couldn't update this review: " + e.message);
     }
