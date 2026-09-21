@@ -129,8 +129,11 @@ function Logo({ size = 72, scale = 2 }) {
   );
 }
 
-function VariantPicker({ variants, name, onImageClick }) {
-  const [index, setIndex] = useState(0);
+// Controlled by the parent (App) via `index`/`onSelect` — NOT internal state
+// — so that whichever color/style a customer taps is something the parent
+// actually knows about and can put in the cart / WhatsApp order text,
+// instead of the choice only ever changing the picture on screen.
+function VariantPicker({ variants, name, index, onSelect, onImageClick }) {
   return (
     <div>
       <div
@@ -151,7 +154,7 @@ function VariantPicker({ variants, name, onImageClick }) {
         {variants.map((v, i) => (
           <button
             key={v.name}
-            onClick={(e) => { e.stopPropagation(); setIndex(i); }}
+            onClick={(e) => { e.stopPropagation(); onSelect(i); }}
             aria-label={v.name}
             style={{
               aspectRatio: "1", borderRadius: 8, overflow: "hidden", padding: 0,
@@ -515,7 +518,21 @@ export default function App() {
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem("ttc_cart");
-      return saved ? JSON.parse(saved) : {};
+      const parsed = saved ? JSON.parse(saved) : {};
+      // The cart used to be stored as { [productId]: qty } — a plain number
+      // per entry, with no room for which color/variant was chosen. A
+      // customer's browser could still have one of those saved from before
+      // this changed, so upgrade any old-shape entries on the fly rather
+      // than losing whatever was already in their cart.
+      const upgraded = {};
+      Object.entries(parsed).forEach(([key, value]) => {
+        if (typeof value === "number") {
+          upgraded[key] = { id: key, variant: null, qty: value };
+        } else if (value && typeof value === "object") {
+          upgraded[key] = value;
+        }
+      });
+      return upgraded;
     } catch (e) {
       return {};
     }
@@ -528,6 +545,14 @@ export default function App() {
       // storage unavailable (e.g. private browsing) — ignore
     }
   }, [cart]);
+  // Which color/style is currently selected for each variant-based product,
+  // keyed by product id (index into that product's `variants` array).
+  // Shared between the shop-grid card and Quick View so a color picked in
+  // one place is still shown when the other opens.
+  const [variantIndex, setVariantIndex] = useState({});
+  function selectVariant(productId, index) {
+    setVariantIndex((v) => ({ ...v, [productId]: index }));
+  }
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   // Brief "Added to cart" confirmation shown after any Add-to-cart click.
@@ -814,21 +839,29 @@ export default function App() {
   }, [products]);
 
   const categories = useMemo(() => ["All", ...Array.from(new Set(products.map((p) => p.category)))], [products]);
+  // "featured" keeps the admin portal's custom display order (the default);
+  // the other two re-sort by price without touching that underlying order.
+  const [sortBy, setSortBy] = useState("featured");
   const visibleProducts = useMemo(() => {
     let list = activeCategory === "All" ? products : products.filter((p) => p.category === activeCategory);
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
     }
+    if (sortBy === "price-asc") {
+      list = [...list].sort((a, b) => a.price - b.price);
+    } else if (sortBy === "price-desc") {
+      list = [...list].sort((a, b) => b.price - a.price);
+    }
     return list;
-  }, [activeCategory, searchQuery, products]);
+  }, [activeCategory, searchQuery, products, sortBy]);
 
-  // Jump back to page 1 whenever the category or search changes — otherwise
-  // a customer could be stranded on "page 3" of a filtered list that only
-  // has one page.
+  // Jump back to page 1 whenever the category, search, or sort changes —
+  // otherwise a customer could be stranded on "page 3" of a filtered/sorted
+  // list that only has one page.
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, sortBy]);
 
   const PRODUCTS_PER_PAGE = 20;
   const totalPages = Math.max(1, Math.ceil(visibleProducts.length / PRODUCTS_PER_PAGE));
@@ -844,9 +877,18 @@ export default function App() {
         // it was deleted or edited from the admin portal since they added
         // it, `products.find` below won't find it. Drop those instead of
         // showing a broken "Rsundefined" line item.
-        .map(([id, qty]) => {
-          const p = products.find((pr) => pr.id === id);
-          return p ? { ...p, qty } : null;
+        .map(([cartKey, entry]) => {
+          const p = products.find((pr) => pr.id === entry.id);
+          if (!p) return null;
+          const variantObj =
+            entry.variant && p.variants ? p.variants.find((v) => v.name === entry.variant) : null;
+          return {
+            ...p,
+            qty: entry.qty,
+            cartKey,
+            variantName: entry.variant || null,
+            variantPhoto: variantObj ? variantObj.photo : null,
+          };
         })
         .filter((i) => i && i.qty > 0),
     [cart, products]
@@ -873,7 +915,15 @@ export default function App() {
   const checkoutItems = useMemo(() => {
     if (directBuyItem) {
       const p = products.find((pr) => pr.id === directBuyItem.id);
-      return p ? [{ ...p, qty: directBuyItem.qty }] : [];
+      if (!p) return [];
+      const variantObj =
+        directBuyItem.variant && p.variants ? p.variants.find((v) => v.name === directBuyItem.variant) : null;
+      return [{
+        ...p,
+        qty: directBuyItem.qty,
+        variantName: directBuyItem.variant || null,
+        variantPhoto: variantObj ? variantObj.photo : null,
+      }];
     }
     return cartItems;
   }, [directBuyItem, cartItems, products]);
@@ -898,17 +948,24 @@ export default function App() {
     setPromoError("");
   }
 
-  function addToCart(id, qty = 1) {
-    setCart((c) => ({ ...c, [id]: (c[id] || 0) + qty }));
+  // `variant` is the chosen color/style name (or null for a product with no
+  // variants) — kept as part of the cart key so "Red" and "Yellow" of the
+  // same product are two separate lines, not merged into one.
+  function addToCart(id, qty = 1, variant = null) {
+    const key = variant ? `${id}::${variant}` : id;
+    setCart((c) => {
+      const existing = c[key];
+      return { ...c, [key]: { id, variant, qty: (existing ? existing.qty : 0) + qty } };
+    });
     setCartToast(true);
     clearTimeout(cartToastTimer.current);
     cartToastTimer.current = setTimeout(() => setCartToast(false), 2200);
   }
-  function buyNow(id, qty = 1) {
+  function buyNow(id, qty = 1, variant = null) {
     // Deliberately does NOT touch the shared cart — "Buy Now" checks out
     // just this one item, it doesn't add it to whatever's already in the
     // cart (see checkoutItems above).
-    setDirectBuyItem({ id, qty });
+    setDirectBuyItem({ id, qty, variant });
     setDrawerOpen(false);
     setCheckoutOpen(true);
   }
@@ -929,15 +986,24 @@ export default function App() {
     setQuickViewSize(p && p.sizes ? p.sizes[0] : null);
     if (push) window.history.pushState({}, "", urlForProduct(id));
   }
-  function changeQty(id, delta) {
+  function changeQty(cartKey, delta) {
     setCart((c) => {
-      const next = Math.max(0, (c[id] || 0) + delta);
-      return { ...c, [id]: next };
+      const existing = c[cartKey];
+      if (!existing) return c;
+      const nextQty = Math.max(0, existing.qty + delta);
+      if (nextQty === 0) {
+        const rest = { ...c };
+        delete rest[cartKey];
+        return rest;
+      }
+      return { ...c, [cartKey]: { ...existing, qty: nextQty } };
     });
   }
 
   function buildOrderText() {
-    const lines = checkoutItems.map((i) => `• ${i.name} x${i.qty} — Rs${i.price * i.qty}`).join("\n");
+    const lines = checkoutItems
+      .map((i) => `• ${i.name}${i.variantName ? ` (${i.variantName})` : ""} x${i.qty} — Rs${i.price * i.qty}`)
+      .join("\n");
     const promoLine = appliedPromo
       ? `Promo code: ${appliedPromo} (-Rs${checkoutDiscount})\n`
       : "";
@@ -1333,18 +1399,49 @@ export default function App() {
       {/* Shop grid */}
       <section id="shop" className="ttc-shop-section" style={{ maxWidth: 1000, margin: "0 auto" }}>
         <div className="ttc-shop-panel" style={{ background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)", borderRadius: 24 }}>
-          <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, color: COLORS.maroonDark, marginBottom: 22 }}>
-            The collection
-          </h2>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 22 }}>
+            <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, color: COLORS.maroonDark, margin: 0 }}>
+              The collection
+            </h2>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "#7A6E64" }}>
+              Sort by
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                aria-label="Sort products"
+                style={{
+                  border: `1.3px solid ${COLORS.bgSoft}`, borderRadius: 999, padding: "7px 14px",
+                  fontSize: 12.5, fontWeight: 600, color: COLORS.charcoal, background: COLORS.cream,
+                  cursor: "pointer",
+                }}
+              >
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+            </label>
+          </div>
 
           <div className="ttc-product-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 22 }}>
             {visibleProducts.length === 0 ? (
               <p style={{ color: "#7A6E64", fontSize: 14, gridColumn: "1/-1" }}>No items match your search.</p>
-            ) : pagedProducts.map((p) => (
+            ) : pagedProducts.map((p) => {
+              // The color/style currently selected for this product, so the
+              // Add/Buy buttons below order exactly what's shown, not
+              // whatever the first swatch happens to be.
+              const selectedIndex = variantIndex[p.id] ?? 0;
+              const selectedVariant = p.variants ? p.variants[selectedIndex] : null;
+              return (
               <div key={p.id} className="ttc-product-card" style={{ background: COLORS.cream, borderRadius: 18 }}>
                 <div onClick={p.variants ? undefined : () => openQuickView(p.id)} style={{ cursor: p.variants ? "default" : "pointer" }}>
                   {p.variants ? (
-                    <VariantPicker variants={p.variants} name={p.name} onImageClick={() => openQuickView(p.id)} />
+                    <VariantPicker
+                      variants={p.variants}
+                      name={p.name}
+                      index={selectedIndex}
+                      onSelect={(i) => selectVariant(p.id, i)}
+                      onImageClick={() => openQuickView(p.id)}
+                    />
                   ) : p.photos ? (
                     <ProductPhotoGallery photos={p.photos} name={p.name} />
                   ) : (
@@ -1381,7 +1478,7 @@ export default function App() {
                       Rs{p.price}
                     </span>
                     <button
-                      onClick={() => addToCart(p.id)}
+                      onClick={() => addToCart(p.id, 1, selectedVariant ? selectedVariant.name : null)}
                       style={{
                         background: "transparent", color: COLORS.navy, border: `1.3px solid ${COLORS.navy}`,
                         borderRadius: 999, padding: "8px 14px", fontSize: 12, fontWeight: 700,
@@ -1392,7 +1489,7 @@ export default function App() {
                     </button>
                   </div>
                   <button
-                    onClick={() => buyNow(p.id)}
+                    onClick={() => buyNow(p.id, 1, selectedVariant ? selectedVariant.name : null)}
                     style={{
                       width: "100%", background: COLORS.navy, color: COLORS.cream, border: "none",
                       borderRadius: 999, padding: "9px 0", fontSize: 12.5, fontWeight: 700,
@@ -1402,7 +1499,8 @@ export default function App() {
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {totalPages > 1 && (
@@ -1564,6 +1662,28 @@ export default function App() {
         </div>
       </footer>
 
+      {/* Floating WhatsApp button — always reachable while browsing, so a
+          customer with a question doesn't have to hunt for the footer link.
+          Hidden while the cart drawer, checkout, or quick view is open so it
+          never floats on top of those and blocks anything underneath. */}
+      {!drawerOpen && !checkoutOpen && !quickViewId && (
+        <a
+          href={`https://wa.me/${WHATSAPP_NUMBER}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat with us on WhatsApp"
+          style={{
+            position: "fixed", right: 20, bottom: 20, zIndex: 45,
+            width: 54, height: 54, borderRadius: "50%",
+            background: "#25D366", color: "#fff",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 6px 18px rgba(0,0,0,0.25)", textDecoration: "none",
+          }}
+        >
+          <MessageCircle size={26} />
+        </a>
+      )}
+
       {/* "Added to cart" confirmation toast */}
       {cartToast && (
         <div
@@ -1604,11 +1724,11 @@ export default function App() {
             ) : (
               <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 14 }}>
                 {cartItems.map((i) => (
-                  <div key={i.id} style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                  <div key={i.cartKey} style={{ display: "flex", gap: 10, alignItems: "center" }}>
                     <div style={{ width: 50, height: 50, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "#fff" }}>
-                      {mainPhotoFor(i) ? (
+                      {(i.variantPhoto || mainPhotoFor(i)) ? (
                         <img
-                          src={mainPhotoFor(i)}
+                          src={i.variantPhoto || mainPhotoFor(i)}
                           alt={i.name}
                           loading="lazy"
                           style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -1619,14 +1739,17 @@ export default function App() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: 700 }}>{i.name}</div>
+                      {i.variantName && (
+                        <div style={{ fontSize: 11.5, color: "#7A6E64" }}>{i.variantName}</div>
+                      )}
                       <div style={{ fontSize: 12, color: COLORS.maroon }}>Rs{i.price}</div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <button onClick={() => changeQty(i.id, -1)} style={{ background: COLORS.bgSoft, border: "none", borderRadius: 6, width: 22, height: 22 }}>
+                      <button onClick={() => changeQty(i.cartKey, -1)} style={{ background: COLORS.bgSoft, border: "none", borderRadius: 6, width: 22, height: 22 }}>
                         <Minus size={12} />
                       </button>
                       <span style={{ fontSize: 13, width: 16, textAlign: "center" }}>{i.qty}</span>
-                      <button onClick={() => changeQty(i.id, 1)} style={{ background: COLORS.bgSoft, border: "none", borderRadius: 6, width: 22, height: 22 }}>
+                      <button onClick={() => changeQty(i.cartKey, 1)} style={{ background: COLORS.bgSoft, border: "none", borderRadius: 6, width: 22, height: 22 }}>
                         <Plus size={12} />
                       </button>
                     </div>
@@ -1714,6 +1837,8 @@ export default function App() {
       {quickViewId && (() => {
         const p = products.find((pr) => pr.id === quickViewId);
         if (!p) return null;
+        const qvSelectedIndex = variantIndex[p.id] ?? 0;
+        const qvSelectedVariant = p.variants ? p.variants[qvSelectedIndex] : null;
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 55, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
             <div onClick={() => closeQuickView()} style={{ position: "absolute", inset: 0, background: "rgba(43,36,32,0.55)" }} />
@@ -1736,7 +1861,12 @@ export default function App() {
               <div className="ttc-qv-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
                 <div style={{ padding: 20 }}>
                   {p.variants ? (
-                    <VariantPicker variants={p.variants} name={p.name} />
+                    <VariantPicker
+                      variants={p.variants}
+                      name={p.name}
+                      index={qvSelectedIndex}
+                      onSelect={(i) => selectVariant(p.id, i)}
+                    />
                   ) : p.photos ? (
                     <ProductPhotoGallery key={p.id} photos={p.photos} name={p.name} autoPlay />
                   ) : (
@@ -1811,7 +1941,7 @@ export default function App() {
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     <button
-                      onClick={() => { addToCart(p.id, quickViewQty); closeQuickView(); setDrawerOpen(true); }}
+                      onClick={() => { addToCart(p.id, quickViewQty, qvSelectedVariant ? qvSelectedVariant.name : null); closeQuickView(); setDrawerOpen(true); }}
                       style={{
                         width: "100%", background: "transparent", color: COLORS.navy,
                         border: `1.5px solid ${COLORS.navy}`, borderRadius: 999, padding: "12px 0",
@@ -1821,7 +1951,7 @@ export default function App() {
                       <ShoppingBag size={16} /> Add to Cart
                     </button>
                     <button
-                      onClick={() => { buyNow(p.id, quickViewQty); closeQuickView(); }}
+                      onClick={() => { buyNow(p.id, quickViewQty, qvSelectedVariant ? qvSelectedVariant.name : null); closeQuickView(); }}
                       style={{
                         width: "100%", background: COLORS.navy, color: COLORS.cream,
                         border: "none", borderRadius: 999, padding: "12px 0",

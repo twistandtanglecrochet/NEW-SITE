@@ -56,6 +56,19 @@
       fbq('track', 'PageView');
     </script>
     <!-- End Meta Pixel Code -->
+
+    <!-- Google Analytics (GA4) -->
+    <!-- To turn this on: create a GA4 property at https://analytics.google.com,
+         copy its Measurement ID (looks like G-ABC1234XYZ), then replace
+         BOTH occurrences of G-XXXXXXXXXX below with that ID. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    <!-- End Google Analytics -->
   </head>
   <body>
     <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1546860426718106&amp;ev=PageView&amp;noscript=1" /></noscript>

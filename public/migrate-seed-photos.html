@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TTC Admin — Migrate Seed Photos</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  :root {
+    --maroon: #6E1E36;
+    --maroon-dark: #3F1220;
+    --cream: #FBF6F0;
+    --bg: #F3E9E2;
+    --bg-soft: #EDE0D8;
+    --charcoal: #2B2420;
+    --gold: #B98A2E;
+    --green: #2E7D32;
+    --red: #C0392B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--charcoal);
+  }
+  header {
+    background: var(--maroon-dark);
+    color: var(--cream);
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 { font-size: 18px; margin: 0; }
+  header button {
+    background: var(--maroon);
+    color: var(--cream);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 80px; }
+  .card {
+    background: var(--cream);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .card h2 { margin-top: 0; font-size: 16px; color: var(--maroon-dark); }
+  .card p { font-size: 13.5px; line-height: 1.5; color: #5A5048; }
+  .card ol, .card ul { font-size: 13.5px; line-height: 1.6; color: #5A5048; padding-left: 20px; }
+  .btn {
+    background: var(--maroon);
+    color: var(--cream);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.secondary { background: var(--bg-soft); color: var(--charcoal); }
+  .btn.success { background: var(--green); }
+  .center { text-align: center; padding: 60px 20px; }
+  .center h2 { color: var(--maroon-dark); }
+  .msg { font-size: 13px; margin-top: 10px; }
+  .msg.error { color: var(--red); }
+  .msg.success { color: var(--green); }
+  .hidden { display: none !important; }
+  .progress { font-size: 13.5px; font-weight: 600; margin-top: 14px; color: var(--maroon-dark); }
+  .progress-bar-track { background: var(--bg-soft); border-radius: 999px; height: 8px; margin-top: 8px; overflow: hidden; }
+  .progress-bar-fill { background: var(--maroon); height: 100%; width: 0%; transition: width 0.2s; }
+  .plist { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; max-height: 340px; overflow-y: auto; }
+  .prow {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg); border-radius: 10px; padding: 8px 10px;
+  }
+  .prow img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+  .prow .name { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 600; word-break: break-all; }
+  .prow .status { font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .status.pending { color: #7A6E64; }
+  .status.working { color: var(--gold); }
+  .status.done { color: var(--green); }
+  .status.failed { color: var(--red); }
+  code { background: var(--bg-soft); padding: 2px 6px; border-radius: 4px; font-size: 12.5px; }
+</style>
+</head>
+<body>
+
+<div id="signedOut" class="center hidden">
+  <h2>Twist &amp; Tangle Crochet — Admin</h2>
+  <p>Sign in with the store's Google account to continue.</p>
+  <button class="btn" id="signInBtn">Sign in with Google</button>
+  <div class="msg error" id="authMsg"></div>
+</div>
+
+<div id="notAllowed" class="center hidden">
+  <h2>Not authorized</h2>
+  <p>This Google account isn't allowed to manage products.</p>
+  <button class="btn secondary" id="signOutBtn2">Sign out</button>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>Migrate Seed Photos</h1>
+    <button id="signOutBtn">Sign out</button>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>What this does</h2>
+      <p>
+        Your original 16 starter-catalog products still carry their photos as raw image data
+        baked directly into the site's code, instead of using fast links the way every photo
+        you've added since has. That makes your site's code noticeably heavier to load.
+      </p>
+      <p>
+        This one-time tool uploads those <strong id="photoCountLabel">…</strong> photos to your
+        Cloudinary account, then builds you a ready-to-use replacement for one file in your
+        project — <code>src/data/products.js</code> — with fast links in place of the raw data.
+        Nothing on your live site changes visually, and nothing in your admin database is
+        touched — any of these 16 products you've already imported into the admin portal
+        already use fast links and are unaffected either way.
+      </p>
+      <button class="btn" id="startBtn">Start migration</button>
+      <div class="progress hidden" id="progress">
+        <div id="progressText"></div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" id="progressBar"></div></div>
+      </div>
+      <div class="msg" id="formMsg"></div>
+    </div>
+
+    <div id="downloadCard" class="card hidden">
+      <h2>Done — get your updated file</h2>
+      <p>All photos uploaded successfully. Here's what to do next:</p>
+      <ol>
+        <li>Click "Download updated products.js" below.</li>
+        <li>Open your project on GitHub and go to <code>src/data/products.js</code>.</li>
+        <li>Click the pencil (Edit) icon.</li>
+        <li>Select all the existing text (Ctrl/Cmd+A) and delete it.</li>
+        <li>Open the file you just downloaded, copy everything in it, and paste it into GitHub.</li>
+        <li>Commit the change — Vercel will redeploy automatically in a minute or two.</li>
+      </ol>
+      <button class="btn success" id="downloadBtn">Download updated products.js</button>
+    </div>
+
+    <div class="card">
+      <h2>Photos (<span id="countLabel">0</span>)</h2>
+      <div class="plist" id="photoList"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { PHOTO_CONSTS, PRODUCTS_JS_SOURCE } from "./migrate-seed-photos-data.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDWU7UDR7Q0s9k1ZAfdiqmoupKoOAVHuC8",
+    authDomain: "ttc1-e7b35.firebaseapp.com",
+    projectId: "ttc1-e7b35",
+    storageBucket: "ttc1-e7b35.firebasestorage.app",
+    messagingSenderId: "351259501918",
+    appId: "1:351259501918:web:e1dc45ea924f71e5a31bcf",
+    measurementId: "G-J3C8GHWQ1X",
+  };
+
+  const CLOUDINARY_CLOUD_NAME = "kqcnm3ge";
+  const CLOUDINARY_UPLOAD_PRESET = "TTC SITE";
+
+  // Keep this in sync with the same list in admin.html / import-starter-catalog.html.
+  const ADMIN_EMAILS = [
+    "twistanddtanglecrochet@gmail.com",
+    "adhanaan1050@gmail.com",
+  ];
+
+  function dataUriToBlob(dataUri) {
+    const [header, base64] = dataUri.split(",");
+    const mimeMatch = header.match(/data:(.*?);base64/);
+    const mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+
+  async function uploadToCloudinary(blob, filename) {
+    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+    const formData = new FormData();
+    formData.append("file", blob, filename || "photo.jpg");
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    const res = await fetch(url, { method: "POST", body: formData });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error("Cloudinary upload failed: " + errText);
+    }
+    const data = await res.json();
+    return data.secure_url;
+  }
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  const $ = (id) => document.getElementById(id);
+  const signedOutEl = $("signedOut");
+  const notAllowedEl = $("notAllowed");
+  const appEl = $("app");
+
+  function showOnly(el) {
+    [signedOutEl, notAllowedEl, appEl].forEach((e) => e.classList.add("hidden"));
+    el.classList.remove("hidden");
+  }
+
+  $("signInBtn").addEventListener("click", async () => {
+    $("authMsg").textContent = "";
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      $("authMsg").textContent = e.message;
+    }
+  });
+  $("signOutBtn").addEventListener("click", () => signOut(auth));
+  $("signOutBtn2").addEventListener("click", () => signOut(auth));
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      showOnly(signedOutEl);
+      return;
+    }
+    if (!ADMIN_EMAILS.includes(user.email)) {
+      showOnly(notAllowedEl);
+      return;
+    }
+    showOnly(appEl);
+    init();
+  });
+
+  // { name, dataUri, url (once uploaded) }
+  const items = PHOTO_CONSTS.map((c) => ({ ...c, url: null }));
+  let initialized = false;
+  let updatedSource = null;
+
+  function init() {
+    if (initialized) return;
+    initialized = true;
+    $("photoCountLabel").textContent = items.length;
+    $("countLabel").textContent = items.length;
+    renderList();
+  }
+
+  function renderList() {
+    const list = $("photoList");
+    list.innerHTML = "";
+    items.forEach((it) => {
+      const row = document.createElement("div");
+      row.className = "prow";
+      row.id = "prow-" + it.name;
+      row.innerHTML = `
+        <img src="${it.dataUri}" alt="" />
+        <div class="name">${it.name}</div>
+        <div class="status pending" id="status-${it.name}">Not started</div>
+      `;
+      list.appendChild(row);
+    });
+    updateStartButton();
+  }
+
+  function updateStartButton() {
+    const remaining = items.filter((it) => !it.url);
+    const btn = $("startBtn");
+    if (remaining.length === 0) {
+      btn.textContent = "All photos migrated";
+      btn.disabled = true;
+    } else if (remaining.length < items.length) {
+      btn.textContent = `Retry remaining (${remaining.length} left)`;
+      btn.disabled = false;
+    } else {
+      btn.textContent = "Start migration";
+      btn.disabled = false;
+    }
+  }
+
+  function setStatus(name, text, cls) {
+    const el = $("status-" + name);
+    if (el) {
+      el.textContent = text;
+      el.className = "status " + cls;
+    }
+  }
+
+  function buildUpdatedSource() {
+    let text = PRODUCTS_JS_SOURCE;
+    for (const it of items) {
+      if (!it.url) continue;
+      if (text.indexOf(it.dataUri) === -1) continue;
+      text = text.replace(it.dataUri, it.url);
+    }
+    return text;
+  }
+
+  $("startBtn").addEventListener("click", async () => {
+    const btn = $("startBtn");
+    const progress = $("progress");
+    const progressText = $("progressText");
+    const progressBar = $("progressBar");
+    const msg = $("formMsg");
+    btn.disabled = true;
+    progress.classList.remove("hidden");
+    msg.textContent = "";
+
+    const remaining = items.filter((it) => !it.url);
+    let ok = 0;
+    let failed = 0;
+
+    for (let i = 0; i < remaining.length; i++) {
+      const it = remaining[i];
+      progressText.textContent = `Uploading ${i + 1} of ${remaining.length}: ${it.name}...`;
+      progressBar.style.width = `${Math.round(((i) / remaining.length) * 100)}%`;
+      setStatus(it.name, "Uploading...", "working");
+      try {
+        const blob = dataUriToBlob(it.dataUri);
+        it.url = await uploadToCloudinary(blob, `${it.name}.jpg`);
+        setStatus(it.name, "Done ✓", "done");
+        ok++;
+      } catch (e) {
+        setStatus(it.name, "Failed — will retry", "failed");
+        failed++;
+      }
+      progressBar.style.width = `${Math.round(((i + 1) / remaining.length) * 100)}%`;
+    }
+
+    progress.classList.add("hidden");
+    const allDone = items.every((it) => it.url);
+    if (allDone) {
+      msg.className = "msg success";
+      msg.textContent = `Done — all ${items.length} photos uploaded. Your updated file is ready below.`;
+      updatedSource = buildUpdatedSource();
+      $("downloadCard").classList.remove("hidden");
+    } else if (failed === 0) {
+      msg.className = "msg success";
+      msg.textContent = `Uploaded ${ok} more photo(s).`;
+    } else {
+      msg.className = "msg error";
+      msg.textContent = `Uploaded ${ok} photo(s), but ${failed} failed (likely a connection hiccup). Click "Retry remaining" to try just those again.`;
+    }
+    updateStartButton();
+  });
+
+  $("downloadBtn").addEventListener("click", () => {
+    if (!updatedSource) return;
+    const blob = new Blob([updatedSource], { type: "text/javascript" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "products.js";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  showOnly(signedOutEl);
+</script>
+</body>
+</html>
