@@ -180,7 +180,11 @@
     return data.secure_url;
   }
 
-  const ADMIN_EMAIL = "twistanddtanglecrochet@gmail.com";
+  // Keep this in sync with the same list in admin.html.
+  const ADMIN_EMAILS = [
+    "twistanddtanglecrochet@gmail.com",
+    "adhanaan1050@gmail.com",
+  ];
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -213,7 +217,7 @@
       showOnly(signedOutEl);
       return;
     }
-    if (user.email !== ADMIN_EMAIL) {
+    if (!ADMIN_EMAILS.includes(user.email)) {
       showOnly(notAllowedEl);
       return;
     }
