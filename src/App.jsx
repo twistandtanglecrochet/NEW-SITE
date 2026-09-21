@@ -22,6 +22,15 @@ const PROMO_CODES = {
   "WELCOME50": { type: "flat", value: 50 },
 };
 
+// The one photo used to represent a cart/review item — the product's first
+// plain photo, or its first variant's photo for variant-based products.
+function mainPhotoFor(item) {
+  if (!item) return null;
+  if (item.photos && item.photos[0]) return item.photos[0];
+  if (item.variants && item.variants[0] && item.variants[0].photo) return item.variants[0].photo;
+  return null;
+}
+
 function StitchDivider() {
   return (
     <svg viewBox="0 0 400 20" preserveAspectRatio="none" style={{ width: "100%", height: 16, display: "block" }}>
@@ -158,9 +167,21 @@ function VariantPicker({ variants, name, onImageClick }) {
   );
 }
 
-function ProductPhotoGallery({ photos, name }) {
+function ProductPhotoGallery({ photos, name, autoPlay = false }) {
   const [index, setIndex] = useState(0);
   const go = (delta) => setIndex((i) => (i + delta + photos.length) % photos.length);
+
+  // Auto-advance every 4 seconds — only used where a product has just been
+  // opened (the quick view), not on the small grid thumbnails, so browsing
+  // the shop isn't distracting. Any manual click also resets this timer
+  // (via the `index` dependency) so it doesn't fight with the customer.
+  useEffect(() => {
+    if (!autoPlay || photos.length <= 1) return;
+    const timer = setInterval(() => {
+      setIndex((i) => (i + 1) % photos.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [autoPlay, photos.length, index]);
 
   return (
     <div style={{ position: "relative" }}>
@@ -509,6 +530,11 @@ export default function App() {
   }, [cart]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  // Brief "Added to cart" confirmation shown after any Add-to-cart click.
+  const [cartToast, setCartToast] = useState(false);
+  const cartToastTimer = React.useRef(null);
+  // How many products to show on one shop-grid page.
+  const [currentPage, setCurrentPage] = useState(1);
   // Set only by the "Buy Now" buttons, to { id, qty } for that one product.
   // While this is set, the checkout modal orders just that single item,
   // regardless of anything else sitting in the cart — "Buy Now" is meant to
@@ -552,11 +578,12 @@ export default function App() {
     return map;
   }, [reviews]);
 
-  // Most recent approved reviews across every product, for the homepage
-  // "What customers say" section — reviews are already newest-first from the
-  // Firestore query below, so this is just "take the approved ones".
+  // Reviews chosen for the homepage "What customers say" section. Being
+  // approved isn't enough on its own — a review also has to be individually
+  // starred/featured from the admin portal, so this only ever shows the
+  // handful you've picked rather than every approved review on the site.
   const homepageReviews = useMemo(
-    () => reviews.filter((r) => r.approved).slice(0, 6),
+    () => reviews.filter((r) => r.approved && r.featured).slice(0, 6),
     [reviews]
   );
 
@@ -796,6 +823,20 @@ export default function App() {
     return list;
   }, [activeCategory, searchQuery, products]);
 
+  // Jump back to page 1 whenever the category or search changes — otherwise
+  // a customer could be stranded on "page 3" of a filtered list that only
+  // has one page.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, searchQuery]);
+
+  const PRODUCTS_PER_PAGE = 20;
+  const totalPages = Math.max(1, Math.ceil(visibleProducts.length / PRODUCTS_PER_PAGE));
+  const pagedProducts = useMemo(
+    () => visibleProducts.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE),
+    [visibleProducts, currentPage]
+  );
+
   const cartItems = useMemo(
     () =>
       Object.entries(cart)
@@ -859,6 +900,9 @@ export default function App() {
 
   function addToCart(id, qty = 1) {
     setCart((c) => ({ ...c, [id]: (c[id] || 0) + qty }));
+    setCartToast(true);
+    clearTimeout(cartToastTimer.current);
+    cartToastTimer.current = setTimeout(() => setCartToast(false), 2200);
   }
   function buyNow(id, qty = 1) {
     // Deliberately does NOT touch the shared cart — "Buy Now" checks out
@@ -867,6 +911,12 @@ export default function App() {
     setDirectBuyItem({ id, qty });
     setDrawerOpen(false);
     setCheckoutOpen(true);
+  }
+  // Adjusts quantity from inside the checkout popup itself — only meaningful
+  // for a direct "Buy Now" purchase (a cart checkout can have several
+  // different items, each already adjustable from the cart drawer).
+  function changeCheckoutQty(delta) {
+    setDirectBuyItem((item) => (item ? { ...item, qty: Math.max(1, item.qty + delta) } : item));
   }
   function closeCheckout() {
     setCheckoutOpen(false);
@@ -1290,7 +1340,7 @@ export default function App() {
           <div className="ttc-product-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 22 }}>
             {visibleProducts.length === 0 ? (
               <p style={{ color: "#7A6E64", fontSize: 14, gridColumn: "1/-1" }}>No items match your search.</p>
-            ) : visibleProducts.map((p) => (
+            ) : pagedProducts.map((p) => (
               <div key={p.id} className="ttc-product-card" style={{ background: COLORS.cream, borderRadius: 18 }}>
                 <div onClick={p.variants ? undefined : () => openQuickView(p.id)} style={{ cursor: p.variants ? "default" : "pointer" }}>
                   {p.variants ? (
@@ -1354,6 +1404,29 @@ export default function App() {
               </div>
             ))}
           </div>
+
+          {totalPages > 1 && (
+            <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 26, flexWrap: "wrap" }}>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => {
+                    setCurrentPage(pageNum);
+                    document.getElementById("shop")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  aria-current={pageNum === currentPage ? "page" : undefined}
+                  style={{
+                    width: 34, height: 34, borderRadius: "50%", border: "none",
+                    background: pageNum === currentPage ? COLORS.navy : COLORS.bgSoft,
+                    color: pageNum === currentPage ? COLORS.cream : COLORS.charcoal,
+                    fontSize: 13, fontWeight: 700, cursor: "pointer",
+                  }}
+                >
+                  {pageNum}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -1369,14 +1442,51 @@ export default function App() {
                 What customers say
               </h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
-                {homepageReviews.map((r) => (
-                  <div key={r.id} style={{ background: COLORS.cream, borderRadius: 16, padding: 16 }}>
-                    <StarRating rating={r.rating} />
-                    <p style={{ fontSize: 13, color: "#5A4E46", lineHeight: 1.5, margin: "8px 0" }}>{r.comment}</p>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal }}>{r.name}</div>
-                    <div style={{ fontSize: 11.5, color: "#7A6E64" }}>on {r.productName}</div>
-                  </div>
-                ))}
+                {homepageReviews.map((r) => {
+                  const reviewProduct = products.find((p) => p.id === r.productId);
+                  const reviewPhoto = mainPhotoFor(reviewProduct);
+                  const goToProduct = () => { if (reviewProduct) openQuickView(reviewProduct.id); };
+                  return (
+                    <div key={r.id} style={{ background: COLORS.cream, borderRadius: 16, padding: 16, position: "relative" }}>
+                      <StarRating rating={r.rating} />
+                      <p style={{ fontSize: 13, color: "#5A4E46", lineHeight: 1.5, margin: "8px 0", paddingRight: reviewPhoto ? 56 : 0 }}>
+                        {r.comment}
+                      </p>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal }}>{r.name}</div>
+                      {reviewProduct ? (
+                        <button
+                          onClick={goToProduct}
+                          style={{
+                            fontSize: 11.5, color: COLORS.maroon, background: "none", border: "none",
+                            padding: 0, textDecoration: "underline", cursor: "pointer",
+                          }}
+                        >
+                          on {r.productName}
+                        </button>
+                      ) : (
+                        <div style={{ fontSize: 11.5, color: "#7A6E64" }}>on {r.productName}</div>
+                      )}
+                      {reviewPhoto && (
+                        <button
+                          onClick={goToProduct}
+                          aria-label={`View ${r.productName}`}
+                          style={{
+                            position: "absolute", bottom: 14, right: 14, width: 46, height: 46,
+                            borderRadius: 10, overflow: "hidden", border: `1.5px solid ${COLORS.bgSoft}`,
+                            padding: 0, background: "#fff", cursor: "pointer",
+                          }}
+                        >
+                          <img
+                            src={reviewPhoto}
+                            alt={r.productName}
+                            loading="lazy"
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -1454,6 +1564,21 @@ export default function App() {
         </div>
       </footer>
 
+      {/* "Added to cart" confirmation toast */}
+      {cartToast && (
+        <div
+          style={{
+            position: "fixed", left: "50%", bottom: 24, transform: "translateX(-50%)",
+            zIndex: 60, background: COLORS.maroonDark, color: COLORS.cream,
+            borderRadius: 999, padding: "10px 20px", fontSize: 13.5, fontWeight: 700,
+            display: "flex", alignItems: "center", gap: 8, boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
+            pointerEvents: "none",
+          }}
+        >
+          <ShoppingBag size={15} /> Added to cart
+        </div>
+      )}
+
       {/* Cart drawer */}
       {drawerOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 40, display: "flex", justifyContent: "flex-end" }}>
@@ -1480,8 +1605,17 @@ export default function App() {
               <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 14 }}>
                 {cartItems.map((i) => (
                   <div key={i.id} style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <div style={{ width: 50, height: 50, borderRadius: 8, overflow: "hidden", flexShrink: 0 }}>
-                      <ProductSwatch colors={i.swatch} real={i.real} />
+                    <div style={{ width: 50, height: 50, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "#fff" }}>
+                      {mainPhotoFor(i) ? (
+                        <img
+                          src={mainPhotoFor(i)}
+                          alt={i.name}
+                          loading="lazy"
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      ) : (
+                        <ProductSwatch colors={i.swatch} real={i.real} />
+                      )}
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: 700 }}>{i.name}</div>
@@ -1604,7 +1738,7 @@ export default function App() {
                   {p.variants ? (
                     <VariantPicker variants={p.variants} name={p.name} />
                   ) : p.photos ? (
-                    <ProductPhotoGallery photos={p.photos} name={p.name} />
+                    <ProductPhotoGallery key={p.id} photos={p.photos} name={p.name} autoPlay />
                   ) : (
                     <ProductSwatch colors={p.swatch} real={p.real} />
                   )}
@@ -1746,6 +1880,70 @@ export default function App() {
                 border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg, resize: "none",
               }}
             />
+
+            {directBuyItem && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal, marginBottom: 8 }}>Quantity</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <button
+                    onClick={() => changeCheckoutQty(-1)}
+                    style={{ background: COLORS.bgSoft, border: "none", borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center" }}
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span style={{ fontSize: 15, fontWeight: 700, minWidth: 20, textAlign: "center" }}>{directBuyItem.qty}</span>
+                  <button
+                    onClick={() => changeCheckoutQty(1)}
+                    style={{ background: COLORS.bgSoft, border: "none", borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center" }}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginBottom: 14 }}>
+              {appliedPromo ? (
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  background: COLORS.bgSoft, borderRadius: 10, padding: "8px 12px", fontSize: 13,
+                }}>
+                  <span style={{ color: COLORS.maroon, fontWeight: 700 }}>
+                    {appliedPromo} applied
+                  </span>
+                  <button onClick={removePromo} style={{ background: "none", border: "none", color: COLORS.charcoal }}>
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input
+                      value={promoInput}
+                      onChange={(e) => { setPromoInput(e.target.value); setPromoError(""); }}
+                      placeholder="Promo code"
+                      style={{
+                        flex: 1, padding: "8px 12px", borderRadius: 10,
+                        border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg,
+                      }}
+                    />
+                    <button
+                      onClick={applyPromo}
+                      style={{
+                        background: COLORS.navy, color: COLORS.cream, border: "none",
+                        borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 700,
+                      }}
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {promoError && (
+                    <div style={{ fontSize: 11.5, color: "#C0392B", marginTop: 6 }}>{promoError}</div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {checkoutDiscount > 0 && (
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: COLORS.maroon, marginBottom: 4 }}>
                 <span>Discount ({appliedPromo})</span>
