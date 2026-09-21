@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star } from "lucide-react";
+import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star, ArrowUp } from "lucide-react";
 import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { COLORS } from "./data/colors.js";
@@ -555,6 +555,15 @@ export default function App() {
   }
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  // "Back to top" button — only appears once the customer has scrolled down
+  // some distance, so it doesn't clutter the hero section.
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShowBackToTop(window.scrollY > 600);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   // Brief "Added to cart" confirmation shown after any Add-to-cart click.
   const [cartToast, setCartToast] = useState(false);
   const cartToastTimer = React.useRef(null);
@@ -1682,6 +1691,24 @@ export default function App() {
         >
           <MessageCircle size={26} />
         </a>
+      )}
+
+      {/* "Back to top" button — same hide-behind-overlays rule as the
+          WhatsApp button, on the opposite corner so the two never collide. */}
+      {showBackToTop && !drawerOpen && !checkoutOpen && !quickViewId && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+          style={{
+            position: "fixed", left: 20, bottom: 20, zIndex: 45,
+            width: 48, height: 48, borderRadius: "50%",
+            background: COLORS.navy, color: COLORS.cream, border: "none",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 6px 18px rgba(0,0,0,0.25)", cursor: "pointer",
+          }}
+        >
+          <ArrowUp size={22} />
+        </button>
       )}
 
       {/* "Added to cart" confirmation toast */}
