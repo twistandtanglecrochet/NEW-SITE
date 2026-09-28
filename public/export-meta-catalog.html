@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TTC Admin — Meta Catalog Export</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  :root {
+    --maroon: #6E1E36; --maroon-dark: #3F1220; --cream: #FBF6F0; --bg: #F3E9E2;
+    --bg-soft: #EDE0D8; --charcoal: #2B2420; --gold: #B98A2E; --green: #2E7D32; --red: #C0392B;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--charcoal); }
+  header { background: var(--maroon-dark); color: var(--cream); padding: 18px 20px; }
+  header h1 { font-size: 18px; margin: 0; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 80px; }
+  .card { background: var(--cream); border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .card h2 { margin-top: 0; font-size: 16px; color: var(--maroon-dark); }
+  .card p, .card li { font-size: 13.5px; line-height: 1.5; color: #5A5048; }
+  .card ol { padding-left: 20px; margin: 0; }
+  .btn { background: var(--maroon); color: var(--cream); border: none; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .row-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .msg { font-size: 13.5px; padding: 10px 12px; border-radius: 8px; margin-top: 12px; line-height: 1.45; }
+  .msg.ok { background: #E6F2E7; color: var(--green); }
+  .msg.warn { background: #FBF0DC; color: #7A5A12; }
+  .msg.error { background: #F8E1DE; color: var(--red); }
+  .hidden { display: none !important; }
+  .plist { display: flex; flex-direction: column; gap: 8px; }
+  .pitem { display: flex; gap: 12px; align-items: center; padding: 8px; border-radius: 10px; background: #fff; }
+  .pitem img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; background: var(--bg-soft); flex-shrink: 0; }
+  .pitem .info { flex: 1; min-width: 0; }
+  .pitem .name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pitem .meta { font-size: 12px; color: #7A6E64; }
+  .pitem .issue { font-size: 12px; color: var(--red); margin-top: 2px; }
+  .pitem .good { font-size: 12px; color: var(--green); margin-top: 2px; }
+</style>
+</head>
+<body>
+<header><h1>TTC Admin — Meta Catalog Export</h1></header>
+<div class="wrap">
+  <div class="card">
+    <h2>Export your products for Meta</h2>
+    <p>This reads every product currently on the shop — the ones you added in the admin portal plus any starter products — and builds a CSV file you can upload to your Meta catalog (Commerce Manager → Catalog → Data sources → Data feed → Upload once).</p>
+    <p>Photos are padded to a 1080×1080 white square automatically, since Meta rejects photos smaller than 500×500. Product links use the address you opened this page on: <strong id="originLabel"></strong></p>
+    <div class="row-btns">
+      <button class="btn" id="loadBtn">Load products</button>
+      <button class="btn hidden" id="downloadBtn">Download CSV</button>
+    </div>
+    <div id="status"></div>
+  </div>
+  <div class="card hidden" id="listCard">
+    <h2>Products (<span id="countLabel">0</span>)</h2>
+    <div class="plist" id="productList"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDWU7UDR7Q0s9k1ZAfdiqmoupKoOAVHuC8",
+    authDomain: "ttc1-e7b35.firebaseapp.com",
+    projectId: "ttc1-e7b35",
+    storageBucket: "ttc1-e7b35.firebasestorage.app",
+    messagingSenderId: "351259501918",
+    appId: "1:351259501918:web:e1dc45ea924f71e5a31bcf",
+    measurementId: "G-J3C8GHWQ1X",
+  };
+
+  // BEGIN-LOGIC
+  const BRAND = "Twist & Tangle Crochet";
+  const MIN_SIDE = 500;
+
+  // The 16 built-in starter products (from src/data/products.js), without
+  // their embedded photos. Their first photo is published at /og/<id>.jpg by
+  // scripts/generate-seo.mjs on every build. If you change products.js,
+  // update this list too.
+  const SEED_PRODUCTS = [{"id": "p22", "name": "Crochet Flower Claw Clip", "price": 250, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted flower claw clips — available in two styles. Tap a thumbnail to preview each one.", "variants": ["Olive Square Clip, Red & Tan Flower", "Maroon Wrapped Clip, Yellow Flower"]}, {"id": "p21", "name": "Crochet Rose Bag/Phone Charm", "price": 400, "tag": "New", "category": "Bag & Phone Charms", "desc": "Hand-crocheted ivory rose charm with dark green leaf accents, on a cord loop — perfect for a bag, phone, or AirPods case.", "variants": []}, {"id": "p20", "name": "Crochet Rose Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted rose keychain in deep maroon, finished with a sturdy keyring — an elegant everyday accessory or gift.", "variants": []}, {"id": "p19", "name": "Crochet Pony (Set of 2)", "price": 300, "tag": "New", "category": "Hair Ties", "desc": "Hand-crocheted hair ties, sold as a set of 2 — a scalloped ring style or a cute bow-topped ponytail band, available in several color combinations. Tap a thumbnail to preview each one.", "variants": ["Red & Yellow Scallop Ring", "Red Band, Yellow Bow", "Orange Band, Red & Brown Bow", "Pink Band, Teal Bow", "Green Band, Red Bow"]}, {"id": "p18", "name": "Crochet Mini Hat Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted mini sun-hat keychain in ivory and teal — a cute, unique charm for bags or keys.", "variants": []}, {"id": "p17", "name": "Crochet Flower Hair Catcher", "price": 250, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted flower hair catcher (claw clip) — available in gold & red, red & gold, pink, or green. Tap a thumbnail to preview each color.", "variants": ["All 4 Catchers", "Gold & Red", "Red & Gold", "Pink", "Green"]}, {"id": "p23", "name": "Crochet Loop Hair Claw Clip", "price": 250, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted loop-style hair claw clip — available in yellow, red, pink, or beige with a red flower. Tap a thumbnail to preview each color.", "variants": ["All 4 Colors", "Yellow", "Red", "Pink", "Beige with Red Flower"]}, {"id": "p24", "name": "Crochet Scalloped Flower Claw Clip", "price": 400, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted scalloped flower claw clip — available in six two-tone color combinations. Tap a thumbnail to preview each one.", "variants": ["All 6 Colors", "Teal & Maroon", "Cream & Maroon", "Green & Red", "Blue & Cream", "Mint & Pink", "Coral & Navy"]}, {"id": "p25", "name": "Crochet AirPods Pouch", "price": 500, "tag": "New", "category": "Crochet Purses", "desc": "Hand-crocheted AirPods pouch in royal blue, finished with a sturdy wrist loop — a snug, handy carrier for your earbuds on the go.", "variants": []}, {"id": "p1", "name": "Maroon Bloom Pouch", "price": 1000, "tag": "Bestseller", "category": "Crochet Purses", "desc": "A hand-stitched drawstring pouch with two crochet blossoms — deep maroon body, blush trim. Handy for carrying cash, AirPods, cosmetics, and other small essentials.", "variants": []}, {"id": "p3", "name": "Yellow Crochet Hoop Earrings", "price": 500, "tag": "New", "category": "Crochet Earrings", "desc": "Hand-crocheted mustard-yellow hoop earrings finished with red beaded trim and gold-tone hooks.", "variants": []}, {"id": "p4", "name": "Sunflower Keychain", "price": 500, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted sunflower keychain with a deep brown center, finished with a sturdy keyring.", "variants": []}, {"id": "p14", "name": "Mini Jersey Keychain (No. 10)", "price": 500, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted mini football jersey keychain in blue and white with a No. 10 detail — a fun gift for any football fan.", "variants": []}, {"id": "p15", "name": "Pink Bow Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted pink bow keychain, finished with a sturdy keyring — a sweet everyday accessory or gift.", "variants": []}, {"id": "p16", "name": "Mini Bag Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted mini bag keychain in mustard yellow with a fun stitched face — a playful, unique accessory.", "variants": []}, {"id": "p8", "name": "Crochet Hair Clips", "price": 550, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted hair clip pairs, each topped with a crochet flower — available in six color combinations. Tap a thumbnail to preview each one.", "variants": ["Mustard & White", "Tan & Blue Pearl", "Cream & Red", "Maroon & Ivory", "Red & Green Beaded", "Ivory & Teal"]}];
+
+  // Inserts a Cloudinary transformation that pads the photo onto a white
+  // 1080x1080 square (scaling up if needed) — Meta's minimum is 500x500.
+  function metaImageUrl(url) {
+    const m = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/.exec(url || "");
+    if (!m) return url || "";
+    return m[1] + "c_pad,b_white,w_1080,h_1080,q_auto,f_jpg/" + m[2];
+  }
+
+  // Drops site-only instructions ("Tap a thumbnail...") that make no sense in a Facebook ad.
+  function cleanDescription(desc, name) {
+    let d = String(desc || "").replace(/\s+/g, " ").trim();
+    d = d.split(/(?<=[.!?])\s+/).filter((s) => !/tap a thumbnail/i.test(s)).join(" ").trim();
+    if (!d) d = "Handmade crochet " + name + ".";
+    if (!/[.!?]$/.test(d)) d += ".";
+    return d + " Handmade to order in Lahore, Pakistan.";
+  }
+
+  function photoList(p) {
+    const list = [];
+    (Array.isArray(p.photos) ? p.photos : []).forEach((u) => u && list.push(u));
+    (Array.isArray(p.variants) ? p.variants : []).forEach((v) => v && v.photo && list.push(v.photo));
+    return list.filter((u) => /^https?:\/\//i.test(u));
+  }
+
+  // Same merge rule as the live site (App.jsx): Firestore products first,
+  // then any starter product that hasn't been imported (no matching seedId).
+  function mergeProducts(fromFirestore, origin) {
+    const imported = new Set(fromFirestore.map((p) => p.seedId).filter(Boolean));
+    const seeds = SEED_PRODUCTS.filter((s) => !imported.has(s.id)).map((s) => ({
+      ...s, isSeed: true, photos: [origin + "/og/" + s.id + ".jpg"],
+    }));
+    return [...fromFirestore, ...seeds];
+  }
+
+  function toRow(p, origin) {
+    const photos = p.isSeed ? p.photos : photoList(p).map(metaImageUrl);
+    const variantNames = (Array.isArray(p.variants) ? p.variants : []).map((v) => v && v.name).filter(Boolean);
+    let description = cleanDescription(p.desc, p.name);
+    if (variantNames.length > 1) description += " Options: " + variantNames.join("; ") + ".";
+    const issues = [];
+    const price = Number(p.price);
+    if (!p.name) issues.push("Missing name");
+    if (!(price > 0)) issues.push("Missing or zero price");
+    if (!photos.length) issues.push("No photo");
+    return {
+      row: {
+        id: p.id,
+        title: String(p.name || "").slice(0, 200),
+        description: description.slice(0, 9999),
+        availability: "in stock",
+        condition: "new",
+        price: price > 0 ? price.toFixed(0) + " PKR" : "",
+        link: origin + "/product/" + encodeURIComponent(p.id),
+        image_link: photos[0] || "",
+        additional_image_link: photos.slice(1, 21).join(","),
+        brand: BRAND,
+        product_type: p.category || "",
+        custom_label_0: p.tag || "",
+      },
+      issues,
+      isSeed: !!p.isSeed,
+    };
+  }
+
+  const COLUMNS = ["id","title","description","availability","condition","price","link","image_link","additional_image_link","brand","product_type","custom_label_0"];
+
+  function toCsv(rows) {
+    const esc = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+    return [COLUMNS.join(","), ...rows.map((r) => COLUMNS.map((c) => esc(r[c])).join(","))].join("\r\n");
+  }
+  // END-LOGIC
+
+  const $ = (id) => document.getElementById(id);
+  const origin = window.location.origin;
+  $("originLabel").textContent = origin;
+  let entries = [];
+
+  function setStatus(kind, html) {
+    $("status").innerHTML = html ? '<div class="msg ' + kind + '">' + html + "</div>" : "";
+  }
+  const escHtml = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  function checkImageSize(url) {
+    return new Promise((resolve) => {
+      if (!url) return resolve(null);
+      const img = new Image();
+      img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+  }
+
+  async function load() {
+    $("loadBtn").disabled = true;
+    $("downloadBtn").classList.add("hidden");
+    setStatus("ok", "Loading products…");
+    let fromFirestore = [];
+    let firestoreFailed = false;
+    try {
+      const db = getFirestore(initializeApp(firebaseConfig));
+      const snap = await getDocs(collection(db, "products"));
+      fromFirestore = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      fromFirestore.sort((a, b) => (typeof a.order === "number" ? a.order : 1e9) - (typeof b.order === "number" ? b.order : 1e9));
+    } catch (err) {
+      firestoreFailed = true;
+      console.error(err);
+    }
+
+    entries = mergeProducts(fromFirestore, origin).map((p) => toRow(p, origin));
+    setStatus("ok", "Checking photos…");
+    await Promise.all(entries.map(async (e) => {
+      const size = await checkImageSize(e.row.image_link);
+      if (!size) e.issues.push("Photo didn't load");
+      else if (size.w < MIN_SIDE || size.h < MIN_SIDE) {
+        e.issues.push("Photo is " + size.w + "×" + size.h + " — Meta needs at least 500×500" +
+          (e.isSeed ? ". Run import-starter-catalog.html once to fix this." : ""));
+      }
+    }));
+
+    render();
+    const ready = entries.filter((e) => !e.issues.length).length;
+    const problems = entries.length - ready;
+    let msg = ready + " of " + entries.length + " products are ready for Meta.";
+    if (problems) msg += " The CSV still includes all of them, but Meta will reject the " + problems + " marked in red until they're fixed.";
+    if (firestoreFailed) msg = "Couldn't reach your product database, so only the starter products are listed. Check your connection and try again. " + msg;
+    setStatus(firestoreFailed || problems ? "warn" : "ok", escHtml(msg));
+    $("downloadBtn").classList.remove("hidden");
+    $("loadBtn").disabled = false;
+    $("loadBtn").textContent = "Reload products";
+  }
+
+  function render() {
+    $("listCard").classList.remove("hidden");
+    $("countLabel").textContent = entries.length;
+    $("productList").innerHTML = entries.map((e) => {
+      const r = e.row;
+      const status = e.issues.length
+        ? e.issues.map((i) => '<div class="issue">' + escHtml(i) + "</div>").join("")
+        : '<div class="good">Ready</div>';
+      return '<div class="pitem"><img src="' + escHtml(r.image_link) + '" alt="" loading="lazy" />' +
+        '<div class="info"><div class="name">' + escHtml(r.title || "(no name)") + "</div>" +
+        '<div class="meta">' + escHtml(r.price || "no price") + " · " + escHtml(r.product_type || "no category") + "</div>" +
+        status + "</div></div>";
+    }).join("");
+  }
+
+  function download() {
+    const csv = "\uFEFF" + toCsv(entries.map((e) => e.row));
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "ttc-meta-catalog-" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  $("loadBtn").addEventListener("click", load);
+  $("downloadBtn").addEventListener("click", download);
+</script>
+</body>
+</html>
