@@ -584,6 +584,9 @@ export default function App() {
   const [quickViewQty, setQuickViewQty] = useState(1);
   const [quickViewSize, setQuickViewSize] = useState(null);
   const [instaCopied, setInstaCopied] = useState(false);
+  // Remembers the last order saved to the admin panel, so tapping the
+  // WhatsApp/Instagram button twice for the same order doesn't save it twice.
+  const lastSavedOrderRef = React.useRef("");
   const [promoInput, setPromoInput] = useState("");
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [promoError, setPromoError] = useState("");
@@ -1043,6 +1046,49 @@ export default function App() {
       .catch(() => {
         // Clipboard unavailable — the Instagram tab still opens either way.
       });
+  }
+
+  // Saves a copy of the order to Firestore so it shows up under "Orders" in
+  // the admin panel. Fire-and-forget on purpose: the WhatsApp/Instagram link
+  // must open immediately (see the note above), and a failed save should
+  // never stop the customer from sending their order.
+  function saveOrderToAdmin(channel) {
+    const signature = channel + "|" + buildOrderText();
+    if (lastSavedOrderRef.current === signature) return;
+    lastSavedOrderRef.current = signature;
+    const items = checkoutItems.map((i) => {
+      const photo = i.variantPhoto || mainPhotoFor(i);
+      return {
+        productId: String(i.id),
+        name: String(i.name || ""),
+        variant: i.variantName || null,
+        qty: i.qty,
+        price: i.price,
+        // Built-in starter products keep their photos inside the site's code
+        // (very large) — only short web links are worth storing with an order.
+        photo: typeof photo === "string" && /^https?:\/\//.test(photo) ? photo : null,
+      };
+    });
+    addDoc(collection(db, "orders"), {
+      items,
+      subtotal: checkoutSubtotal,
+      discount: checkoutDiscount,
+      promo: appliedPromo || null,
+      total: checkoutTotal,
+      customer: {
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+        notes: form.notes.trim(),
+      },
+      channel,
+      status: "new",
+      starred: false,
+      createdAt: serverTimestamp(),
+    }).catch((err) => {
+      console.warn("Couldn't save order to admin panel:", err.message);
+      lastSavedOrderRef.current = "";
+    });
   }
 
   const canSubmit = form.name.trim() && form.phone.trim() && form.address.trim() && checkoutItems.length > 0;
@@ -2118,7 +2164,10 @@ export default function App() {
               href={canSubmit ? buildWhatsAppLink() : undefined}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => { if (!canSubmit) e.preventDefault(); }}
+              onClick={(e) => {
+                if (!canSubmit) { e.preventDefault(); return; }
+                saveOrderToAdmin("whatsapp");
+              }}
               aria-disabled={!canSubmit}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -2136,6 +2185,7 @@ export default function App() {
               onClick={(e) => {
                 if (!canSubmit) { e.preventDefault(); return; }
                 copyOrderTextForInstagram();
+                saveOrderToAdmin("instagram");
               }}
               aria-disabled={!canSubmit}
               style={{
