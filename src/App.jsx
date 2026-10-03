@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star, ArrowUp } from "lucide-react";
-import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, onSnapshot, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { COLORS } from "./data/colors.js";
 import { LOGO_SRC, BG_SRC } from "./data/siteImages.js";
@@ -16,7 +16,10 @@ import {
 
 const WHATSAPP_NUMBER = "923027609899";
 
-// Promo codes: type "percent" (e.g. 10 = 10% off) or "flat" (fixed Rs amount off)
+// Promo codes: type "percent" (e.g. 10 = 10% off) or "flat" (fixed Rs amount off).
+// These are only a fallback now — the live list is managed from the admin
+// panel ("Promo codes") and read from Firestore (config/promoCodes). Until
+// that's been saved once, these defaults are used.
 const PROMO_CODES = {
   "TTC10": { type: "percent", value: 10 },
   "WELCOME50": { type: "flat", value: 50 },
@@ -589,6 +592,7 @@ export default function App() {
   const lastSavedOrderRef = React.useRef("");
   const [promoInput, setPromoInput] = useState("");
   const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoCodes, setPromoCodes] = useState(PROMO_CODES);
   const [promoError, setPromoError] = useState("");
   const [products, setProducts] = useState(SEED_PRODUCTS);
   // True once the products listener has responded at least once (success or
@@ -758,6 +762,29 @@ export default function App() {
     }
   }, [quickViewId, activeCategory, products]);
 
+  // Live promo codes from the admin panel. Only active codes are usable; if
+  // the admin hasn't saved the list yet, the built-in PROMO_CODES stay.
+  useEffect(() => {
+    const unsub = onSnapshot(
+      doc(db, "config", "promoCodes"),
+      (snap) => {
+        if (!snap.exists()) return;
+        const all = (snap.data() && snap.data().codes) || {};
+        const active = {};
+        for (const [code, p] of Object.entries(all)) {
+          if (p && p.active !== false && (p.type === "percent" || p.type === "flat") && Number(p.value) > 0) {
+            active[code.toUpperCase()] = { type: p.type, value: Number(p.value) };
+          }
+        }
+        setPromoCodes(active);
+        // A code the customer already applied that's since been switched off.
+        setAppliedPromo((current) => (current && !active[current] ? null : current));
+      },
+      () => {} // keep the built-in codes if this can't be read
+    );
+    return () => unsub();
+  }, []);
+
   useEffect(() => {
     const q = query(collection(db, "products"));
     const unsub = onSnapshot(
@@ -910,7 +937,7 @@ export default function App() {
 
   function calcDiscount(subtotalAmount) {
     if (!appliedPromo) return 0;
-    const promo = PROMO_CODES[appliedPromo];
+    const promo = promoCodes[appliedPromo];
     if (!promo) return 0;
     if (promo.type === "percent") return Math.round((subtotalAmount * promo.value) / 100);
     return Math.min(promo.value, subtotalAmount);
@@ -919,7 +946,7 @@ export default function App() {
   // everything currently in the cart. The checkout modal uses its own
   // checkoutSubtotal/checkoutDiscount/checkoutTotal below instead, so that a
   // "Buy Now" purchase never mixes in whatever else happens to be in the cart.
-  const discount = useMemo(() => calcDiscount(subtotal), [appliedPromo, subtotal]);
+  const discount = useMemo(() => calcDiscount(subtotal), [appliedPromo, subtotal, promoCodes]);
   const total = Math.max(0, subtotal - discount);
 
   // What the checkout modal actually orders: just the one "Buy Now" item
@@ -940,13 +967,13 @@ export default function App() {
     return cartItems;
   }, [directBuyItem, cartItems, products]);
   const checkoutSubtotal = checkoutItems.reduce((s, i) => s + i.qty * i.price, 0);
-  const checkoutDiscount = useMemo(() => calcDiscount(checkoutSubtotal), [appliedPromo, checkoutSubtotal]);
+  const checkoutDiscount = useMemo(() => calcDiscount(checkoutSubtotal), [appliedPromo, checkoutSubtotal, promoCodes]);
   const checkoutTotal = Math.max(0, checkoutSubtotal - checkoutDiscount);
 
   function applyPromo() {
     const code = promoInput.trim().toUpperCase();
     if (!code) return;
-    if (PROMO_CODES[code]) {
+    if (promoCodes[code]) {
       setAppliedPromo(code);
       setPromoError("");
     } else {
