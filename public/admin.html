@@ -258,6 +258,36 @@
   .order-actions .undo-btn { background: var(--bg-soft); color: var(--charcoal); }
   .order-actions .del-btn { background: none; color: #C0392B; margin-left: auto; }
   .empty { color: #7A6E64; font-size: 13px; }
+  .nav-group { font-size: 12px; color: #7A6E64; padding: 14px 0 6px 24px; border-top: 1px solid var(--bg-soft); margin: 8px 12px 0 0; }
+  body.nav-collapsed .nav-group { font-size: 0; padding: 0; margin: 8px 16px 8px 16px; width: 48px; }
+  @media (max-width: 760px) { body.nav-collapsed .nav-group { font-size: 12px; padding: 14px 0 6px 24px; margin: 8px 12px 0 0; width: auto; } }
+  .subhead { font-size: 14px; color: var(--maroon-dark); margin: 22px 0 0; }
+  .promo-list { display: flex; flex-direction: column; gap: 8px; }
+  .promo-row { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--bg-soft); border-radius: 10px; padding: 10px 12px; }
+  .promo-row.off { opacity: 0.6; }
+  .promo-code { font-weight: 700; font-size: 14px; letter-spacing: 0.5px; min-width: 110px; }
+  .promo-what { flex: 1; font-size: 13px; color: #5A5048; }
+  .promo-row .del-link { background: none; border: none; color: #C0392B; font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 4px; font-family: inherit; }
+  .switch { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #5A5048; cursor: pointer; margin: 0; font-weight: 500; }
+  .switch input { width: 34px; height: 20px; appearance: none; background: #D8CCC3; border-radius: 999px; position: relative; cursor: pointer; margin: 0; transition: background 0.15s; }
+  .switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.15s; }
+  .switch input:checked { background: var(--maroon); }
+  .switch input:checked::after { transform: translateX(14px); }
+  .switch input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .promo-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 560px) { .promo-form { grid-template-columns: 1fr; } }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+  .tool-card { margin-bottom: 0; }
+  .tool-card .btn { margin-top: 6px; }
+  .tool-card code { font-size: 11.5px; background: var(--bg-soft); padding: 1px 4px; border-radius: 4px; }
+  .admin-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .admin-row { display: flex; align-items: center; gap: 8px; font-size: 13px; background: #fff; border: 1px solid var(--bg-soft); border-radius: 8px; padding: 7px 10px; }
+  .admin-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .admin-row .owner { flex: none; overflow: visible; font-size: 11px; color: var(--gold); font-weight: 700; }
+  .admin-row button { background: none; border: none; color: #C0392B; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .admin-add { display: flex; gap: 8px; flex-wrap: wrap; }
+  .admin-add input { flex: 1; min-width: 160px; width: auto; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--bg-soft); background: var(--bg); font-size: 14px; font-family: inherit; }
+  .admin-add .btn { margin-top: 0; }
   /* Edit/Delete buttons in the product and review lists had no background
      set, so "Delete" showed as white text on a near-white button. */
   .product-row .actions .danger, .review-row .actions .danger { background: #C0392B; color: #fff; }
@@ -313,6 +343,9 @@
       <button type="button" class="nav-item" data-view="reviews" title="Reviews"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="m12 8 1 2 2 .3-1.5 1.4.4 2.1L12 12.8l-1.9 1 .4-2.1L9 10.3l2-.3z"/></svg><span class="nav-label">Reviews</span><span class="nav-badge hidden" id="navBadgeReviews"></span></button>
       <button type="button" class="nav-item" data-view="manageReviews" title="Manage reviews"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg><span class="nav-label">Manage reviews</span></button>
       <button type="button" class="nav-item" data-view="orders" title="Orders"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span class="nav-label">Orders</span><span class="nav-badge hidden" id="navBadgeOrders"></span></button>
+      <div class="nav-group">More</div>
+      <button type="button" class="nav-item" data-view="promos" title="Promo codes"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg><span class="nav-label">Promo codes</span></button>
+      <button type="button" class="nav-item" data-view="tools" title="Tools"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4a5 5 0 0 0-4.6 6.9L4 17.3V20h2.7l6.4-6.4A5 5 0 0 0 20 9l-3 1-2-2 1-3z"/></svg><span class="nav-label">Tools</span></button>
     </nav>
     <div class="scrim" id="scrim"></div>
 
@@ -450,6 +483,61 @@
       <div class="order-list" id="orderList"></div>
     </div>
     </section>
+
+    <section data-view-panel="promos" class="hidden">
+    <div class="card">
+      <h2>Promo codes</h2>
+      <p class="hint">Customers type these at checkout (in the cart or on Buy Now). Changes reach the shop within a few seconds. Switch a code off to pause it without deleting it.</p>
+      <div class="msg error hidden" id="promoError"></div>
+      <div class="promo-list" id="promoList"></div>
+      <h3 class="subhead">Add a code</h3>
+      <div class="promo-form">
+        <div>
+          <label for="promo_code">Code</label>
+          <input type="text" id="promo_code" placeholder="e.g. EID20" maxlength="20" autocomplete="off" />
+        </div>
+        <div>
+          <label for="promo_type">Discount type</label>
+          <select id="promo_type">
+            <option value="percent">Percent off (%)</option>
+            <option value="flat">Fixed amount off (Rs)</option>
+          </select>
+        </div>
+        <div>
+          <label for="promo_value">Amount</label>
+          <input type="number" id="promo_value" min="1" placeholder="e.g. 20" />
+        </div>
+      </div>
+      <button type="button" class="btn" id="promoAddBtn">Add code</button>
+      <div class="msg" id="promoMsg"></div>
+    </div>
+    </section>
+
+    <section data-view-panel="tools" class="hidden">
+    <div class="tools-grid">
+      <div class="card tool-card">
+        <h2>Move photos to Cloudinary</h2>
+        <p class="hint">Uploads the 16 starter products' built-in photos to Cloudinary and gives you a lighter <code>src/data/products.js</code> to put on GitHub. This takes about 1.6 MB off your site, so it opens much faster.</p>
+        <a class="btn" href="/migrate-seed-photos.html" style="text-decoration:none; display:inline-block;">Move photos</a>
+      </div>
+      <div class="card tool-card">
+        <h2>Export Meta catalog</h2>
+        <p class="hint">Downloads a CSV of all products for Facebook/Instagram: Commerce Manager → Catalog → Data sources → Upload. Re-download whenever you add products or change prices.</p>
+        <button type="button" class="btn" id="metaCsvBtn">Download CSV</button>
+        <div class="msg" id="metaCsvMsg"></div>
+      </div>
+      <div class="card tool-card">
+        <h2>Admin list</h2>
+        <p class="hint">Who can sign in to this admin panel. Owners are fixed and can't be removed; only an owner can add or remove other admins.</p>
+        <div class="admin-list" id="adminList"></div>
+        <div class="admin-add" id="adminAddRow">
+          <input type="email" id="admin_email" placeholder="name@gmail.com" autocomplete="off" />
+          <button type="button" class="btn" id="adminAddBtn">Add admin</button>
+        </div>
+        <div class="msg" id="adminMsg"></div>
+      </div>
+    </div>
+    </section>
     </main>
   </div>
 </div>
@@ -460,7 +548,7 @@
     getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+    getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDoc, setDoc,
     onSnapshot, query, orderBy, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -531,12 +619,27 @@
   $("signOutBtn").addEventListener("click", () => signOut(auth));
   $("signOutBtn2").addEventListener("click", () => signOut(auth));
 
-  onAuthStateChanged(auth, (user) => {
+  // Owners (ADMIN_EMAILS above) always get in. Anyone else gets in only if an
+  // owner has added them under Tools → Admin list (saved in config/admins;
+  // the Firestore rules only let listed admins read that document).
+  let isOwner = false;
+  async function isListedAdmin(email) {
+    try {
+      const snap = await getDoc(doc(db, "config", "admins"));
+      const emails = (snap.exists() && Array.isArray(snap.data().emails)) ? snap.data().emails : [];
+      return emails.map((e) => String(e).toLowerCase()).includes(String(email).toLowerCase());
+    } catch (e) {
+      return false; // permission denied = not on the list
+    }
+  }
+
+  onAuthStateChanged(auth, async (user) => {
     if (!user) {
       showOnly(signedOutEl);
       return;
     }
-    if (!ADMIN_EMAILS.includes(user.email)) {
+    isOwner = ADMIN_EMAILS.includes(user.email);
+    if (!isOwner && !(await isListedAdmin(user.email))) {
       showOnly(notAllowedEl);
       return;
     }
@@ -544,10 +647,12 @@
     startProductListener();
     startReviewListener();
     startOrderListener();
+    startPromoListener();
+    startAdminListListener();
   });
 
   // ---- sidebar navigation (Keep-style) ----
-  const VIEWS = ["import", "add", "products", "reviews", "manageReviews", "orders"];
+  const VIEWS = ["import", "add", "products", "reviews", "manageReviews", "orders", "promos", "tools"];
   const isPhone = () => window.matchMedia("(max-width: 760px)").matches;
 
   function showView(name) {
@@ -1006,6 +1111,224 @@
       alert("Couldn't update this order: " + e.message);
     }
   }
+
+  // ---- promo codes (config/promoCodes, read live by the shop) ----
+  // Used the first time only, so the shop's existing codes carry over.
+  const DEFAULT_PROMO_CODES = {
+    TTC10: { type: "percent", value: 10, active: true },
+    WELCOME50: { type: "flat", value: 50, active: true },
+  };
+  const promoRef = doc(db, "config", "promoCodes");
+  let promoCodes = null;
+  let promoUnsub = null;
+
+  function startPromoListener() {
+    if (promoUnsub) return;
+    promoUnsub = onSnapshot(
+      promoRef,
+      (snap) => {
+        $("promoError").classList.add("hidden");
+        if (!snap.exists()) {
+          // First visit: save the codes the shop already uses, so nothing changes for customers.
+          setDoc(promoRef, { codes: DEFAULT_PROMO_CODES }).catch((e) => showPromoError(e));
+          return;
+        }
+        promoCodes = (snap.data() && snap.data().codes) || {};
+        renderPromos();
+      },
+      (err) => showPromoError(err)
+    );
+  }
+
+  function showPromoError(err) {
+    $("promoError").classList.remove("hidden");
+    $("promoError").textContent = "Couldn't load promo codes (" + err.message + "). If it says \"permissions\", the new Firestore rules haven't been published yet.";
+  }
+
+  function describePromo(p) {
+    return p.type === "percent" ? p.value + "% off" : "Rs " + p.value + " off";
+  }
+
+  function renderPromos() {
+    const list = $("promoList");
+    const codes = Object.keys(promoCodes || {}).sort();
+    if (!codes.length) {
+      list.innerHTML = '<p class="empty">No promo codes. Add one below.</p>';
+      return;
+    }
+    list.innerHTML = codes.map((code) => {
+      const p = promoCodes[code];
+      const on = p.active !== false;
+      return `<div class="promo-row${on ? "" : " off"}">
+        <span class="promo-code">${escapeHtml(code)}</span>
+        <span class="promo-what">${escapeHtml(describePromo(p))}</span>
+        <label class="switch"><input type="checkbox" data-promo-toggle="${escapeHtml(code)}" ${on ? "checked" : ""} aria-label="${escapeHtml(code)} active" />${on ? "On" : "Off"}</label>
+        <button type="button" class="del-link" data-promo-delete="${escapeHtml(code)}">Delete</button>
+      </div>`;
+    }).join("");
+    list.querySelectorAll("[data-promo-toggle]").forEach((box) =>
+      box.addEventListener("change", () => {
+        const code = box.getAttribute("data-promo-toggle");
+        savePromos({ ...promoCodes, [code]: { ...promoCodes[code], active: box.checked } });
+      })
+    );
+    list.querySelectorAll("[data-promo-delete]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const code = btn.getAttribute("data-promo-delete");
+        if (!confirm("Delete the code " + code + "? Customers won't be able to use it anymore.")) return;
+        const next = { ...promoCodes };
+        delete next[code];
+        savePromos(next);
+      })
+    );
+  }
+
+  async function savePromos(next) {
+    try {
+      await setDoc(promoRef, { codes: next });
+    } catch (e) {
+      alert("Couldn't save promo codes: " + e.message);
+    }
+  }
+
+  $("promoAddBtn").addEventListener("click", async () => {
+    const msg = $("promoMsg");
+    const code = $("promo_code").value.trim().toUpperCase();
+    const type = $("promo_type").value;
+    const value = Number($("promo_value").value);
+    msg.className = "msg error";
+    if (!/^[A-Z0-9]{3,20}$/.test(code)) { msg.textContent = "Use 3–20 letters or numbers for the code, no spaces."; return; }
+    if (!(value > 0)) { msg.textContent = "Enter an amount above 0."; return; }
+    if (type === "percent" && value > 90) { msg.textContent = "A percent discount can be at most 90%."; return; }
+    if (promoCodes && promoCodes[code]) { msg.textContent = code + " already exists — delete it first to change it."; return; }
+    await savePromos({ ...(promoCodes || {}), [code]: { type, value, active: true } });
+    $("promo_code").value = "";
+    $("promo_value").value = "";
+    msg.className = "msg success";
+    msg.textContent = code + " added — customers can use it now.";
+  });
+
+  // ---- admin list (config/admins) ----
+  const adminsRef = doc(db, "config", "admins");
+  let extraAdmins = [];
+  let adminUnsub = null;
+
+  function startAdminListListener() {
+    if (adminUnsub) return;
+    adminUnsub = onSnapshot(
+      adminsRef,
+      (snap) => {
+        extraAdmins = (snap.exists() && Array.isArray(snap.data().emails)) ? snap.data().emails : [];
+        renderAdmins();
+      },
+      (err) => {
+        $("adminMsg").className = "msg error";
+        $("adminMsg").textContent = "Couldn't load the admin list (" + err.message + ").";
+      }
+    );
+    renderAdmins();
+  }
+
+  function renderAdmins() {
+    const owners = ADMIN_EMAILS.map((e) => `<div class="admin-row"><span>${escapeHtml(e)}</span><span class="owner">Owner</span></div>`);
+    const others = extraAdmins.map((e) => `<div class="admin-row"><span>${escapeHtml(e)}</span>${isOwner ? `<button type="button" data-admin-remove="${escapeHtml(e)}">Remove</button>` : ""}</div>`);
+    $("adminList").innerHTML = owners.concat(others).join("");
+    $("adminAddRow").classList.toggle("hidden", !isOwner);
+    $("adminList").querySelectorAll("[data-admin-remove]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const email = btn.getAttribute("data-admin-remove");
+        if (!confirm("Remove " + email + " as an admin?")) return;
+        saveAdmins(extraAdmins.filter((e) => e !== email));
+      })
+    );
+  }
+
+  async function saveAdmins(emails) {
+    try {
+      await setDoc(adminsRef, { emails });
+      $("adminMsg").className = "msg success";
+      $("adminMsg").textContent = "Admin list saved.";
+    } catch (e) {
+      $("adminMsg").className = "msg error";
+      $("adminMsg").textContent = "Couldn't save: " + e.message;
+    }
+  }
+
+  $("adminAddBtn").addEventListener("click", () => {
+    const email = $("admin_email").value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      $("adminMsg").className = "msg error";
+      $("adminMsg").textContent = "Enter a valid Google email address.";
+      return;
+    }
+    if (ADMIN_EMAILS.includes(email) || extraAdmins.includes(email)) {
+      $("adminMsg").className = "msg error";
+      $("adminMsg").textContent = email + " is already an admin.";
+      return;
+    }
+    $("admin_email").value = "";
+    saveAdmins([...extraAdmins, email]);
+  });
+
+  // ---- Meta catalog CSV ----
+  // The 16 starter products (without photos). Their first photo is published
+  // at /og/<id>.jpg on every build. Starter products already imported into
+  // the admin panel (matching seedId) are skipped, the same way the shop does.
+  const SEED_PRODUCTS_META = [{"id": "p22", "name": "Crochet Flower Claw Clip", "price": 250, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted flower claw clips — available in two styles. Tap a thumbnail to preview each one.", "variants": ["Olive Square Clip, Red & Tan Flower", "Maroon Wrapped Clip, Yellow Flower"]}, {"id": "p21", "name": "Crochet Rose Bag/Phone Charm", "price": 400, "tag": "New", "category": "Bag & Phone Charms", "desc": "Hand-crocheted ivory rose charm with dark green leaf accents, on a cord loop — perfect for a bag, phone, or AirPods case.", "variants": []}, {"id": "p20", "name": "Crochet Rose Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted rose keychain in deep maroon, finished with a sturdy keyring — an elegant everyday accessory or gift.", "variants": []}, {"id": "p19", "name": "Crochet Pony (Set of 2)", "price": 300, "tag": "New", "category": "Hair Ties", "desc": "Hand-crocheted hair ties, sold as a set of 2 — a scalloped ring style or a cute bow-topped ponytail band, available in several color combinations. Tap a thumbnail to preview each one.", "variants": ["Red & Yellow Scallop Ring", "Red Band, Yellow Bow", "Orange Band, Red & Brown Bow", "Pink Band, Teal Bow", "Green Band, Red Bow"]}, {"id": "p18", "name": "Crochet Mini Hat Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted mini sun-hat keychain in ivory and teal — a cute, unique charm for bags or keys.", "variants": []}, {"id": "p17", "name": "Crochet Flower Hair Catcher", "price": 250, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted flower hair catcher (claw clip) — available in gold & red, red & gold, pink, or green. Tap a thumbnail to preview each color.", "variants": ["All 4 Catchers", "Gold & Red", "Red & Gold", "Pink", "Green"]}, {"id": "p23", "name": "Crochet Loop Hair Claw Clip", "price": 250, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted loop-style hair claw clip — available in yellow, red, pink, or beige with a red flower. Tap a thumbnail to preview each color.", "variants": ["All 4 Colors", "Yellow", "Red", "Pink", "Beige with Red Flower"]}, {"id": "p24", "name": "Crochet Scalloped Flower Claw Clip", "price": 400, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted scalloped flower claw clip — available in six two-tone color combinations. Tap a thumbnail to preview each one.", "variants": ["All 6 Colors", "Teal & Maroon", "Cream & Maroon", "Green & Red", "Blue & Cream", "Mint & Pink", "Coral & Navy"]}, {"id": "p25", "name": "Crochet AirPods Pouch", "price": 500, "tag": "New", "category": "Crochet Purses", "desc": "Hand-crocheted AirPods pouch in royal blue, finished with a sturdy wrist loop — a snug, handy carrier for your earbuds on the go.", "variants": []}, {"id": "p1", "name": "Maroon Bloom Pouch", "price": 1000, "tag": "Bestseller", "category": "Crochet Purses", "desc": "A hand-stitched drawstring pouch with two crochet blossoms — deep maroon body, blush trim. Handy for carrying cash, AirPods, cosmetics, and other small essentials.", "variants": []}, {"id": "p3", "name": "Yellow Crochet Hoop Earrings", "price": 500, "tag": "New", "category": "Crochet Earrings", "desc": "Hand-crocheted mustard-yellow hoop earrings finished with red beaded trim and gold-tone hooks.", "variants": []}, {"id": "p4", "name": "Sunflower Keychain", "price": 500, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted sunflower keychain with a deep brown center, finished with a sturdy keyring.", "variants": []}, {"id": "p14", "name": "Mini Jersey Keychain (No. 10)", "price": 500, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted mini football jersey keychain in blue and white with a No. 10 detail — a fun gift for any football fan.", "variants": []}, {"id": "p15", "name": "Pink Bow Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted pink bow keychain, finished with a sturdy keyring — a sweet everyday accessory or gift.", "variants": []}, {"id": "p16", "name": "Mini Bag Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted mini bag keychain in mustard yellow with a fun stitched face — a playful, unique accessory.", "variants": []}, {"id": "p8", "name": "Crochet Hair Clips", "price": 550, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted hair clip pairs, each topped with a crochet flower — available in six color combinations. Tap a thumbnail to preview each one.", "variants": ["Mustard & White", "Tan & Blue Pearl", "Cream & Red", "Maroon & Ivory", "Red & Green Beaded", "Ivory & Teal"]}];
+
+  function metaImageUrl(url) {
+    const m = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/.exec(url || "");
+    return m ? m[1] + "c_pad,b_white,w_1080,h_1080,q_auto,f_jpg/" + m[2] : (url || "");
+  }
+
+  function buildMetaCsv() {
+    const imported = new Set(currentProducts.map((p) => p.seedId).filter(Boolean));
+    const seeds = SEED_PRODUCTS_META.filter((s) => !imported.has(s.id))
+      .map((s) => ({ ...s, photos: [SITE_DOMAIN + "/og/" + s.id + ".jpg"], isSeed: true, variants: (s.variants || []).map((n) => ({ name: n })) }));
+    const all = [...currentProducts, ...seeds];
+    const cols = ["id","title","description","availability","condition","price","link","image_link","additional_image_link","brand","product_type","custom_label_0"];
+    const esc = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+    let smallPhotos = 0;
+    const rows = all.map((p) => {
+      let photos;
+      if (p.isSeed) { photos = p.photos; smallPhotos++; }
+      else {
+        photos = [...(p.photos || []), ...((p.variants || []).map((v) => v && v.photo))]
+          .filter((u) => /^https?:\/\//i.test(u || "")).map(metaImageUrl);
+      }
+      let desc = String(p.desc || "").replace(/\s+/g, " ").trim()
+        .split(/(?<=[.!?])\s+/).filter((x) => !/tap a thumbnail/i.test(x)).join(" ").trim();
+      if (!desc) desc = "Handmade crochet " + p.name;
+      if (!/[.!?]$/.test(desc)) desc += ".";
+      desc += " Handmade to order in Lahore, Pakistan.";
+      const names = (p.variants || []).map((v) => v && v.name).filter(Boolean);
+      if (names.length > 1) desc += " Options: " + names.join("; ") + ".";
+      const r = {
+        id: p.id, title: String(p.name || "").slice(0, 200), description: desc,
+        availability: p.tag === "Sold Out" ? "out of stock" : "in stock", condition: "new",
+        price: Number(p.price) > 0 ? Math.round(Number(p.price)) + " PKR" : "",
+        link: SITE_DOMAIN + "/product/" + encodeURIComponent(p.id),
+        image_link: photos[0] || "", additional_image_link: photos.slice(1, 21).join(","),
+        brand: "Twist & Tangle Crochet", product_type: p.category || "", custom_label_0: p.tag || "",
+      };
+      return cols.map((c) => esc(r[c])).join(",");
+    });
+    return { csv: "\uFEFF" + [cols.join(","), ...rows].join("\r\n"), count: all.length, smallPhotos };
+  }
+
+  $("metaCsvBtn").addEventListener("click", () => {
+    const { csv, count, smallPhotos } = buildMetaCsv();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    a.download = "ttc-meta-catalog-" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    const msg = $("metaCsvMsg");
+    msg.className = smallPhotos ? "msg error" : "msg success";
+    msg.textContent = "Downloaded " + count + " products." + (smallPhotos
+      ? " " + smallPhotos + " starter products still use their small built-in photos, which Meta will reject (they're under 500×500). Import them first (Import products) to fix that."
+      : "");
+  });
 
   // ---- category dropdown ----
   // These are the categories already used by the site's starter catalog. They're
