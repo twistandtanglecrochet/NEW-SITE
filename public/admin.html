@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TTC Admin — Manage Products</title>
+<title>TTC Admin</title>
 <meta name="robots" content="noindex, nofollow" />
 <style>
   :root {
@@ -167,6 +167,101 @@
     background: var(--gold);
     color: #fff;
   }
+  /* ---- Keep-style layout: top bar + left sidebar ---- */
+  .topbar {
+    position: sticky; top: 0; z-index: 30; background: var(--cream); color: var(--maroon-dark);
+    border-bottom: 1px solid var(--bg-soft); padding: 8px 16px; gap: 8px; justify-content: flex-start;
+  }
+  .topbar .brand { font-size: 20px; font-weight: 600; flex: 1; }
+  .topbar .signout { background: var(--bg-soft); color: var(--charcoal); }
+  .icon-btn {
+    background: none !important; color: #5A5048 !important; width: 48px; height: 48px; border-radius: 50% !important;
+    padding: 0 !important; display: flex; align-items: center; justify-content: center;
+  }
+  .icon-btn:hover { background: var(--bg-soft) !important; }
+  .shell { display: flex; align-items: flex-start; }
+  .sidebar {
+    position: sticky; top: 65px; flex-shrink: 0; width: 280px; padding: 8px 0;
+    display: flex; flex-direction: column; transition: width 0.18s ease;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 0; height: 48px; padding: 0 0 0 24px; margin-right: 12px;
+    border: none; background: none; color: var(--charcoal); font-size: 14px; font-weight: 500; font-family: inherit;
+    border-radius: 0 24px 24px 0; cursor: pointer; text-align: left; white-space: nowrap; overflow: hidden;
+  }
+  .nav-item svg { flex-shrink: 0; color: #5A5048; }
+  .nav-item .nav-label { margin-left: 32px; flex: 1; }
+  .nav-item:hover { background: var(--bg-soft); }
+  .nav-item.active { background: #F3D8DE; color: var(--maroon-dark); font-weight: 700; }
+  .nav-item.active svg { color: var(--maroon); }
+  .nav-item:focus-visible, .chip:focus-visible, .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .nav-badge {
+    background: var(--maroon); color: var(--cream); font-size: 11px; font-weight: 700; border-radius: 999px;
+    padding: 2px 8px; margin-right: 14px;
+  }
+  /* collapsed (desktop): icons only, like Keep */
+  body.nav-collapsed .sidebar { width: 80px; }
+  body.nav-collapsed .nav-item { width: 48px; height: 48px; padding: 0 0 0 13px; margin: 0 0 0 16px; border-radius: 50%; position: relative; overflow: visible; }
+  body.nav-collapsed .nav-item .nav-label { display: none; }
+  body.nav-collapsed .nav-badge { position: absolute; top: 4px; right: 0; padding: 1px 5px; margin: 0; font-size: 10px; }
+  .scrim { display: none; }
+  .wrap { flex: 1; min-width: 0; }
+  .hint { font-size: 12.5px; color: #7A6E64; margin-top: -6px; line-height: 1.5; }
+  /* phones: sidebar slides in over the page */
+  @media (max-width: 760px) {
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; background: var(--cream);
+      padding-top: 16px; transform: translateX(-100%); transition: transform 0.2s ease;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+    }
+    body.nav-open .sidebar { transform: none; }
+    body.nav-open .scrim { display: block; position: fixed; inset: 0; z-index: 40; background: rgba(43,36,32,0.35); }
+    body.nav-collapsed .sidebar { width: 280px; }
+    body.nav-collapsed .nav-item { width: auto; height: 48px; padding: 0 0 0 24px; margin: 0 12px 0 0; border-radius: 0 24px 24px 0; }
+    body.nav-collapsed .nav-item .nav-label { display: inline; }
+    body.nav-collapsed .nav-badge { position: static; padding: 2px 8px; margin-right: 14px; font-size: 11px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .sidebar { transition: none; } }
+
+  /* ---- orders ---- */
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .chip {
+    border: 1px solid var(--bg-soft); background: #fff; color: var(--charcoal); border-radius: 999px;
+    padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .chip span { color: #7A6E64; font-weight: 500; margin-left: 4px; }
+  .chip.active { background: var(--maroon-dark); border-color: var(--maroon-dark); color: var(--cream); }
+  .chip.active span { color: #E8D9CF; }
+  .order-list { display: flex; flex-direction: column; gap: 12px; }
+  .order-card { background: #fff; border-radius: 12px; padding: 14px; border: 1px solid var(--bg-soft); }
+  .order-card.is-starred { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+  .order-card.is-done { opacity: 0.75; }
+  .order-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+  .order-who { font-weight: 700; font-size: 15px; }
+  .order-when { font-size: 11.5px; color: #7A6E64; text-align: right; white-space: nowrap; }
+  .order-channel { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-top: 4px; }
+  .order-channel.whatsapp { background: #DCF5E3; color: #1E6B33; }
+  .order-channel.instagram { background: #E3E8F5; color: #153A73; }
+  .order-contact { font-size: 13px; margin-top: 8px; line-height: 1.55; color: #5A5048; }
+  .order-contact a { color: var(--maroon); font-weight: 600; }
+  .order-items { margin: 10px 0 0; padding: 10px 0 0; border-top: 1px dashed var(--bg-soft); list-style: none; }
+  .order-items li { display: flex; gap: 10px; align-items: center; font-size: 13px; padding: 3px 0; }
+  .order-items img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+  .order-items .line-price { margin-left: auto; white-space: nowrap; }
+  .order-total { display: flex; justify-content: flex-end; gap: 14px; font-size: 13px; margin-top: 6px; color: #5A5048; flex-wrap: wrap; }
+  .order-total strong { color: var(--charcoal); font-size: 14px; }
+  .order-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .order-actions button {
+    border: none; padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 12.5px; font-weight: 600; font-family: inherit;
+  }
+  .order-actions .done-btn { background: var(--maroon); color: var(--cream); }
+  .order-actions .undo-btn { background: var(--bg-soft); color: var(--charcoal); }
+  .order-actions .del-btn { background: none; color: #C0392B; margin-left: auto; }
+  .empty { color: #7A6E64; font-size: 13px; }
+  /* Edit/Delete buttons in the product and review lists had no background
+     set, so "Delete" showed as white text on a near-white button. */
+  .product-row .actions .danger, .review-row .actions .danger { background: #C0392B; color: #fff; }
+  .product-row .actions .secondary, .review-row .actions .secondary { background: var(--bg-soft); color: var(--charcoal); }
   .center { text-align: center; padding: 60px 20px; }
   .center h2 { color: var(--maroon-dark); }
   .msg { font-size: 13px; margin-top: 10px; }
@@ -202,18 +297,35 @@
 </div>
 
 <div id="app" class="hidden">
-  <header>
-    <h1>TTC Admin — Manage Products</h1>
-    <button id="signOutBtn">Sign out</button>
+  <header class="topbar">
+    <button type="button" class="icon-btn" id="menuBtn" aria-label="Show or hide menu" aria-expanded="true">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="brand">TTC Admin</div>
+    <button type="button" class="signout" id="signOutBtn">Sign out</button>
   </header>
 
-  <div class="wrap">
-    <div class="card" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-      <div style="font-size:13px; color:#5A5048; max-width:480px;">
-        Your 16 starter-catalog products aren't editable here yet — they still live in the site's code.
-        <a href="/import-starter-catalog.html" style="color:var(--maroon); font-weight:600;">Import them once</a> to manage them here too.
-      </div>
+  <div class="shell">
+    <nav class="sidebar" id="sidebar" aria-label="Admin sections">
+      <button type="button" class="nav-item" data-view="import" title="Import products"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span class="nav-label">Import products</span></button>
+      <button type="button" class="nav-item" data-view="add" title="Add new product"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span class="nav-label">Add new product</span></button>
+      <button type="button" class="nav-item" data-view="products" title="Manage products"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span class="nav-label">Manage products</span></button>
+      <button type="button" class="nav-item" data-view="reviews" title="Reviews"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="m12 8 1 2 2 .3-1.5 1.4.4 2.1L12 12.8l-1.9 1 .4-2.1L9 10.3l2-.3z"/></svg><span class="nav-label">Reviews</span><span class="nav-badge hidden" id="navBadgeReviews"></span></button>
+      <button type="button" class="nav-item" data-view="manageReviews" title="Manage reviews"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg><span class="nav-label">Manage reviews</span></button>
+      <button type="button" class="nav-item" data-view="orders" title="Orders"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span class="nav-label">Orders</span><span class="nav-badge hidden" id="navBadgeOrders"></span></button>
+    </nav>
+    <div class="scrim" id="scrim"></div>
+
+    <main class="wrap">
+    <section data-view-panel="import" class="hidden">
+    <div class="card">
+      <h2>Import products</h2>
+      <p class="hint">Your 16 starter products live in the site's code, so they can't be edited here until you import them. The import tool copies them into this admin panel — after that you can edit, reorder or delete them like any other product. Products that are already imported are skipped, so it's safe to run again.</p>
+      <a class="btn" href="/import-starter-catalog.html" style="text-decoration:none; display:inline-block;">Open import tool</a>
     </div>
+    </section>
+
+    <section data-view-panel="add" class="hidden">
     <div class="card">
       <h2 id="formTitle">Add a new product</h2>
       <form id="productForm">
@@ -272,7 +384,9 @@
         <div class="msg" id="formMsg"></div>
       </form>
     </div>
+    </section>
 
+    <section data-view-panel="products" class="hidden">
     <div class="card">
       <h2>Current products (<span id="countLabel">0</span>)</h2>
       <div class="msg error hidden" id="listError"></div>
@@ -304,16 +418,39 @@
         </div>
       </div>
     </div>
+    </section>
 
+    <section data-view-panel="reviews" class="hidden">
     <div class="card">
-      <h2>Reviews (<span id="reviewPendingLabel">0</span> waiting for approval)</h2>
-      <p style="font-size:12.5px;color:#7A6E64;margin-top:-8px;">
-        A review a customer submits doesn't show on the site until you approve it here — so nothing appears without you seeing it first.
-        Once approved, a review shows under its own product; use the star button to also feature it in "What customers say" on the homepage.
-      </p>
+      <h2>Reviews waiting for approval (<span id="reviewPendingLabel">0</span>)</h2>
+      <p class="hint">A review a customer submits doesn't show on the site until you approve it here. Approved reviews move to Manage reviews.</p>
       <div class="msg error hidden" id="reviewListError"></div>
       <div class="review-list" id="reviewList"></div>
     </div>
+    </section>
+
+    <section data-view-panel="manageReviews" class="hidden">
+    <div class="card">
+      <h2>Approved reviews (<span id="reviewApprovedLabel">0</span>)</h2>
+      <p class="hint">These show under their own product on the site. Use the star button to also feature a review in "What customers say" on the homepage.</p>
+      <div class="review-list" id="approvedReviewList"></div>
+    </div>
+    </section>
+
+    <section data-view-panel="orders" class="hidden">
+    <div class="card">
+      <h2>Orders</h2>
+      <p class="hint">An order is saved here when a customer taps "Send order via WhatsApp" or "Order via Instagram DM" at checkout. Check your WhatsApp or Instagram to confirm they actually sent the message.</p>
+      <div class="chips" role="tablist">
+        <button type="button" class="chip active" data-order-filter="new">New <span id="ordersNewCount">0</span></button>
+        <button type="button" class="chip" data-order-filter="starred">Starred <span id="ordersStarredCount">0</span></button>
+        <button type="button" class="chip" data-order-filter="done">Done <span id="ordersDoneCount">0</span></button>
+      </div>
+      <div class="msg error hidden" id="orderListError"></div>
+      <div class="order-list" id="orderList"></div>
+    </div>
+    </section>
+    </main>
   </div>
 </div>
 
@@ -406,7 +543,56 @@
     showOnly(appEl);
     startProductListener();
     startReviewListener();
+    startOrderListener();
   });
+
+  // ---- sidebar navigation (Keep-style) ----
+  const VIEWS = ["import", "add", "products", "reviews", "manageReviews", "orders"];
+  const isPhone = () => window.matchMedia("(max-width: 760px)").matches;
+
+  function showView(name) {
+    if (!VIEWS.includes(name)) name = "orders";
+    document.querySelectorAll("[data-view-panel]").forEach((panel) =>
+      panel.classList.toggle("hidden", panel.getAttribute("data-view-panel") !== name)
+    );
+    document.querySelectorAll(".nav-item[data-view]").forEach((btn) => {
+      const active = btn.getAttribute("data-view") === name;
+      btn.classList.toggle("active", active);
+      if (active) btn.setAttribute("aria-current", "page"); else btn.removeAttribute("aria-current");
+    });
+    if (location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
+    document.body.classList.remove("nav-open");
+    window.scrollTo({ top: 0 });
+  }
+
+  document.querySelectorAll(".nav-item[data-view]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const view = btn.getAttribute("data-view");
+      // Opening "Add new product" from the menu always starts a fresh product,
+      // even if an edit was left half-done.
+      if (view === "add" && $("editId").value) resetForm();
+      showView(view);
+    })
+  );
+
+  $("menuBtn").addEventListener("click", () => {
+    if (isPhone()) {
+      document.body.classList.toggle("nav-open");
+    } else {
+      document.body.classList.toggle("nav-collapsed");
+      try { localStorage.setItem("ttcNavCollapsed", document.body.classList.contains("nav-collapsed") ? "1" : "0"); } catch (e) {}
+    }
+  });
+  $("scrim").addEventListener("click", () => document.body.classList.remove("nav-open"));
+  try { if (localStorage.getItem("ttcNavCollapsed") === "1") document.body.classList.add("nav-collapsed"); } catch (e) {}
+
+  function setBadge(id, count) {
+    const el = $(id);
+    el.textContent = count;
+    el.classList.toggle("hidden", !count);
+  }
+
+  showView(location.hash.replace("#", "") || "orders");
 
   // ---- product list ----
   let unsub = null;
@@ -485,7 +671,7 @@
     const list = $("productList");
     list.innerHTML = "";
     if (currentProducts.length === 0) {
-      list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No products added here yet. This list is separate from the site\'s built-in starter catalog (the original 13 products) — anything you add here shows up on the site alongside them.</p>';
+      list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No products added here yet. This list is separate from the site\'s built-in starter catalog (the 16 starter products) — anything you add here shows up on the site alongside them.</p>';
       return;
     }
     currentProducts.forEach((p, idx) => {
@@ -583,20 +769,24 @@
   }
 
   function renderReviewList() {
-    const pendingCount = currentReviews.filter((r) => !r.approved).length;
-    $("reviewPendingLabel").textContent = pendingCount;
+    const pending = currentReviews.filter((r) => !r.approved);
+    const approved = currentReviews.filter((r) => r.approved);
+    $("reviewPendingLabel").textContent = pending.length;
+    $("reviewApprovedLabel").textContent = approved.length;
+    setBadge("navBadgeReviews", pending.length);
+    renderReviewRows($("reviewList"), pending,
+      "No reviews waiting — new ones from customers will show up here.");
+    renderReviewRows($("approvedReviewList"), approved,
+      "No approved reviews yet. Approve one under Reviews and it moves here.");
+  }
 
-    const list = $("reviewList");
+  function renderReviewRows(list, reviews, emptyText) {
     list.innerHTML = "";
-    if (currentReviews.length === 0) {
-      list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No reviews yet — they\'ll show up here as customers leave them.</p>';
+    if (reviews.length === 0) {
+      list.innerHTML = '<p class="empty">' + escapeHtml(emptyText) + "</p>";
       return;
     }
-
-    // Pending ones first, so they're never buried under older approved reviews.
-    const sorted = [...currentReviews].sort((a, b) => (a.approved === b.approved ? 0 : a.approved ? 1 : -1));
-
-    sorted.forEach((r) => {
+    reviews.forEach((r) => {
       const row = document.createElement("div");
       row.className = "review-row";
       const stars = "★".repeat(r.rating || 0) + "☆".repeat(5 - (r.rating || 0));
@@ -669,6 +859,151 @@
       await deleteDoc(doc(db, "reviews", id));
     } catch (e) {
       alert("Couldn't delete: " + e.message);
+    }
+  }
+
+  // ---- orders ----
+  // Saved by the shop's checkout (src/App.jsx) when a customer taps the
+  // WhatsApp or Instagram order button.
+  let orderUnsub = null;
+  let currentOrders = [];
+  let orderFilter = "new";
+
+  function startOrderListener() {
+    if (orderUnsub) return;
+    const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+    orderUnsub = onSnapshot(
+      q,
+      (snap) => {
+        $("orderListError").classList.add("hidden");
+        currentOrders = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        renderOrders();
+      },
+      (err) => {
+        $("orderListError").classList.remove("hidden");
+        $("orderListError").textContent =
+          "Couldn't load orders (" + err.message + "). If it says \"permissions\", the Firestore rules for orders haven't been added yet.";
+      }
+    );
+  }
+
+  document.querySelectorAll("[data-order-filter]").forEach((chip) =>
+    chip.addEventListener("click", () => {
+      orderFilter = chip.getAttribute("data-order-filter");
+      document.querySelectorAll("[data-order-filter]").forEach((c) => c.classList.toggle("active", c === chip));
+      renderOrders();
+    })
+  );
+
+  // Turns a Pakistani number like 0300-1234567 into 923001234567 for wa.me links.
+  function waNumber(phone) {
+    let d = String(phone || "").replace(/\D/g, "");
+    if (d.startsWith("00")) d = d.slice(2);
+    if (d.startsWith("0")) d = "92" + d.slice(1);
+    else if (d.length === 10 && d.startsWith("3")) d = "92" + d;
+    return d;
+  }
+
+  function formatOrderDate(ts) {
+    if (!ts || !ts.toDate) return "Just now";
+    return ts.toDate().toLocaleString("en-PK", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+  }
+
+  function renderOrders() {
+    const fresh = currentOrders.filter((o) => o.status !== "done");
+    const done = currentOrders.filter((o) => o.status === "done");
+    const starred = currentOrders.filter((o) => o.starred);
+    $("ordersNewCount").textContent = fresh.length;
+    $("ordersDoneCount").textContent = done.length;
+    $("ordersStarredCount").textContent = starred.length;
+    setBadge("navBadgeOrders", fresh.length);
+
+    let shown = orderFilter === "done" ? done : orderFilter === "starred" ? starred : fresh;
+    // Starred orders float to the top of the New list.
+    if (orderFilter === "new") shown = [...shown].sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0));
+
+    const list = $("orderList");
+    list.innerHTML = "";
+    if (shown.length === 0) {
+      const empty = {
+        new: "No new orders. They'll appear here as soon as a customer checks out.",
+        starred: "No starred orders. Tap ☆ Star on any order to keep it here.",
+        done: "Nothing marked done yet. Tap \"Move to done\" once an order is delivered.",
+      }[orderFilter];
+      list.innerHTML = '<p class="empty">' + escapeHtml(empty) + "</p>";
+      return;
+    }
+
+    shown.forEach((o) => {
+      const c = o.customer || {};
+      const items = Array.isArray(o.items) ? o.items : [];
+      const isDone = o.status === "done";
+      const card = document.createElement("div");
+      card.className = "order-card" + (o.starred ? " is-starred" : "") + (isDone ? " is-done" : "");
+      const wa = waNumber(c.phone);
+      card.innerHTML = `
+        <div class="order-top">
+          <div>
+            <div class="order-who">${escapeHtml(c.name || "No name")}</div>
+            <span class="order-channel ${o.channel === "instagram" ? "instagram" : "whatsapp"}">${o.channel === "instagram" ? "Instagram" : "WhatsApp"}</span>
+          </div>
+          <div class="order-when">${escapeHtml(formatOrderDate(o.createdAt))}${isDone ? "<br>Done" : ""}</div>
+        </div>
+        <div class="order-contact">
+          ${escapeHtml(c.phone || "")}
+          ${wa ? ` · <a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a> · <a href="tel:${escapeHtml(c.phone)}">Call</a>` : ""}
+          <br>${escapeHtml(c.address || "")}
+          ${c.notes ? `<br><em>Note: ${escapeHtml(c.notes)}</em>` : ""}
+        </div>
+        <ul class="order-items">
+          ${items.map((i) => `
+            <li>
+              ${i.photo ? `<img src="${escapeHtml(i.photo)}" alt="" />` : ""}
+              <span>${escapeHtml(i.name)}${i.variant ? ` (${escapeHtml(i.variant)})` : ""} × ${Number(i.qty) || 1}</span>
+              <span class="line-price">Rs${(Number(i.price) || 0) * (Number(i.qty) || 1)}</span>
+            </li>`).join("")}
+        </ul>
+        <div class="order-total">
+          ${o.promo ? `<span>Promo ${escapeHtml(o.promo)}: -Rs${Number(o.discount) || 0}</span>` : ""}
+          <strong>Total Rs${Number(o.total) || 0}</strong>
+        </div>
+        <div class="order-actions">
+          <button type="button" class="star-toggle${o.starred ? " is-featured" : ""}" data-order-star="${o.id}">${o.starred ? "★ Starred" : "☆ Star"}</button>
+          ${isDone
+            ? `<button type="button" class="undo-btn" data-order-undo="${o.id}">Move back to new</button>`
+            : `<button type="button" class="done-btn" data-order-done="${o.id}">Move to done</button>`}
+          <button type="button" class="del-btn" data-order-delete="${o.id}">Delete</button>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+
+    list.querySelectorAll("[data-order-star]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const o = currentOrders.find((x) => x.id === btn.getAttribute("data-order-star"));
+        if (o) updateOrder(o.id, { starred: !o.starred });
+      })
+    );
+    list.querySelectorAll("[data-order-done]").forEach((btn) =>
+      btn.addEventListener("click", () => updateOrder(btn.getAttribute("data-order-done"), { status: "done", doneAt: serverTimestamp() }))
+    );
+    list.querySelectorAll("[data-order-undo]").forEach((btn) =>
+      btn.addEventListener("click", () => updateOrder(btn.getAttribute("data-order-undo"), { status: "new" }))
+    );
+    list.querySelectorAll("[data-order-delete]").forEach((btn) =>
+      btn.addEventListener("click", async () => {
+        if (!confirm("Delete this order? This can't be undone.")) return;
+        try { await deleteDoc(doc(db, "orders", btn.getAttribute("data-order-delete"))); }
+        catch (e) { alert("Couldn't delete: " + e.message); }
+      })
+    );
+  }
+
+  async function updateOrder(id, data) {
+    try {
+      await updateDoc(doc(db, "orders", id), data);
+    } catch (e) {
+      alert("Couldn't update this order: " + e.message);
     }
   }
 
@@ -943,10 +1278,13 @@
     $("formTitle").textContent = "Edit product";
     $("submitBtn").textContent = "Save changes";
     $("cancelEditBtn").classList.remove("hidden");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    showView("add");
   }
 
-  $("cancelEditBtn").addEventListener("click", resetForm);
+  $("cancelEditBtn").addEventListener("click", () => {
+    resetForm();
+    showView("products");
+  });
 
   async function handleDelete(id) {
     if (!confirm("Delete this product? This can't be undone.")) return;
@@ -1051,9 +1389,15 @@
         await addDoc(collection(db, "products"), { ...data, order: maxOrder + 1, createdAt: serverTimestamp() });
       }
 
-      msg.className = "msg success";
-      msg.textContent = "Saved! It'll appear on the site within a few seconds.";
+      // resetForm() clears the message box, so it has to run before the
+      // success message is written (otherwise the message never shows).
       resetForm();
+      if (id) {
+        showView("products");
+      } else {
+        msg.className = "msg success";
+        msg.textContent = "Saved! It'll appear on the site within a few seconds.";
+      }
     } catch (err) {
       msg.className = "msg error";
       msg.textContent = "Something went wrong: " + err.message;
