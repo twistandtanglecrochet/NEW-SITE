@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star, ArrowUp } from "lucide-react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star, ArrowUp, CheckCircle2 } from "lucide-react";
 import { collection, doc, onSnapshot, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { COLORS } from "./data/colors.js";
 import { LOGO_SRC, BG_SRC } from "./data/siteImages.js";
 import { categorySlug } from "./data/slug.js";
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "./data/siteConfig.js";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SHOW_DIRECT_ORDER_LINKS, PAYMENT_METHODS, DELIVERY_LABEL } from "./data/siteConfig.js";
 import {
   SEED_PRODUCTS,
   POUCH_FRONT_SRC,
@@ -15,6 +15,39 @@ import {
 } from "./data/products.js";
 
 const WHATSAPP_NUMBER = "923027609899";
+
+// ---- Website orders ----
+// Readable order numbers like TTC-K7F3Q. Leaves out 0/O and 1/I so they
+// can't be confused when read out over the phone.
+const ORDER_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function makeOrderNo() {
+  let out = "";
+  const pick = new Uint32Array(5);
+  try { crypto.getRandomValues(pick); } catch (e) { for (let i = 0; i < 5; i++) pick[i] = Math.floor(Math.random() * 1e9); }
+  for (let i = 0; i < 5; i++) out += ORDER_CODE_CHARS[pick[i] % ORDER_CODE_CHARS.length];
+  return "TTC-" + out;
+}
+// Pakistani mobile numbers: 0300 1234567, 0300-1234567, +92 300 1234567, 92300…
+function isValidPkMobile(phone) {
+  const d = String(phone || "").replace(/[\s\-().]/g, "");
+  return /^(?:\+92|0092|92|0)3\d{9}$/.test(d);
+}
+// One website order per browser every 30 seconds (simple spam guard). If
+// storage is blocked, the guard is just skipped — it never stops the order.
+const LAST_ORDER_KEY = "ttc_last_website_order_at";
+const ORDER_COOLDOWN_MS = 30000;
+function readLastOrderAt() {
+  try { return Number(localStorage.getItem(LAST_ORDER_KEY)) || 0; } catch (e) { return 0; }
+}
+function writeLastOrderAt(ms) {
+  try { localStorage.setItem(LAST_ORDER_KEY, String(ms)); } catch (e) {}
+}
+function withTimeout(promise, ms) {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error("timeout")), ms);
+    promise.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
+  });
+}
 
 // Promo codes: type "percent" (e.g. 10 = 10% off) or "flat" (fixed Rs amount off).
 // These are only a fallback now — the live list is managed from the admin
@@ -582,7 +615,14 @@ export default function App() {
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [form, setForm] = useState({ name: "", phone: "", address: "", notes: "" });
+  const [form, setForm] = useState({ name: "", phone: "", address: "", notes: "", payment: PAYMENT_METHODS[0] });
+  // Website ordering ("Place order"):
+  const [honeypot, setHoneypot] = useState(""); // hidden field only bots fill in
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [placing, setPlacing] = useState(false);
+  const [placeError, setPlaceError] = useState(null); // { text, offerWhatsApp, orderNo }
+  const [placedOrder, setPlacedOrder] = useState(null); // shown on the thank-you screen
+  const placingRef = useRef(false);
   const [quickViewId, setQuickViewId] = useState(null);
   const [quickViewQty, setQuickViewQty] = useState(1);
   const [quickViewSize, setQuickViewSize] = useState(null);
@@ -1017,6 +1057,9 @@ export default function App() {
   function closeCheckout() {
     setCheckoutOpen(false);
     setDirectBuyItem(null);
+    setPlacedOrder(null);
+    setPlaceError(null);
+    setPhoneTouched(false);
   }
   function openQuickView(id, push = true) {
     const p = products.find((pr) => pr.id === id);
@@ -1039,7 +1082,7 @@ export default function App() {
     });
   }
 
-  function buildOrderText() {
+  function buildOrderText(orderNo) {
     const lines = checkoutItems
       .map((i) => `• ${i.name}${i.variantName ? ` (${i.variantName})` : ""} x${i.qty} — Rs${i.price * i.qty}`)
       .join("\n");
@@ -1047,14 +1090,16 @@ export default function App() {
       ? `Promo code: ${appliedPromo} (-Rs${checkoutDiscount})\n`
       : "";
     return (
-      `Hi TTC! I'd like to order:\n\n${lines}\n\nSubtotal: Rs${checkoutSubtotal}\n${promoLine}Total: Rs${checkoutTotal}\n\n` +
-      `Name: ${form.name}\nPhone: ${form.phone}\nAddress: ${form.address}\n` +
+      `Hi TTC! I'd like to order:\n` +
+      (orderNo ? `(Website order ${orderNo} didn't go through, so I'm sending it here.)\n` : "") +
+      `\n${lines}\n\nSubtotal: Rs${checkoutSubtotal}\n${promoLine}Total: Rs${checkoutTotal}\n\n` +
+      `Name: ${form.name}\nPhone: ${form.phone}\nAddress: ${form.address}\nPayment: ${form.payment}\n` +
       (form.notes ? `Notes: ${form.notes}\n` : "")
     );
   }
 
-  function buildWhatsAppLink() {
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildOrderText())}`;
+  function buildWhatsAppLink(orderNo) {
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildOrderText(orderNo))}`;
   }
 
   // Copies the order text for pasting into Instagram. Deliberately does NOT
@@ -1083,7 +1128,31 @@ export default function App() {
     const signature = channel + "|" + buildOrderText();
     if (lastSavedOrderRef.current === signature) return;
     lastSavedOrderRef.current = signature;
-    const items = checkoutItems.map((i) => {
+    addDoc(collection(db, "orders"), {
+      items: orderItemsForSave(),
+      subtotal: checkoutSubtotal,
+      discount: checkoutDiscount,
+      promo: appliedPromo || null,
+      total: checkoutTotal,
+      customer: {
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+        notes: form.notes.trim(),
+      },
+      paymentMethod: form.payment || PAYMENT_METHODS[0],
+      channel,
+      status: "new",
+      starred: false,
+      createdAt: serverTimestamp(),
+    }).catch((err) => {
+      console.warn("Couldn't save order to admin panel:", err.message);
+      lastSavedOrderRef.current = "";
+    });
+  }
+
+  function orderItemsForSave() {
+    return checkoutItems.map((i) => {
       const photo = i.variantPhoto || mainPhotoFor(i);
       return {
         productId: String(i.id),
@@ -1096,29 +1165,95 @@ export default function App() {
         photo: typeof photo === "string" && /^https?:\/\//.test(photo) ? photo : null,
       };
     });
-    addDoc(collection(db, "orders"), {
-      items,
-      subtotal: checkoutSubtotal,
-      discount: checkoutDiscount,
-      promo: appliedPromo || null,
-      total: checkoutTotal,
-      customer: {
-        name: form.name.trim(),
-        phone: form.phone.trim(),
-        address: form.address.trim(),
-        notes: form.notes.trim(),
-      },
-      channel,
-      status: "new",
-      starred: false,
-      createdAt: serverTimestamp(),
-    }).catch((err) => {
-      console.warn("Couldn't save order to admin panel:", err.message);
-      lastSavedOrderRef.current = "";
-    });
   }
 
-  const canSubmit = form.name.trim() && form.phone.trim() && form.address.trim() && checkoutItems.length > 0;
+  // "Place order": saves the order straight to the admin panel — no
+  // WhatsApp needed. If saving fails, the customer is offered WhatsApp
+  // with the full order written out, so the sale is never lost.
+  async function placeWebsiteOrder() {
+    if (placingRef.current) return;
+    setPhoneTouched(true);
+    setPlaceError(null);
+    if (!canSubmit) return;
+
+    const firstName = form.name.trim().split(/\s+/)[0];
+    const summary = {
+      firstName,
+      phone: form.phone.trim(),
+      itemCount: checkoutItems.reduce((n, i) => n + i.qty, 0),
+      total: checkoutTotal,
+    };
+
+    // Bots fill in the hidden field — pretend it worked and save nothing.
+    if (honeypot.trim()) {
+      setPlacedOrder({ ...summary, orderNo: makeOrderNo() });
+      return;
+    }
+
+    const wait = ORDER_COOLDOWN_MS - (Date.now() - readLastOrderAt());
+    if (wait > 0) {
+      setPlaceError({
+        text: `You placed an order a moment ago. Please wait ${Math.ceil(wait / 1000)} seconds before placing another one.`,
+        offerWhatsApp: false,
+      });
+      return;
+    }
+
+    const orderNo = makeOrderNo();
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      setPlaceError({ text: "You seem to be offline, so your order couldn't be placed.", offerWhatsApp: true, orderNo });
+      return;
+    }
+
+    placingRef.current = true;
+    setPlacing(true);
+    try {
+      await withTimeout(
+        addDoc(collection(db, "orders"), {
+          orderNo,
+          items: orderItemsForSave(),
+          subtotal: checkoutSubtotal,
+          discount: checkoutDiscount,
+          promo: appliedPromo || null,
+          deliveryCharge: null, // delivery is charged separately, confirmed on the call
+          total: checkoutTotal,
+          customer: {
+            name: form.name.trim(),
+            phone: form.phone.trim(),
+            address: form.address.trim(),
+            notes: form.notes.trim(),
+          },
+          paymentMethod: form.payment || PAYMENT_METHODS[0],
+          channel: "website",
+          status: "new",
+          starred: false,
+          createdAt: serverTimestamp(),
+        }),
+        15000
+      );
+      writeLastOrderAt(Date.now());
+      setPlacedOrder({ ...summary, orderNo });
+      if (!directBuyItem) setCart({});
+      setAppliedPromo(null);
+      setPromoInput("");
+      setForm((f) => ({ ...f, notes: "" }));
+    } catch (err) {
+      console.warn("Website order failed:", err && err.message);
+      setPlaceError({
+        text: err && err.message === "timeout"
+          ? "This is taking too long — your connection may be slow, so we couldn't confirm your order."
+          : "Sorry, something went wrong and your order couldn't be placed.",
+        offerWhatsApp: true,
+        orderNo,
+      });
+    } finally {
+      placingRef.current = false;
+      setPlacing(false);
+    }
+  }
+
+  const phoneValid = isValidPkMobile(form.phone);
+  const canSubmit = !!(form.name.trim() && phoneValid && form.address.trim() && checkoutItems.length > 0);
 
   return (
     <div className="ttc-bg-scroll" style={{
@@ -2076,32 +2211,107 @@ export default function App() {
       {checkoutOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
           <div onClick={closeCheckout} style={{ position: "absolute", inset: 0, background: "rgba(43,36,32,0.5)" }} />
-          <div style={{ position: "relative", background: COLORS.cream, borderRadius: 18, padding: 26, width: 380, maxWidth: "100%" }}>
+          <div style={{ position: "relative", background: COLORS.cream, borderRadius: 18, padding: 26, width: 380, maxWidth: "100%", maxHeight: "calc(100vh - 32px)", overflowY: "auto" }}>
+            {placedOrder ? (
+              <div style={{ textAlign: "center", padding: "10px 4px" }} role="status">
+                <CheckCircle2 size={48} color={COLORS.maroon} style={{ margin: "0 auto 10px" }} />
+                <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 22, color: COLORS.maroonDark, marginBottom: 6 }}>
+                  Thank you, {placedOrder.firstName}!
+                </div>
+                <div style={{ fontSize: 13.5, color: COLORS.charcoal, marginBottom: 14 }}>Your order has been placed.</div>
+                <div style={{ background: COLORS.bgSoft, borderRadius: 12, padding: "12px 14px", marginBottom: 14, fontSize: 13.5, lineHeight: 1.7 }}>
+                  <div>Order number: <strong style={{ letterSpacing: 0.5 }}>{placedOrder.orderNo}</strong></div>
+                  <div>{placedOrder.itemCount} {placedOrder.itemCount === 1 ? "item" : "items"} · <strong>Rs{placedOrder.total}</strong></div>
+                </div>
+                <p style={{ fontSize: 13, color: "#5A5048", lineHeight: 1.55, marginBottom: 18 }}>
+                  We'll call or WhatsApp you on <strong>{placedOrder.phone}</strong> to confirm your order, delivery charges and payment.
+                </p>
+                <button
+                  onClick={closeCheckout}
+                  style={{ width: "100%", background: COLORS.maroon, color: COLORS.cream, border: "none", borderRadius: 999, padding: "12px 0", fontSize: 14, fontWeight: 700 }}
+                >
+                  Continue shopping
+                </button>
+              </div>
+            ) : (<>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 19, color: COLORS.maroonDark }}>
-                Complete your order
+                Place your order
               </span>
               <button onClick={closeCheckout} style={{ background: "none", border: "none", color: COLORS.charcoal }}>
                 <X size={18} />
               </button>
             </div>
-            <p style={{ fontSize: 12.5, color: "#7A6E64", marginBottom: 16, lineHeight: 1.5 }}>
-              Fill in your details — this sends your order straight to TTC on WhatsApp to confirm and arrange payment.
-            </p>
-            {["name", "phone", "address"].map((field) => (
-              <input
-                key={field}
-                placeholder={field === "name" ? "Full name" : field === "phone" ? "Phone number" : "Delivery address"}
-                value={form[field]}
-                onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                style={{
-                  width: "100%", padding: "10px 12px", marginBottom: 10, borderRadius: 10,
-                  border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg,
-                }}
-              />
-            ))}
+            <div style={{ marginBottom: 14 }}>
+              {checkoutItems.map((i) => (
+                <div key={i.cartKey || `${i.id}-${i.variantName || ""}`} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 13, padding: "7px 0", borderBottom: `1px solid ${COLORS.bgSoft}` }}>
+                  <span>{i.name}{i.variantName ? ` (${i.variantName})` : ""} x{i.qty}</span>
+                  <span style={{ whiteSpace: "nowrap" }}>Rs{i.price * i.qty}</span>
+                </div>
+              ))}
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "7px 0", borderBottom: `1px solid ${COLORS.bgSoft}` }}>
+                <span>Delivery</span>
+                <span style={{ color: "#7A6E64" }}>{DELIVERY_LABEL}</span>
+              </div>
+            </div>
+            {["name", "phone", "address"].map((field) => {
+              const phoneError = field === "phone" && phoneTouched && form.phone.trim() && !phoneValid;
+              return (
+                <div key={field} style={{ marginBottom: 10 }}>
+                  <label htmlFor={`co_${field}`} style={{ display: "block", fontSize: 12, color: "#5A5048", marginBottom: 4 }}>
+                    {field === "name" ? "Full name" : field === "phone" ? "Mobile number" : "Delivery address"}
+                  </label>
+                  <input
+                    id={`co_${field}`}
+                    placeholder={field === "name" ? "Ali Raza" : field === "phone" ? "0300 1234567" : "House 14, Street 2, Gulberg"}
+                    value={form[field]}
+                    onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                    onBlur={field === "phone" ? () => setPhoneTouched(true) : undefined}
+                    type={field === "phone" ? "tel" : "text"}
+                    inputMode={field === "phone" ? "tel" : undefined}
+                    autoComplete={field === "name" ? "name" : field === "phone" ? "tel" : "street-address"}
+                    aria-label={field === "name" ? "Full name" : field === "phone" ? "Mobile number" : "Delivery address"}
+                    aria-invalid={phoneError ? "true" : undefined}
+                    style={{
+                      width: "100%", padding: "10px 12px", borderRadius: 10,
+                      border: `1px solid ${phoneError ? "#C0392B" : COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg,
+                    }}
+                  />
+                  {phoneError && (
+                    <div style={{ fontSize: 11.5, color: "#C0392B", marginTop: 4 }}>
+                      Please enter a Pakistani mobile number, e.g. 0300 1234567 or +92 300 1234567.
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {/* Honeypot: hidden from people, but spam bots fill it in. */}
+            <input
+              type="text"
+              name="company"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              style={{ position: "absolute", left: -9999, width: 1, height: 1, opacity: 0 }}
+            />
+            <label htmlFor="co_payment" style={{ display: "block", fontSize: 12, color: "#5A5048", marginBottom: 4 }}>Payment</label>
+            <select
+              id="co_payment"
+              value={form.payment}
+              onChange={(e) => setForm({ ...form, payment: e.target.value })}
+              style={{
+                width: "100%", padding: "10px 12px", marginBottom: 10, borderRadius: 10,
+                border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg, color: COLORS.charcoal,
+              }}
+            >
+              {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+            <label htmlFor="co_notes" style={{ display: "block", fontSize: 12, color: "#5A5048", marginBottom: 4 }}>Notes (optional)</label>
             <textarea
-              placeholder="Notes (colour preference, gift message, etc.) — optional"
+              id="co_notes"
+              placeholder="Colour preference, gift message, etc."
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               rows={2}
@@ -2184,56 +2394,87 @@ export default function App() {
               <span>Total</span>
               <span>Rs{checkoutTotal}</span>
             </div>
-            <div style={{ fontSize: 11.5, color: "#C0392B", textAlign: "right", marginBottom: 14 }}>
-              * Delivery charges are separate
-            </div>
-            <a
-              href={canSubmit ? buildWhatsAppLink() : undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                if (!canSubmit) { e.preventDefault(); return; }
-                saveOrderToAdmin("whatsapp");
-              }}
-              aria-disabled={!canSubmit}
+            <div style={{ marginBottom: 12 }} />
+            <button
+              onClick={placeWebsiteOrder}
+              disabled={placing}
+              aria-disabled={!canSubmit || placing}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                width: "100%", background: canSubmit ? "#25D366" : "#C9BEB4", color: "#fff",
-                border: "none", borderRadius: 999, padding: "12px 0", fontSize: 14, fontWeight: 700,
-                textDecoration: "none", cursor: canSubmit ? "pointer" : "default", boxSizing: "border-box",
+                width: "100%", background: canSubmit && !placing ? COLORS.maroon : "#C9BEB4", color: COLORS.cream,
+                border: "none", borderRadius: 999, padding: "13px 0", fontSize: 14.5, fontWeight: 700,
+                cursor: canSubmit && !placing ? "pointer" : "default",
               }}
             >
-              <MessageCircle size={16} /> Send order via WhatsApp
-            </a>
-            <a
-              href={canSubmit ? "https://ig.me/m/twisttanglecrochet" : undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                if (!canSubmit) { e.preventDefault(); return; }
-                copyOrderTextForInstagram();
-                saveOrderToAdmin("instagram");
-              }}
-              aria-disabled={!canSubmit}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                width: "100%", background: canSubmit ? COLORS.navy : "#C9BEB4", color: "#fff",
-                border: "none", borderRadius: 999, padding: "12px 0", fontSize: 14, fontWeight: 700,
-                marginTop: 10, textDecoration: "none", cursor: canSubmit ? "pointer" : "default", boxSizing: "border-box",
-              }}
-            >
-              <Instagram size={16} /> Order via Instagram DM
-            </a>
+              {placing ? "Placing your order…" : `Place order · Rs${checkoutTotal}`}
+            </button>
+            {!canSubmit && !placing && (
+              <div style={{ fontSize: 11, color: "#A69A8E", marginTop: 8, textAlign: "center" }}>
+                Fill in your name, a mobile number, and your address to continue.
+              </div>
+            )}
+            {placeError && (
+              <div role="alert" style={{ background: "#F8E1DE", color: "#8E2A1E", borderRadius: 10, padding: "10px 12px", marginTop: 12, fontSize: 12.5, lineHeight: 1.5 }}>
+                {placeError.text}
+                {placeError.offerWhatsApp && (
+                  <>
+                    {" "}Don't worry — you can send the same order on WhatsApp instead.
+                    <a
+                      href={buildWhatsAppLink(placeError.orderNo)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => saveOrderToAdmin("whatsapp")}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 10,
+                        background: "#25D366", color: "#fff", borderRadius: 999, padding: "10px 0",
+                        fontSize: 13.5, fontWeight: 700, textDecoration: "none",
+                      }}
+                    >
+                      <MessageCircle size={15} /> Send this order on WhatsApp instead
+                    </a>
+                  </>
+                )}
+              </div>
+            )}
+            {SHOW_DIRECT_ORDER_LINKS && (
+              <div style={{ fontSize: 12, color: "#7A6E64", marginTop: 12, textAlign: "center" }}>
+                Or send it yourself:{" "}
+                <a
+                  href={canSubmit ? buildWhatsAppLink() : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (!canSubmit) { e.preventDefault(); setPhoneTouched(true); return; }
+                    saveOrderToAdmin("whatsapp");
+                  }}
+                  aria-disabled={!canSubmit}
+                  style={{ color: canSubmit ? "#1E8E4A" : "#A69A8E", fontWeight: 700, cursor: canSubmit ? "pointer" : "default" }}
+                >
+                  WhatsApp
+                </a>
+                {" / "}
+                <a
+                  href={canSubmit ? "https://ig.me/m/twisttanglecrochet" : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (!canSubmit) { e.preventDefault(); setPhoneTouched(true); return; }
+                    copyOrderTextForInstagram();
+                    saveOrderToAdmin("instagram");
+                  }}
+                  aria-disabled={!canSubmit}
+                  style={{ color: canSubmit ? COLORS.navy : "#A69A8E", fontWeight: 700, cursor: canSubmit ? "pointer" : "default" }}
+                >
+                  Instagram
+                </a>
+              </div>
+            )}
             {instaCopied && (
               <div style={{ fontSize: 11.5, color: COLORS.maroon, marginTop: 8, textAlign: "center" }}>
                 Order details copied — paste them into the Instagram chat.
               </div>
             )}
-            {!canSubmit && (
-              <div style={{ fontSize: 11, color: "#A69A8E", marginTop: 8, textAlign: "center" }}>
-                Fill in name, phone, and address to continue.
-              </div>
-            )}
+            </>)}
           </div>
         </div>
       )}
