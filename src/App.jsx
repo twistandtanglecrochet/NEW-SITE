@@ -1245,6 +1245,9 @@ export default function App() {
           : "Sorry, something went wrong and your order couldn't be placed.",
         offerWhatsApp: true,
         orderNo,
+        // Shown small and grey so the shop owner can tell what went wrong
+        // (e.g. "permission-denied" = Firestore rules not published).
+        code: err && err.message === "timeout" ? "timeout" : (err && err.code) || "unknown",
       });
     } finally {
       placingRef.current = false;
@@ -2433,6 +2436,11 @@ export default function App() {
                       <MessageCircle size={15} /> Send this order on WhatsApp instead
                     </a>
                   </>
+                )}
+                {placeError.code && (
+                  <div style={{ fontSize: 10.5, color: "#A69A8E", marginTop: 8, textAlign: "center" }}>
+                    Error code: {placeError.code}
+                  </div>
                 )}
               </div>
             )}
