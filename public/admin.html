@@ -258,6 +258,24 @@
   .order-actions .undo-btn { background: var(--bg-soft); color: var(--charcoal); }
   .order-actions .del-btn { background: none; color: #C0392B; margin-left: auto; }
   .empty { color: #7A6E64; font-size: 13px; }
+  /* ---- new order alert ---- */
+  .order-alert {
+    position: sticky; top: 65px; z-index: 25; display: flex; align-items: center; gap: 10px;
+    background: var(--maroon-dark); color: var(--cream); padding: 10px 16px; font-size: 14px;
+    animation: alertIn 0.25s ease-out;
+  }
+  .order-alert-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); flex-shrink: 0; animation: alertPulse 1.2s ease-in-out infinite; }
+  .order-alert-text { flex: 1; min-width: 0; }
+  .order-alert-view { background: var(--gold); color: #fff; border: none; border-radius: 8px; padding: 7px 12px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .order-alert-close { background: none; border: none; color: var(--cream); font-size: 22px; line-height: 1; cursor: pointer; padding: 0 4px; }
+  .order-alert button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  @keyframes alertIn { from { transform: translateY(-100%); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes alertPulse { 50% { opacity: 0.35; } }
+  @media (prefers-reduced-motion: reduce) { .order-alert, .order-alert-dot { animation: none; } }
+  .alert-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 6px; }
+  .alert-controls .switch { font-size: 13px; color: var(--charcoal); font-weight: 600; }
+  .order-channel.website { background: #F3D8DE; color: var(--maroon-dark); }
+  .order-no { font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px; color: #5A5048; margin-left: 6px; }
   .nav-group { font-size: 12px; color: #7A6E64; padding: 14px 0 6px 24px; border-top: 1px solid var(--bg-soft); margin: 8px 12px 0 0; }
   body.nav-collapsed .nav-group { font-size: 0; padding: 0; margin: 8px 16px 8px 16px; width: 48px; }
   @media (max-width: 760px) { body.nav-collapsed .nav-group { font-size: 12px; padding: 14px 0 6px 24px; margin: 8px 12px 0 0; width: auto; } }
@@ -334,6 +352,12 @@
     <div class="brand">TTC Admin</div>
     <button type="button" class="signout" id="signOutBtn">Sign out</button>
   </header>
+  <div class="order-alert hidden" id="orderAlert" role="alert">
+    <span class="order-alert-dot" aria-hidden="true"></span>
+    <span class="order-alert-text" id="orderAlertText"></span>
+    <button type="button" class="order-alert-view" id="orderAlertView">View order</button>
+    <button type="button" class="order-alert-close" id="orderAlertClose" aria-label="Dismiss">×</button>
+  </div>
 
   <div class="shell">
     <nav class="sidebar" id="sidebar" aria-label="Admin sections">
@@ -473,7 +497,14 @@
     <section data-view-panel="orders" class="hidden">
     <div class="card">
       <h2>Orders</h2>
-      <p class="hint">An order is saved here when a customer taps "Send order via WhatsApp" or "Order via Instagram DM" at checkout. Check your WhatsApp or Instagram to confirm they actually sent the message.</p>
+      <p class="hint">Website orders are placed right on the shop. WhatsApp/Instagram orders are saved when a customer taps those links — check your WhatsApp or Instagram to confirm they actually sent the message.</p>
+      <div class="alert-controls">
+        <label class="switch"><input type="checkbox" id="alertsToggle" /> New order alerts</label>
+        <button type="button" class="chip" id="notifyBtn">Allow notifications</button>
+        <button type="button" class="chip" id="testSoundBtn">Test alert sound</button>
+      </div>
+      <p class="hint" id="notifyHint"></p>
+      <p class="hint">Alerts (sound, banner and notification) only work while this admin page is open in a browser tab. Phones may pause it when the screen locks.</p>
       <div class="chips" role="tablist">
         <button type="button" class="chip active" data-order-filter="new">New <span id="ordersNewCount">0</span></button>
         <button type="button" class="chip" data-order-filter="starred">Starred <span id="ordersStarredCount">0</span></button>
@@ -655,8 +686,12 @@
   const VIEWS = ["import", "add", "products", "reviews", "manageReviews", "orders", "promos", "tools"];
   const isPhone = () => window.matchMedia("(max-width: 760px)").matches;
 
+  let currentView = "orders";
+  let alertsReady = false; // set once the alert code below has loaded
   function showView(name) {
     if (!VIEWS.includes(name)) name = "orders";
+    currentView = name;
+    if (name === "orders" && alertsReady) markOrdersSeen(true);
     document.querySelectorAll("[data-view-panel]").forEach((panel) =>
       panel.classList.toggle("hidden", panel.getAttribute("data-view-panel") !== name)
     );
@@ -982,6 +1017,7 @@
       (snap) => {
         $("orderListError").classList.add("hidden");
         currentOrders = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        detectNewOrders(currentOrders);
         renderOrders();
       },
       (err) => {
@@ -999,6 +1035,128 @@
       renderOrders();
     })
   );
+
+  function channelClass(ch) { return ch === "website" ? "website" : ch === "instagram" ? "instagram" : "whatsapp"; }
+  function channelLabel(ch) { return ch === "website" ? "Website" : ch === "instagram" ? "Instagram" : "WhatsApp"; }
+
+  // ---- new order alerts ----
+  // Orders already in the database when the page opens are remembered
+  // silently; only orders that arrive after that trigger an alert.
+  const seenOrderIds = new Set();
+  let ordersLoadedOnce = false;
+  let unseenNewOrders = 0;
+  let alertsOn = true;
+  try { alertsOn = localStorage.getItem("ttcOrderAlerts") !== "off"; } catch (e) {}
+  $("alertsToggle").checked = alertsOn;
+  $("alertsToggle").addEventListener("change", () => {
+    alertsOn = $("alertsToggle").checked;
+    try { localStorage.setItem("ttcOrderAlerts", alertsOn ? "on" : "off"); } catch (e) {}
+  });
+
+  function detectNewOrders(orders) {
+    const fresh = [];
+    orders.forEach((o) => {
+      if (!seenOrderIds.has(o.id)) {
+        seenOrderIds.add(o.id);
+        if (ordersLoadedOnce && o.status !== "done") fresh.push(o);
+      }
+    });
+    ordersLoadedOnce = true;
+    if (fresh.length && alertsOn) fresh.forEach(alertNewOrder);
+  }
+
+  function orderLabel(o) {
+    const c = o.customer || {};
+    return "New order" + (o.orderNo ? " " + o.orderNo : "") + " from " + (c.name || "a customer") + " · Rs" + (Number(o.total) || 0);
+  }
+
+  function alertNewOrder(o) {
+    playChime();
+    unseenNewOrders++;
+    updateTitle();
+    $("orderAlertText").textContent = orderLabel(o) + (unseenNewOrders > 1 ? "  (+" + (unseenNewOrders - 1) + " more)" : "");
+    $("orderAlertView").classList.toggle("hidden", currentView === "orders" && !document.hidden);
+    $("orderAlert").classList.remove("hidden");
+    if ("Notification" in window && Notification.permission === "granted") {
+      try {
+        const n = new Notification(orderLabel(o), {
+          body: (o.items || []).map((i) => (i.name || "") + " × " + (i.qty || 1)).join(", ").slice(0, 120),
+          tag: "ttc-order-" + o.id,
+        });
+        n.onclick = () => { window.focus(); showView("orders"); n.close(); };
+      } catch (e) { /* some phones only allow notifications from an installed app */ }
+    }
+    if (currentView === "orders" && !document.hidden) markOrdersSeen(false);
+  }
+
+  const BASE_TITLE = document.title;
+  function updateTitle() {
+    document.title = unseenNewOrders ? "(" + unseenNewOrders + ") New orders · TTC admin" : BASE_TITLE;
+  }
+  function markOrdersSeen(hideBanner) {
+    unseenNewOrders = 0;
+    updateTitle();
+    if (hideBanner) $("orderAlert").classList.add("hidden");
+  }
+  $("orderAlertClose").addEventListener("click", () => $("orderAlert").classList.add("hidden"));
+  $("orderAlertView").addEventListener("click", () => { showView("orders"); $("orderAlert").classList.add("hidden"); });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && currentView === "orders") markOrdersSeen(false);
+  });
+
+  // A short two-note chime made in the browser (no sound file needed).
+  // Browsers only allow sound after the page has been clicked once, so the
+  // audio is "unlocked" on the first click or key press.
+  let audioCtx = null;
+  function unlockAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    } catch (e) {}
+  }
+  window.addEventListener("pointerdown", unlockAudio);
+  window.addEventListener("keydown", unlockAudio);
+  function playChime() {
+    if (!audioCtx) return;
+    try {
+      const t = audioCtx.currentTime;
+      [[880, 0], [1318.5, 0.16]].forEach(([freq, delay]) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, t + delay);
+        gain.gain.exponentialRampToValueAtTime(0.25, t + delay + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.6);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(t + delay);
+        osc.stop(t + delay + 0.65);
+      });
+    } catch (e) {}
+  }
+  $("testSoundBtn").addEventListener("click", () => { unlockAudio(); setTimeout(playChime, 50); });
+
+  function renderNotifyControls() {
+    const btn = $("notifyBtn");
+    const hint = $("notifyHint");
+    if (!("Notification" in window)) {
+      btn.classList.add("hidden");
+      hint.textContent = "This browser doesn't support pop-up notifications — the sound and banner still work.";
+      return;
+    }
+    btn.classList.toggle("hidden", Notification.permission !== "default");
+    hint.textContent = Notification.permission === "granted"
+      ? "Pop-up notifications are on."
+      : Notification.permission === "denied"
+        ? "Notifications are blocked. To turn them on, click the icon to the left of the web address, open Site settings, and set Notifications to Allow — then reload this page."
+        : "";
+  }
+  $("notifyBtn").addEventListener("click", async () => {
+    try { await Notification.requestPermission(); } catch (e) {}
+    renderNotifyControls();
+  });
+  renderNotifyControls();
+  alertsReady = true;
 
   // Turns a Pakistani number like 0300-1234567 into 923001234567 for wa.me links.
   function waNumber(phone) {
@@ -1050,7 +1208,7 @@
         <div class="order-top">
           <div>
             <div class="order-who">${escapeHtml(c.name || "No name")}</div>
-            <span class="order-channel ${o.channel === "instagram" ? "instagram" : "whatsapp"}">${o.channel === "instagram" ? "Instagram" : "WhatsApp"}</span>
+            <span class="order-channel ${channelClass(o.channel)}">${channelLabel(o.channel)}</span>${o.orderNo ? `<span class="order-no">${escapeHtml(o.orderNo)}</span>` : ""}
           </div>
           <div class="order-when">${escapeHtml(formatOrderDate(o.createdAt))}${isDone ? "<br>Done" : ""}</div>
         </div>
@@ -1058,6 +1216,7 @@
           ${escapeHtml(c.phone || "")}
           ${wa ? ` · <a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a> · <a href="tel:${escapeHtml(c.phone)}">Call</a>` : ""}
           <br>${escapeHtml(c.address || "")}
+          ${o.paymentMethod ? `<br>Payment: ${escapeHtml(o.paymentMethod)}` : ""}
           ${c.notes ? `<br><em>Note: ${escapeHtml(c.notes)}</em>` : ""}
         </div>
         <ul class="order-items">
@@ -1069,6 +1228,7 @@
             </li>`).join("")}
         </ul>
         <div class="order-total">
+          ${o.channel === "website" ? `<span>Delivery: to confirm</span>` : ""}
           ${o.promo ? `<span>Promo ${escapeHtml(o.promo)}: -Rs${Number(o.discount) || 0}</span>` : ""}
           <strong>Total Rs${Number(o.total) || 0}</strong>
         </div>
@@ -1271,10 +1431,11 @@
   });
 
   // ---- Meta catalog CSV ----
-  // The 16 starter products (without photos). Their first photo is published
-  // at /og/<id>.jpg on every build. Starter products already imported into
-  // the admin panel (matching seedId) are skipped, the same way the shop does.
-  const SEED_PRODUCTS_META = [{"id": "p22", "name": "Crochet Flower Claw Clip", "price": 250, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted flower claw clips — available in two styles. Tap a thumbnail to preview each one.", "variants": ["Olive Square Clip, Red & Tan Flower", "Maroon Wrapped Clip, Yellow Flower"]}, {"id": "p21", "name": "Crochet Rose Bag/Phone Charm", "price": 400, "tag": "New", "category": "Bag & Phone Charms", "desc": "Hand-crocheted ivory rose charm with dark green leaf accents, on a cord loop — perfect for a bag, phone, or AirPods case.", "variants": []}, {"id": "p20", "name": "Crochet Rose Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted rose keychain in deep maroon, finished with a sturdy keyring — an elegant everyday accessory or gift.", "variants": []}, {"id": "p19", "name": "Crochet Pony (Set of 2)", "price": 300, "tag": "New", "category": "Hair Ties", "desc": "Hand-crocheted hair ties, sold as a set of 2 — a scalloped ring style or a cute bow-topped ponytail band, available in several color combinations. Tap a thumbnail to preview each one.", "variants": ["Red & Yellow Scallop Ring", "Red Band, Yellow Bow", "Orange Band, Red & Brown Bow", "Pink Band, Teal Bow", "Green Band, Red Bow"]}, {"id": "p18", "name": "Crochet Mini Hat Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted mini sun-hat keychain in ivory and teal — a cute, unique charm for bags or keys.", "variants": []}, {"id": "p17", "name": "Crochet Flower Hair Catcher", "price": 250, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted flower hair catcher (claw clip) — available in gold & red, red & gold, pink, or green. Tap a thumbnail to preview each color.", "variants": ["All 4 Catchers", "Gold & Red", "Red & Gold", "Pink", "Green"]}, {"id": "p23", "name": "Crochet Loop Hair Claw Clip", "price": 250, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted loop-style hair claw clip — available in yellow, red, pink, or beige with a red flower. Tap a thumbnail to preview each color.", "variants": ["All 4 Colors", "Yellow", "Red", "Pink", "Beige with Red Flower"]}, {"id": "p24", "name": "Crochet Scalloped Flower Claw Clip", "price": 400, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted scalloped flower claw clip — available in six two-tone color combinations. Tap a thumbnail to preview each one.", "variants": ["All 6 Colors", "Teal & Maroon", "Cream & Maroon", "Green & Red", "Blue & Cream", "Mint & Pink", "Coral & Navy"]}, {"id": "p25", "name": "Crochet AirPods Pouch", "price": 500, "tag": "New", "category": "Crochet Purses", "desc": "Hand-crocheted AirPods pouch in royal blue, finished with a sturdy wrist loop — a snug, handy carrier for your earbuds on the go.", "variants": []}, {"id": "p1", "name": "Maroon Bloom Pouch", "price": 1000, "tag": "Bestseller", "category": "Crochet Purses", "desc": "A hand-stitched drawstring pouch with two crochet blossoms — deep maroon body, blush trim. Handy for carrying cash, AirPods, cosmetics, and other small essentials.", "variants": []}, {"id": "p3", "name": "Yellow Crochet Hoop Earrings", "price": 500, "tag": "New", "category": "Crochet Earrings", "desc": "Hand-crocheted mustard-yellow hoop earrings finished with red beaded trim and gold-tone hooks.", "variants": []}, {"id": "p4", "name": "Sunflower Keychain", "price": 500, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted sunflower keychain with a deep brown center, finished with a sturdy keyring.", "variants": []}, {"id": "p14", "name": "Mini Jersey Keychain (No. 10)", "price": 500, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted mini football jersey keychain in blue and white with a No. 10 detail — a fun gift for any football fan.", "variants": []}, {"id": "p15", "name": "Pink Bow Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted pink bow keychain, finished with a sturdy keyring — a sweet everyday accessory or gift.", "variants": []}, {"id": "p16", "name": "Mini Bag Keychain", "price": 450, "tag": "New", "category": "Crochet Keychains", "desc": "Hand-crocheted mini bag keychain in mustard yellow with a fun stitched face — a playful, unique accessory.", "variants": []}, {"id": "p8", "name": "Crochet Hair Clips", "price": 550, "tag": "New", "category": "Hair Clips", "desc": "Hand-crocheted hair clip pairs, each topped with a crochet flower — available in six color combinations. Tap a thumbnail to preview each one.", "variants": ["Mustard & White", "Tan & Blue Pearl", "Cream & Red", "Maroon & Ivory", "Red & Green Beaded", "Ivory & Teal"]}];
+  // The 16 starter products from src/data/products.js, with their Cloudinary
+  // photo links. Starter products already imported into the admin panel
+  // (matching seedId) are skipped, the same way the shop does. If you change
+  // a starter product in products.js, update it here too.
+  const SEED_PRODUCTS_META = [{"id":"p22","name":"Crochet Flower Claw Clip","price":250,"tag":"New","category":"Hair Clips","desc":"Hand-crocheted flower claw clips — available in two styles. Tap a thumbnail to preview each one.","variants":["Olive Square Clip, Red & Tan Flower","Maroon Wrapped Clip, Yellow Flower"],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011942/hnrep9pw7u82yg8uriss.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011943/ajdid6banrap8otfgxtr.jpg"]},{"id":"p21","name":"Crochet Rose Bag/Phone Charm","price":400,"tag":"New","category":"Bag & Phone Charms","desc":"Hand-crocheted ivory rose charm with dark green leaf accents, on a cord loop — perfect for a bag, phone, or AirPods case.","variants":[],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011940/v2ae1ir80ebv7ias8s8h.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011941/dzahcad0jqksjpketibr.jpg"]},{"id":"p20","name":"Crochet Rose Keychain","price":450,"tag":"New","category":"Crochet Keychains","desc":"Hand-crocheted rose keychain in deep maroon, finished with a sturdy keyring — an elegant everyday accessory or gift.","variants":[],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011939/rer3shkxct70j0nco8sl.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011939/ders9tcr0wgnq67zudox.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011940/eituauh0zdlaoyyzepzs.jpg"]},{"id":"p19","name":"Crochet Pony (Set of 2)","price":300,"tag":"New","category":"Hair Ties","desc":"Hand-crocheted hair ties, sold as a set of 2 — a scalloped ring style or a cute bow-topped ponytail band, available in several color combinations. Tap a thumbnail to preview each one.","variants":["Red & Yellow Scallop Ring","Red Band, Yellow Bow","Orange Band, Red & Brown Bow","Pink Band, Teal Bow","Green Band, Red Bow"],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011934/om6akbc6mwfrpflnsrkz.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011936/c2o6c0xo6wmsu6acsz5l.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011936/vdmvyksqkebzmqvhxups.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011937/qpzm0mqg80c0re894xqb.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011938/dl0v83iyzxwll9uiaej9.jpg"]},{"id":"p18","name":"Crochet Mini Hat Keychain","price":450,"tag":"New","category":"Crochet Keychains","desc":"Hand-crocheted mini sun-hat keychain in ivory and teal — a cute, unique charm for bags or keys.","variants":[],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011932/tf6wkwmpsefztjxwq0ht.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011933/prssxjajdjpan8hyrdhe.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011933/bgqilkwbswfunyukkejf.jpg"]},{"id":"p17","name":"Crochet Flower Hair Catcher","price":250,"tag":"New","category":"Hair Clips","desc":"Hand-crocheted flower hair catcher (claw clip) — available in gold & red, red & gold, pink, or green. Tap a thumbnail to preview each color.","variants":["All 4 Catchers","Gold & Red","Red & Gold","Pink","Green"],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011929/vpke00fopr0dggi9rt63.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011929/ahi0jbpipduxuywbo3f9.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011930/s5iftezfk9eqkbgy4aw4.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011930/n7ier42y4ptyfd57xzvj.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011931/r1uhjaz1nfljgwukyoiq.jpg"]},{"id":"p23","name":"Crochet Loop Hair Claw Clip","price":250,"tag":"New","category":"Hair Clips","desc":"Hand-crocheted loop-style hair claw clip — available in yellow, red, pink, or beige with a red flower. Tap a thumbnail to preview each color.","variants":["All 4 Colors","Yellow","Red","Pink","Beige with Red Flower"],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011926/b8akgqro01p8nhstqy4o.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011926/z281atpa7d3knqedi43h.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011928/kfwiyvb00hpwesanh1ev.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011928/foukjsu5bmrjm0ytenjb.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011927/sav7hxblgrz8avy8myq5.jpg"]},{"id":"p24","name":"Crochet Scalloped Flower Claw Clip","price":400,"tag":"New","category":"Hair Clips","desc":"Hand-crocheted scalloped flower claw clip — available in six two-tone color combinations. Tap a thumbnail to preview each one.","variants":["All 6 Colors","Teal & Maroon","Cream & Maroon","Green & Red","Blue & Cream","Mint & Pink","Coral & Navy"],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011943/sptprkevlqcicmfuuevp.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011946/a73yiijn4dariblxkxgr.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011947/du6fqpb2wiuaz83002sw.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011945/suul3afymwd9ruddjs6r.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011945/eytfnr31bwvozxxw59pu.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011944/i7b0qsiutinhoys4urhg.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011947/q9bat3yvbxg3m6jwhne2.jpg"]},{"id":"p25","name":"Crochet AirPods Pouch","price":500,"tag":"New","category":"Crochet Purses","desc":"Hand-crocheted AirPods pouch in royal blue, finished with a sturdy wrist loop — a snug, handy carrier for your earbuds on the go.","variants":[],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011948/jvgslfswea3o8skixsjm.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011949/mxvxa5jjw5hszs6pjexu.jpg"]},{"id":"p1","name":"Maroon Bloom Pouch","price":1000,"tag":"Bestseller","category":"Crochet Purses","desc":"A hand-stitched drawstring pouch with two crochet blossoms — deep maroon body, blush trim. Handy for carrying cash, AirPods, cosmetics, and other small essentials.","variants":[],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011909/zwuxydvobbp7ptvidtcv.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011909/ncnvuls4eexpu0jybrxj.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011910/xmrzgbb3yhesxshguvg7.jpg"]},{"id":"p3","name":"Yellow Crochet Hoop Earrings","price":500,"tag":"New","category":"Crochet Earrings","desc":"Hand-crocheted mustard-yellow hoop earrings finished with red beaded trim and gold-tone hooks.","variants":[],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011911/e4clotzorm45kmuudfxg.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011911/rlacfqdtraadpvbhveoa.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011912/fnfrmlcakuakmr2fus3x.jpg"]},{"id":"p4","name":"Sunflower Keychain","price":500,"tag":"New","category":"Crochet Keychains","desc":"Hand-crocheted sunflower keychain with a deep brown center, finished with a sturdy keyring.","variants":[],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011917/zzpiz4ve5lgnfl2bgboy.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011918/ot2cjv7jiwngijvx88eg.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011919/mboeqrid7ewkxipwsbvj.jpg"]},{"id":"p14","name":"Mini Jersey Keychain (No. 10)","price":500,"tag":"New","category":"Crochet Keychains","desc":"Hand-crocheted mini football jersey keychain in blue and white with a No. 10 detail — a fun gift for any football fan.","variants":[],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011920/lzlyw93bxfrqrdvmb2sw.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011921/uq7xtypnhj55dbja4y68.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011922/cl7tahi7qssexkeqfzcn.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011922/h8tdmwtubqs9wvnrr14y.jpg"]},{"id":"p15","name":"Pink Bow Keychain","price":450,"tag":"New","category":"Crochet Keychains","desc":"Hand-crocheted pink bow keychain, finished with a sturdy keyring — a sweet everyday accessory or gift.","variants":[],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011923/fieq6rskayshh4splqif.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011924/kqpou3asae1enkpywdrx.jpg"]},{"id":"p16","name":"Mini Bag Keychain","price":450,"tag":"New","category":"Crochet Keychains","desc":"Hand-crocheted mini bag keychain in mustard yellow with a fun stitched face — a playful, unique accessory.","variants":[],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011924/kugwfniyr9q2wjk91xpp.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011925/a6ov2f0ob9775goyit0f.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011925/h8aku1avnomoeewdfzax.jpg"]},{"id":"p8","name":"Crochet Hair Clips","price":550,"tag":"New","category":"Hair Clips","desc":"Hand-crocheted hair clip pairs, each topped with a crochet flower — available in six color combinations. Tap a thumbnail to preview each one.","variants":["Mustard & White","Tan & Blue Pearl","Cream & Red","Maroon & Ivory","Red & Green Beaded","Ivory & Teal"],"photos":["https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011913/lqifhfny7ek4hn0dbcgc.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011914/ptxkmjrsepwzpzhu4frh.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011914/qojxjssnxxuyh59mb73k.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011915/exh6ktmksucg0dcebfhg.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011916/occgzkg7z6ka1ihlxobd.jpg","https://res.cloudinary.com/kqcnm3ge/image/upload/v1791011917/lxjbsx2dxowfkzgt3jgx.jpg"]}];
 
   function metaImageUrl(url) {
     const m = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/.exec(url || "");
@@ -1284,18 +1445,17 @@
   function buildMetaCsv() {
     const imported = new Set(currentProducts.map((p) => p.seedId).filter(Boolean));
     const seeds = SEED_PRODUCTS_META.filter((s) => !imported.has(s.id))
-      .map((s) => ({ ...s, photos: [SITE_DOMAIN + "/og/" + s.id + ".jpg"], isSeed: true, variants: (s.variants || []).map((n) => ({ name: n })) }));
+      .map((s) => ({ ...s, variants: (s.variants || []).map((n) => ({ name: n })) }));
     const all = [...currentProducts, ...seeds];
     const cols = ["id","title","description","availability","condition","price","link","image_link","additional_image_link","brand","product_type","custom_label_0"];
     const esc = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"';
     let smallPhotos = 0;
     const rows = all.map((p) => {
       let photos;
-      if (p.isSeed) { photos = p.photos; smallPhotos++; }
-      else {
-        photos = [...(p.photos || []), ...((p.variants || []).map((v) => v && v.photo))]
-          .filter((u) => /^https?:\/\//i.test(u || "")).map(metaImageUrl);
-      }
+      photos = [...(p.photos || []), ...((p.variants || []).map((v) => v && v.photo))]
+        .filter((u) => /^https?:\/\//i.test(u || ""));
+      photos = [...new Set(photos)].map(metaImageUrl);
+      if (!photos.length || !/res\.cloudinary\.com/.test(photos[0])) smallPhotos++;
       let desc = String(p.desc || "").replace(/\s+/g, " ").trim()
         .split(/(?<=[.!?])\s+/).filter((x) => !/tap a thumbnail/i.test(x)).join(" ").trim();
       if (!desc) desc = "Handmade crochet " + p.name;
@@ -1326,7 +1486,7 @@
     const msg = $("metaCsvMsg");
     msg.className = smallPhotos ? "msg error" : "msg success";
     msg.textContent = "Downloaded " + count + " products." + (smallPhotos
-      ? " " + smallPhotos + " starter products still use their small built-in photos, which Meta will reject (they're under 500×500). Import them first (Import products) to fix that."
+      ? " " + smallPhotos + " products have no Cloudinary photo, so Meta may reject their images. Re-upload their photos in Edit product."
       : "");
   });
 
