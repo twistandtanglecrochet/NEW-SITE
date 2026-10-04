@@ -9,3 +9,16 @@ export const SITE_URL = "https://twisttanglecrochet.vercel.app";
 export const SITE_NAME = "Twist & Tangle Crochet (TTC)";
 export const SITE_DESCRIPTION =
   "Handmade crochet flowers, earrings, keychains, purses, coasters, hair clips, and more. Made to order in Lahore, Pakistan.";
+
+// Checkout: customers place orders right on the website ("Place order").
+// When this is true, small "Or send it yourself: WhatsApp / Instagram" links
+// also show under the button. Set it to false to hide them.
+export const SHOW_DIRECT_ORDER_LINKS = true;
+
+// Checkout: payment choices shown in the "Payment" dropdown (first one is
+// selected by default). Edit, add or remove options here.
+export const PAYMENT_METHODS = ["Cash on Delivery", "Bank transfer / JazzCash / Easypaisa"];
+
+// Checkout: what the "Delivery" line says (TTC confirms delivery charges on
+// the call). Change to e.g. "Free" or "Rs 200" if you fix a price later.
+export const DELIVERY_LABEL = "Charges are separate";
