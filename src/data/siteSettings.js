@@ -46,11 +46,23 @@ export const DEFAULT_SETTINGS = {
   ads: { on: false, popupDelay: 3, items: [] },
 
   // Orders
-  checkout: { betterForm: false, whatsappAuto: false, whatsappDelay: 2 }, // betterForm = city/email/postal + strict checks; whatsappAuto = open WhatsApp after the thank-you screen
+  checkout: { giftNote: false, betterForm: false, whatsappAuto: false, whatsappDelay: 2 }, // betterForm = city/email/postal + strict checks; whatsappAuto = open WhatsApp after the thank-you screen
   tracking: { on: false },
+  faq: { on: false, footer: true, title: "Questions & returns", items: [
+    { q: "How do I order?", a: "Choose a product, press Add to Cart or Buy Now, write your name, mobile number and full address, then press Place order. We confirm every order on WhatsApp or by call." },
+    { q: "How can I pay?", a: "Payment is confirmed with you when we confirm your order on WhatsApp." },
+    { q: "How do I track my order?", a: "Press “Track your order” and type your order number." },
+    { q: "Are the pieces handmade?", a: "Yes. Every piece is crocheted by hand, so tiny differences are normal and make it special." },
+  ], returnsTitle: "Returns & exchange", returns: "If something is wrong with your order, message us on WhatsApp with a photo and we will help you. (Please edit this text in Admin → Website → FAQ & returns.)" },
+  bundles: { on: false, title: "Combo offers", items: [] },      // items: [{ name, price, productIds: [] }]
+  cartPlus: { suggest: false, giftOn: false, giftOver: 2000, giftText: "Free gift wrap" },
+  insta: { on: false, title: "Follow us on Instagram", link: "", posts: [] }, // posts: [{ image, link }]
+  search: { suggest: false },                    // suggestions list under the search box
+  orders: { numeric: false, start: 2000, slipWA: false },       // order numbers 2000, 2001, … instead of TTC-XXXXX
+  myOrders: { on: false },                       // "My orders" for the customer (orders placed on this phone)
 
   // Product page + order guide
-  productPage: { tabs: false, sizes: false, colours: false, includes: false }, // tabs = Description / Details; sizes & colours = "available" lines
+  productPage: { tabs: false, sizes: false, colours: false, includes: false, full: false, related: false, notify: false, seo: false }, // tabs = Description / Details; sizes & colours = "available" lines
   guide: {
     on: false, home: true, footer: true, buttonText: "Complete order guide", goText: "Go",
     title: "Complete order guide", intro: "Everything about ordering from Twist & Tangle Crochet, step by step.",
@@ -69,7 +81,7 @@ export const DEFAULT_SETTINGS = {
   // Footer (sorted layout) and Look & brand — all off until switched on
   footer: {
     on: false, headline: "Need help choosing? Message us and we'll guide you.", button: "Chat on WhatsApp",
-    shopColumn: true, columns: [], track: true, showTime: true, hours: { open: "", close: "" }, secondNumber: "",
+    shopColumn: true, officialIcons: false, floatRight: false, columns: [], track: true, showTime: true, hours: { open: "", close: "" }, secondNumber: "",
     socials: { whatsapp: true, instagram: "https://www.instagram.com/twisttanglecrochet/", facebook: "https://www.facebook.com/twisttanlecrochet", tiktok: "" },
     copyright: "Copyright © {year} {shop}", lastLine: "Thanks for visiting",
   },
@@ -90,9 +102,9 @@ export const DEFAULT_SETTINGS = {
   // Products
   cardLayout: { on: false, layout: 1 }, // 1 = the current card design
   priceFilter: { on: false },
-  wishlist: { on: false },
+  wishlist: { on: false, reminders: false }, // reminders: "Sold out" / "price dropped" notes on saved items
   recent: { on: false, max: 10 },
-  exploreMore: { on: false, initial: 8 },
+  exploreMore: { on: false, initial: 8, perDevice: false, initialTablet: 8, initialMobile: 6 },
 
   // Cart / delivery
   freeDelivery: { on: false, threshold: 0 }, // Rs; 0 = nothing to show
@@ -106,10 +118,10 @@ export const DEFAULT_SETTINGS = {
   look: { on: false, gap: 22, cardRadius: 18, panelRadius: 24, photoRadius: 14, sectionSpace: 20 },
 
   // Languages
-  i18n: { on: false, defaultLang: "en", en: {}, ur: {} },
+  i18n: { on: false, defaultLang: "en", en: {}, ur: {}, extra: [{"en": "Description", "ur": ""}, {"en": "Details", "ur": ""}, {"en": "Sizes available", "ur": ""}, {"en": "Colours available", "ur": ""}, {"en": "Price includes:", "ur": ""}, {"en": "My orders", "ur": ""}, {"en": "Track this order", "ur": ""}, {"en": "You may also like", "ur": ""}, {"en": "Notify me when it's back", "ur": ""}, {"en": "Complete order guide", "ur": ""}, {"en": "Start shopping", "ur": ""}, {"en": "Ask on WhatsApp", "ur": ""}, {"en": "Good to know", "ur": ""}, {"en": "Goes well with your order", "ur": ""}, {"en": "Add combo to cart", "ur": ""}, {"en": "Follow us on Instagram", "ur": ""}, {"en": "Combo offers", "ur": ""}, {"en": "Questions & returns", "ur": ""}, {"en": "Home", "ur": ""}, {"en": "See all results", "ur": ""}, {"en": "Add to Cart", "ur": ""}, {"en": "Buy Now", "ur": ""}] }, // extra: any English text on the shop -> your Urdu
 
   // Speed
-  speed: { srcset: false, apiShop: false, sw: false },
+  speed: { srcset: false, apiShop: false, sw: false, lightMotion: false, resizeUploads: false, uploadMax: 1600, lcp: false, boot: false, noLive: false, cv: false },
 
   // PWA
   pwa: { install: false, safeArea: false },

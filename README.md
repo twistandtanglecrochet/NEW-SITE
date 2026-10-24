@@ -101,3 +101,21 @@ Shop texts are in `src/data/i18n.js`.
 - **Product page** (Admin → Website → Product page): switches for Description/Details tabs (+ short line), "Sizes available", "Colours available", "Price includes". Per-product fields (short line, Details lines, sizes, colours, price-includes chips) are in the product form.
 - **Complete order guide** (Admin → Website → Order guide): bar under the home banner + guide page (`/guide`), footer link, editable steps and tips; a demo guide is included.
 - **Print slip**: branded, interactive slip (Small/A5/A4, hide pictures/prices, WhatsApp customer, copy address, tick items while packing).
+
+## Round 5 (all OFF by default)
+Search suggestions; numeric order numbers from 2000 (counter in `config/orderCounter`, rule in `firestore.rules`); My orders; gift note; official social icons and bottom-right back-to-top in the footer; promo codes limited to categories; full product page + related + notify + SEO.
+
+## Round 6 (speed, all OFF)
+Lighter motion on phones, shrink photos on upload, Explore-more count per device (computer/tablet/phone), cache headers + Cloudinary preconnect (vercel.json / index.html).
+
+## Round 7
+Costs & profit report (date range, cost types), preview-before-save, undo, backup/restore, customers + CSV, today's work, duplicate product, combos, cart suggestions, free gift, FAQ & returns, Instagram strip, wishlist reminders, "Other text" Urdu list. All switches default OFF. Firestore rules: publish `out/firestore.rules` (orderCounter, expenses).
+
+## Round 8 (speed + admin ease)
+Admin → Speed & app has 4 new switches (all OFF): first big photo first, quick loading screen, load shop data once, skip drawing the footer below the screen. Always on (no visible change): non-blocking fonts, preconnect to fonts/Firestore, a `<main>` landmark, and removal of the unused placeholder Google Analytics tag that logged a console error. Admin: bulk edit of products (category / tag), search orders by name, phone or number, bigger buttons and a fixed Save bar on phones.
+
+## Round 9
+Admin: up to 5 product photos upload at the same time; ◀ ▶ buttons re-order photos. New switch "Approve & send slip" (Order & checkout, OFF): each order gets a button that opens WhatsApp with the order slip ready; nothing is sent automatically and the order remembers it was sent.
+
+## Round 10 (admin look)
+Admin is now Lavender + New look by default (saved per browser). Dashboard → "Admin colours": 6 themes (Lavender, Maroon old, Sage, Rose, Terracotta, Teal) and 7 colour pickers for your own. Dashboard → "Open anything": every admin page as a tile with live counts. The Classic look is still available. The shop is not affected.

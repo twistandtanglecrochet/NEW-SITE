@@ -11,7 +11,8 @@ function photoOf(item) {
 }
 
 // The customer's saved (hearted) products, kept in this browser only.
-export default function WishlistPanel({ ids, products, onClose, onOpen, onAdd, onRemove, t }) {
+export default function WishlistPanel({ ids, products, onClose, onOpen, onAdd, onRemove, t, reminders }) {
+  let saved = {}; if (reminders) { try { saved = JSON.parse(localStorage.getItem("ttc_wish_prices") || "{}") || {}; } catch (e) {} }
   const items = ids.map((id) => products.find((p) => String(p.id) === String(id))).filter(Boolean);
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 52, display: "flex", justifyContent: "flex-end" }} className="ttc-safe-pad">
@@ -41,6 +42,8 @@ export default function WishlistPanel({ ids, products, onClose, onOpen, onAdd, o
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 700 }}>{p.name}</div>
                     <div style={{ fontSize: 12, color: COLORS.maroon }}>Rs{p.price}</div>
+                    {reminders && p.tag === "Sold Out" && <div style={{ fontSize: 11.5, fontWeight: 700, color: "#B3261E" }}>Sold out right now</div>}
+                    {reminders && saved[String(p.id)] > Number(p.price) && <div style={{ fontSize: 11.5, fontWeight: 700, color: "#1B6B3A" }}>Price dropped! Was Rs{saved[String(p.id)]}</div>}
                   </div>
                   <button onClick={() => onAdd(p)} aria-label="Add to cart" style={{ background: COLORS.bgSoft, border: "none", borderRadius: 8, width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Plus size={14} />

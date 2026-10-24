@@ -100,6 +100,7 @@
       "items": []
     },
     "checkout": {
+      "giftNote": false,
       "betterForm": false,
       "whatsappAuto": false,
       "whatsappDelay": 2
@@ -107,11 +108,68 @@
     "tracking": {
       "on": false
     },
+    "faq": {
+      "on": false,
+      "footer": true,
+      "title": "Questions & returns",
+      "items": [
+        {
+          "q": "How do I order?",
+          "a": "Choose a product, press Add to Cart or Buy Now, write your name, mobile number and full address, then press Place order. We confirm every order on WhatsApp or by call."
+        },
+        {
+          "q": "How can I pay?",
+          "a": "Payment is confirmed with you when we confirm your order on WhatsApp."
+        },
+        {
+          "q": "How do I track my order?",
+          "a": "Press “Track your order” and type your order number."
+        },
+        {
+          "q": "Are the pieces handmade?",
+          "a": "Yes. Every piece is crocheted by hand, so tiny differences are normal and make it special."
+        }
+      ],
+      "returnsTitle": "Returns & exchange",
+      "returns": "If something is wrong with your order, message us on WhatsApp with a photo and we will help you. (Please edit this text in Admin → Website → FAQ & returns.)"
+    },
+    "bundles": {
+      "on": false,
+      "title": "Combo offers",
+      "items": []
+    },
+    "cartPlus": {
+      "suggest": false,
+      "giftOn": false,
+      "giftOver": 2000,
+      "giftText": "Free gift wrap"
+    },
+    "insta": {
+      "on": false,
+      "title": "Follow us on Instagram",
+      "link": "",
+      "posts": []
+    },
+    "search": {
+      "suggest": false
+    },
+    "orders": {
+      "numeric": false,
+      "start": 2000,
+      "slipWA": false
+    },
+    "myOrders": {
+      "on": false
+    },
     "productPage": {
       "tabs": false,
       "sizes": false,
       "colours": false,
-      "includes": false
+      "includes": false,
+      "full": false,
+      "related": false,
+      "notify": false,
+      "seo": false
     },
     "guide": {
       "on": false,
@@ -162,6 +220,8 @@
       "headline": "Need help choosing? Message us and we'll guide you.",
       "button": "Chat on WhatsApp",
       "shopColumn": true,
+      "officialIcons": false,
+      "floatRight": false,
       "columns": [],
       "track": true,
       "showTime": true,
@@ -221,7 +281,8 @@
       "on": false
     },
     "wishlist": {
-      "on": false
+      "on": false,
+      "reminders": false
     },
     "recent": {
       "on": false,
@@ -229,7 +290,10 @@
     },
     "exploreMore": {
       "on": false,
-      "initial": 8
+      "initial": 8,
+      "perDevice": false,
+      "initialTablet": 8,
+      "initialMobile": 6
     },
     "freeDelivery": {
       "on": false,
@@ -260,12 +324,109 @@
       "on": false,
       "defaultLang": "en",
       "en": {},
-      "ur": {}
+      "ur": {},
+      "extra": [
+        {
+          "en": "Description",
+          "ur": ""
+        },
+        {
+          "en": "Details",
+          "ur": ""
+        },
+        {
+          "en": "Sizes available",
+          "ur": ""
+        },
+        {
+          "en": "Colours available",
+          "ur": ""
+        },
+        {
+          "en": "Price includes:",
+          "ur": ""
+        },
+        {
+          "en": "My orders",
+          "ur": ""
+        },
+        {
+          "en": "Track this order",
+          "ur": ""
+        },
+        {
+          "en": "You may also like",
+          "ur": ""
+        },
+        {
+          "en": "Notify me when it's back",
+          "ur": ""
+        },
+        {
+          "en": "Complete order guide",
+          "ur": ""
+        },
+        {
+          "en": "Start shopping",
+          "ur": ""
+        },
+        {
+          "en": "Ask on WhatsApp",
+          "ur": ""
+        },
+        {
+          "en": "Good to know",
+          "ur": ""
+        },
+        {
+          "en": "Goes well with your order",
+          "ur": ""
+        },
+        {
+          "en": "Add combo to cart",
+          "ur": ""
+        },
+        {
+          "en": "Follow us on Instagram",
+          "ur": ""
+        },
+        {
+          "en": "Combo offers",
+          "ur": ""
+        },
+        {
+          "en": "Questions & returns",
+          "ur": ""
+        },
+        {
+          "en": "Home",
+          "ur": ""
+        },
+        {
+          "en": "See all results",
+          "ur": ""
+        },
+        {
+          "en": "Add to Cart",
+          "ur": ""
+        },
+        {
+          "en": "Buy Now",
+          "ur": ""
+        }
+      ]
     },
     "speed": {
       "srcset": false,
       "apiShop": false,
-      "sw": false
+      "sw": false,
+      "lightMotion": false,
+      "resizeUploads": false,
+      "uploadMax": 1600,
+      "lcp": false,
+      "boot": false,
+      "noLive": false,
+      "cv": false
     },
     "pwa": {
       "install": false,

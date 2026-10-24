@@ -404,6 +404,43 @@
   .prow .pn { display: flex; gap: 10px; align-items: center; min-width: 0; }
   .prow .pn b { display: block; font-size: 14px; } .prow .pn span { font-size: 12px; color: #7A6E64; }
   .prow input, .prow select { width: 100%; box-sizing: border-box; }
+  .thumb-item { position: relative; }
+  .ph-move { display: flex; justify-content: center; gap: 4px; margin-top: 4px; }
+  .ph-move button { border: 0; background: #F3E7DA; border-radius: 8px; min-width: 32px; min-height: 28px; cursor: pointer; font-size: 12px; }
+  .ph-move button:disabled { opacity: .35; cursor: default; }
+  /* App-style tiles (Dashboard → "Open anything") */
+  .app-tiles-h { margin: 14px 0 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #7A6E64; font-weight: 800; }
+  .app-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+  .app-tile { position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 18px; min-height: 104px; padding: 14px; border: 0; border-radius: 20px; cursor: pointer; text-align: left; font: inherit; font-weight: 800; font-size: 14px; color: var(--charcoal); background: var(--cream); box-shadow: 0 2px 10px rgba(40,30,60,.08); transition: transform .18s ease, box-shadow .18s ease; animation: tileIn .35s ease both; animation-delay: calc(var(--i, 0) * 22ms); }
+  .app-tile:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(40,30,60,.16); }
+  .app-tile:active { transform: scale(.96); }
+  .app-tile:focus-visible { outline: 3px solid var(--maroon); outline-offset: 2px; }
+  .app-tile .nav-ic { width: 40px; height: 40px; border-radius: 13px; transition: transform .25s ease; }
+  .app-tile:hover .nav-ic { transform: rotate(-8deg) scale(1.1); }
+  .app-tile .app-badge { position: absolute; top: 10px; right: 10px; background: var(--maroon); color: #fff; border-radius: 999px; padding: 2px 8px; font-size: 11px; min-width: 22px; text-align: center; animation: tilePulse 1.8s ease-in-out infinite; }
+  @keyframes tileIn { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+  @keyframes tilePulse { 50% { transform: scale(1.12); } }
+  @media (prefers-reduced-motion: reduce) { .app-tile, .app-tile .app-badge { animation: none; transition: none; } }
+  .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 8px 0 12px; }
+  .theme-tile { display: flex; align-items: center; gap: 8px; padding: 10px; border: 2px solid var(--bg-soft); background: #fff; border-radius: 14px; cursor: pointer; font: inherit; font-weight: 700; color: var(--charcoal); min-height: 48px; text-align: left; }
+  .theme-tile[aria-pressed="true"] { border-color: var(--maroon); }
+  .theme-dots i { display: inline-block; width: 16px; height: 16px; border-radius: 50%; margin-left: -4px; border: 2px solid #fff; }
+  .theme-dots i:first-child { margin-left: 0; }
+  .theme-pickers { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .theme-pickers label { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; }
+  .theme-pickers input[type="color"] { width: 44px; height: 34px; padding: 2px; border-radius: 8px; border: 1px solid var(--bg-soft); background: #fff; }
+  .bulk-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; padding: 8px 10px; background: #FBF6F0; border-radius: 12px; }
+  .bulk-bar select { width: auto; min-width: 130px; }
+  .bulk-bar label { font-size: 13px; font-weight: 700; display: flex; gap: 6px; align-items: center; }
+  .bulk-pick { width: 18px; height: 18px; margin-right: 6px; vertical-align: -3px; }
+  /* Phone: bigger tap targets, and the Save bar stays at the bottom of the screen. */
+  @media (max-width: 760px) {
+    .btn, button.secondary, button.danger, .chip { min-height: 44px; }
+    input, select, textarea { font-size: 16px; }
+    .savebar { position: fixed !important; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); z-index: 40; }
+    .savebar .btn { flex: 1; }
+    main, .content { padding-bottom: 90px; }
+  }
   .savebar { position: sticky; bottom: 8px; display: flex; gap: 12px; align-items: center; background: #fff; border-radius: 14px; padding: 10px 14px; box-shadow: 0 4px 18px rgba(63,18,32,.15); }
   @media (max-width: 760px) { .prow { grid-template-columns: 1fr 96px; } .prow select { grid-column: 1 / -1; } .prow.head span:last-child { display: none; } }
   .order-extra { margin-top: 10px; display: grid; gap: 8px; }
@@ -474,6 +511,8 @@
       <div class="nav-results hidden" id="navResults"></div>
       <div class="nav-body">
       <button type="button" class="nav-item" data-view="dashboard" data-kw="home overview start" title="Dashboard"><span class="nav-ic t-blue"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="nav-label">Dashboard</span></button>
+      <button type="button" class="nav-item" data-view="customers" data-kw="customers repeat export csv excel labels courier" title="Customers &amp; export"><span class="nav-ic t-purple"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 11a3 3 0 1 0 0-6M21 20c0-2.5-1.6-4.6-4-5.4"/></svg></span><span class="nav-label">Customers &amp; export</span></button>
+      <button type="button" class="nav-item" data-view="backup" data-kw="backup restore save copy" title="Backup"><span class="nav-ic t-gray"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg></span><span class="nav-label">Backup &amp; restore</span></button>
       <button type="button" class="nav-item" data-view="sales" data-kw="money revenue done total" title="Sales"><span class="nav-ic t-green"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16 7.5c0-1.7-1.8-3-4-3s-4 1.3-4 3 1.8 2.7 4 3 4 1.3 4 3-1.8 3-4 3-4-1.3-4-3"/></svg></span><span class="nav-label">Sales</span></button>
       <button type="button" class="nav-item" data-view="links" data-kw="copy share qr whatsapp url" title="Links"><span class="nav-ic t-teal"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span><span class="nav-label">Links</span></button>
       <div class="nav-group">Orders</div>
@@ -497,6 +536,7 @@
       <button type="button" class="nav-item" data-view="homesections" data-kw="reviews shuffle tiles stats bento visit order" title="Home sections"><span class="nav-ic t-teal"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="6" rx="1.5"/><rect x="3" y="12" width="8" height="9" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/></svg></span><span class="nav-label">Home sections</span></button>
       <button type="button" class="nav-item" data-view="cards" data-kw="layout price filter wishlist recently explore" title="Product cards & filters"><span class="nav-ic t-green"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 14h14"/></svg></span><span class="nav-label">Product cards & filters</span></button>
       <button type="button" class="nav-item" data-view="look" data-kw="spacing corners animation scroll" title="Look & motion"><span class="nav-ic t-pink"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="15.5" cy="10" r="1"/></svg></span><span class="nav-label">Look & motion</span></button>
+      <button type="button" class="nav-item" data-view="offers" data-kw="combo bundle gift faq returns instagram cart suggestions" title="Offers, FAQ &amp; Instagram"><span class="nav-ic t-pink"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18"/><path d="M12 8c-2 0-4-1-4-3s3-2 4 1c1-3 4-3 4-1s-2 3-4 3z"/></svg></span><span class="nav-label">Offers, FAQ &amp; Instagram</span></button>
       <button type="button" class="nav-item" data-view="productpage" data-kw="product page details tabs sizes colours includes" title="Product page"><span class="nav-ic t-amber"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span class="nav-label">Product page</span></button>
       <button type="button" class="nav-item" data-view="guide" data-kw="order guide how to order steps help" title="Order guide"><span class="nav-ic t-blue"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg></span><span class="nav-label">Order guide</span></button>
       <button type="button" class="nav-item" data-view="footer" data-kw="links designed by credit" title="Footer"><span class="nav-ic t-gray"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15h18"/></svg></span><span class="nav-label">Footer</span></button>
@@ -578,7 +618,7 @@
         <label>Photos</label>
         <input type="file" id="f_photos" accept="image/*" multiple />
         <div class="thumbs" id="photoThumbs"></div>
-        <div style="font-size:11.5px;color:#7A6E64;margin-top:14px;">Click ☆ on any photo to make it the main image shown on the site.</div>
+        <div style="font-size:11.5px;color:#7A6E64;margin-top:14px;">You can pick many photos at once (5 upload together). Click ☆ to make a photo the main one; use ◀ ▶ to change the order.</div>
 
         <label>Variants (optional — e.g. different colors, each with its own photo)</label>
         <div class="thumbs" id="variantThumbs"></div>
@@ -610,6 +650,8 @@
 
     <section data-view-panel="brand" class="hidden"><div class="settings-pane" data-pane="brand"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="sales" class="hidden"><div id="salesRoot"></div></section>
+    <section data-view-panel="customers" class="hidden"><div id="custRoot"></div></section>
+    <section data-view-panel="backup" class="hidden"><div id="backupRoot"></div></section>
     <section data-view-panel="links" class="hidden"><div id="linksRoot"></div></section>
     <section data-view-panel="neworder" class="hidden"><div id="manualRoot"></div></section>
     <section data-view-panel="orderflow" class="hidden"><div class="settings-pane" data-pane="orderflow"><div class="card"><p class="hint">Loading…</p></div></div></section>
@@ -620,6 +662,14 @@
       <input type="search" id="productFilter" placeholder="Search products by name or category…" aria-label="Search products" />
       <p class="hint" style="margin-top:6px">“Carousel +” puts the product's main photo in the homepage carousel; press again to take it out.</p>
       <div class="msg error hidden" id="listError"></div>
+      <div class="bulk-bar" id="bulkBar">
+        <label><input type="checkbox" id="bulkAll" /> Select all shown</label>
+        <span class="hint" id="bulkCount" style="margin:0">0 selected</span>
+        <select id="bulkCat" aria-label="New category"><option value="">Category…</option></select>
+        <button type="button" class="secondary" id="bulkCatBtn">Change category</button>
+        <select id="bulkTag" aria-label="New tag"><option value="__">Tag…</option><option value="">No tag</option><option value="New">New</option><option value="Bestseller">Bestseller</option><option value="Limited Stock">Limited Stock</option><option value="Sold Out">Sold Out</option></select>
+        <button type="button" class="secondary" id="bulkTagBtn">Change tag</button>
+      </div>
       <div class="product-list" id="productList"></div>
       <div class="msg" id="dlMsg"></div>
     </div>
@@ -679,6 +729,7 @@
       </div>
       <p class="hint" id="notifyHint"></p>
       <p class="hint">Alerts (sound, banner and notification) only work while this admin page is open in a browser tab. Phones may pause it when the screen locks.</p>
+      <input type="search" id="orderQuery" placeholder="Search orders by name, phone number or order number…" aria-label="Search orders" />
       <div class="chips" role="tablist">
         <button type="button" class="chip active" data-order-filter="new">New <span id="ordersNewCount">0</span></button>
         <button type="button" class="chip" data-order-filter="starred">Starred <span id="ordersStarredCount">0</span></button>
@@ -714,7 +765,18 @@
           <input type="number" id="promo_value" min="1" placeholder="e.g. 20" />
         </div>
       </div>
-      <button type="button" class="btn" id="promoAddBtn">Add code</button>
+      <div class="promo-form" style="margin-top:10px">
+        <div>
+          <label for="promo_scope">Works on</label>
+          <select id="promo_scope">
+            <option value="all">Everything</option>
+            <option value="only">Only these categories</option>
+            <option value="except">Everything except these categories</option>
+          </select>
+        </div>
+        <div style="grid-column: span 2"><label>Categories</label><div id="promo_cats" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+      </div>
+      <button type="button" class="btn" id="promoAddBtn" style="margin-top:10px">Add code</button>
       <div class="msg" id="promoMsg"></div>
     </div>
     </section>
@@ -752,6 +814,7 @@
     <section data-view-panel="homesections" class="hidden"><div class="settings-pane" data-pane="homesections"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="cards" class="hidden"><div class="settings-pane" data-pane="cards"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="look" class="hidden"><div class="settings-pane" data-pane="look"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="offers" class="hidden"><div class="settings-pane" data-pane="offers"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="productpage" class="hidden"><div class="settings-pane" data-pane="productpage"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="guide" class="hidden"><div class="settings-pane" data-pane="guide"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="footer" class="hidden"><div class="settings-pane" data-pane="footer"><div class="card"><p class="hint">Loading…</p></div></div></section>
@@ -768,7 +831,7 @@
     getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDoc, setDoc,
+    getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDoc, setDoc, runTransaction,
     onSnapshot, query, orderBy, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -786,10 +849,26 @@
   const CLOUDINARY_CLOUD_NAME = "kqcnm3ge";
   const CLOUDINARY_UPLOAD_PRESET = "TTC SITE";
 
+  // Optional (Admin → Speed): make big photos smaller before uploading.
+  async function shrinkIfWanted(file) {
+    try {
+      let cfg = S && S.speed;
+      if (!cfg) { const snap = await getDoc(doc(db, "config", "siteSettings")); cfg = (snap.exists() && snap.data().speed) || {}; }
+      if (!cfg.resizeUploads || !/^image\/(jpe?g|png|webp)$/i.test(file.type)) return file;
+      const max = Math.max(600, Number(cfg.uploadMax) || 1600);
+      const bmp = await createImageBitmap(file);
+      const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+      if (k >= 1) return file;
+      const c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+      const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.88));
+      return blob && blob.size < file.size ? new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }) : file;
+    } catch (e) { return file; }
+  }
   async function uploadToCloudinary(file) {
     const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", await shrinkIfWanted(file));
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
     const res = await fetch(url, { method: "POST", body: formData });
     if (!res.ok) {
@@ -873,7 +952,7 @@
   });
 
   // ---- sidebar navigation (Keep-style) ----
-  const VIEWS = ["dashboard", "import", "add", "products", "prices", "brand", "sales", "links", "neworder", "orderflow", "reviews", "manageReviews", "orders", "promos", "tools", "announce", "carousel", "ads", "hero", "homesections", "cards", "productpage", "guide", "look", "footer", "i18n", "shopinfo", "speed"];
+  const VIEWS = ["dashboard", "import", "add", "products", "prices", "brand", "sales", "customers", "backup", "links", "neworder", "orderflow", "reviews", "manageReviews", "orders", "promos", "tools", "announce", "carousel", "ads", "hero", "homesections", "cards", "offers", "productpage", "guide", "look", "footer", "i18n", "shopinfo", "speed"];
   const isPhone = () => window.matchMedia("(max-width: 760px)").matches;
 
   let currentView = "dashboard";
@@ -1003,6 +1082,19 @@
     }
   }
 
+  const bulkSel = new Set();
+  function updateBulk() {
+    $("bulkCount").textContent = bulkSel.size + " selected";
+    const cats = Array.from(new Set([...KNOWN_CATEGORIES, ...currentProducts.map((p) => p.category).filter(Boolean)])).sort();
+    const sel = $("bulkCat"), keep = sel.value;
+    if (sel.options.length !== cats.length + 1) { sel.innerHTML = '<option value="">Category…</option>' + cats.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join(""); sel.value = keep; }
+  }
+  async function bulkApply(field, value, label) {
+    const ids = [...bulkSel].filter((id) => currentProducts.some((p) => p.id === id));
+    if (!ids.length) { alert("Tick the products first."); return; }
+    if (!confirm("Change " + label + " of " + ids.length + " product(s)?")) return;
+    try { for (const id of ids) await updateDoc(doc(db, "products", id), { [field]: value }); bulkSel.clear(); } catch (e) { alert("Couldn't save: " + (e.message || e)); }
+  }
   function renderList() {
     $("countLabel").textContent = currentProducts.length;
     const preserveCategory = $("f_category_select").value === "__new__" ? $("f_category_new").value : $("f_category_select").value;
@@ -1032,24 +1124,30 @@
         </div>
         <img src="${img}" alt="" />
         <div class="info">
-          <div class="name">${escapeHtml(p.name)} ${p.tag ? `<span style="color:#B98A2E;">• ${escapeHtml(p.tag)}</span>` : ""}</div>
+          <div class="name"><input type="checkbox" class="bulk-pick" data-pick="${p.id}" aria-label="Select ${escapeHtml(p.name)}" ${bulkSel.has(p.id) ? "checked" : ""} />${escapeHtml(p.name)} ${p.tag ? `<span style="color:#B98A2E;">• ${escapeHtml(p.tag)}</span>` : ""}</div>
           <div class="meta">Rs${p.price} — ${escapeHtml(p.category)}</div>
         </div>
         <div class="actions">
           <button class="secondary" data-car="${p.id}" title="Add or remove this product's main photo in the homepage carousel">${inCarousel(p.id) ? "In carousel ✓" : "Carousel +"}</button>
           <button class="secondary" data-photos="${p.id}" title="Download all photos of this product">Photos ⬇</button>
           <button class="secondary" data-edit="${p.id}">Edit</button>
+          <button class="secondary" data-dup="${p.id}" title="Make a new product from this one">Duplicate</button>
           <button class="danger" data-delete="${p.id}" style="color:#fff;">Delete</button>
         </div>
       `;
       list.appendChild(row);
     });
     if (!shown) list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No product matches your search.</p>';
+    list.querySelectorAll("[data-pick]").forEach((cb) => cb.addEventListener("change", () => { cb.checked ? bulkSel.add(cb.getAttribute("data-pick")) : bulkSel.delete(cb.getAttribute("data-pick")); updateBulk(); }));
+    updateBulk();
     list.querySelectorAll("[data-car]").forEach((btn) =>
       btn.addEventListener("click", () => toggleCarousel(btn.getAttribute("data-car")))
     );
     list.querySelectorAll("[data-photos]").forEach((btn) =>
       btn.addEventListener("click", () => downloadProductPhotos(btn.getAttribute("data-photos")))
+    );
+    list.querySelectorAll("[data-dup]").forEach((btn) =>
+      btn.addEventListener("click", () => { startEdit(btn.getAttribute("data-dup")); $("editId").value = ""; $("f_name").value = "Copy of " + $("f_name").value; $("formTitle").textContent = "Add a new product (copy)"; $("submitBtn").textContent = "Add product"; $("cancelEditBtn").classList.remove("hidden"); showView("add"); })
     );
     list.querySelectorAll("[data-edit]").forEach((btn) =>
       btn.addEventListener("click", () => startEdit(btn.getAttribute("data-edit")))
@@ -1249,6 +1347,14 @@
     })
   );
 
+  $("orderQuery").addEventListener("input", renderOrders);
+  $("bulkAll").addEventListener("change", (e) => {
+    document.querySelectorAll("#productList [data-pick]").forEach((cb) => { cb.checked = e.target.checked; e.target.checked ? bulkSel.add(cb.getAttribute("data-pick")) : bulkSel.delete(cb.getAttribute("data-pick")); });
+    updateBulk();
+  });
+  $("bulkCatBtn").addEventListener("click", () => { const v = $("bulkCat").value; if (!v) { alert("Choose the new category first."); return; } bulkApply("category", v, "category"); });
+  $("bulkTagBtn").addEventListener("click", () => { const v = $("bulkTag").value; if (v === "__") { alert("Choose the new tag first."); return; } bulkApply("tag", v || null, "tag"); });
+
   const CHANNELS = [["website", "Website"], ["whatsapp", "WhatsApp"], ["instagram", "Instagram"], ["facebook", "Facebook"], ["phone", "Phone call"], ["shop", "In the shop"], ["other", "Other"]];
   function channelClass(ch) { return ch === "website" ? "website" : ch === "instagram" ? "instagram" : "whatsapp"; }
   function channelLabel(ch) { const f = CHANNELS.find((c) => c[0] === ch); return f ? f[1] : "WhatsApp"; }
@@ -1400,6 +1506,17 @@
     let shown = orderFilter === "done" ? done : orderFilter === "starred" ? starred : orderFilter === "cancelled" ? cancelled : fresh;
     // Starred orders float to the top of the New list.
     if (orderFilter === "new") shown = [...shown].sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0));
+    // Search by name, phone (digits only, so 0300-123 matches 0300123) or order number, across every list.
+    const oq = (($("orderQuery") || { value: "" }).value || "").trim().toLowerCase();
+    if (oq) {
+      const oqDigits = oq.replace(/\D/g, "");
+      shown = currentOrders.filter((o) => {
+        const c = o.customer || {};
+        const phone = String(c.phone || "").replace(/\D/g, "");
+        return String(o.orderNo || "").toLowerCase().includes(oq) || String(c.name || "").toLowerCase().includes(oq) ||
+          (oqDigits.length >= 3 && phone.includes(oqDigits));
+      });
+    }
 
     const list = $("orderList");
     list.innerHTML = "";
@@ -1410,7 +1527,7 @@
         done: "Nothing marked done yet. Tap \"Move to done\" once an order is delivered.",
         cancelled: "No cancelled orders.",
       }[orderFilter];
-      list.innerHTML = '<p class="empty">' + escapeHtml(empty) + "</p>";
+      list.innerHTML = '<p class="empty">' + escapeHtml(oq ? "No order matches your search." : empty) + "</p>";
       return;
     }
 
@@ -1525,8 +1642,19 @@
   }
 
   function describePromo(p) {
-    return p.type === "percent" ? p.value + "% off" : "Rs " + p.value + " off";
+    const base = p.type === "percent" ? p.value + "% off" : "Rs " + p.value + " off";
+    const cats = Array.isArray(p.cats) ? p.cats.filter(Boolean) : [];
+    if (p.mode === "only" && cats.length) return base + " · only " + cats.join(", ");
+    if (p.mode === "except" && cats.length) return base + " · not on " + cats.join(", ");
+    return base;
   }
+  function renderPromoCats() {
+    const box = $("promo_cats"); if (!box) return;
+    const keep = [...box.querySelectorAll("input:checked")].map((i) => i.value);
+    const cats = Array.from(new Set([...KNOWN_CATEGORIES, ...currentProducts.map((p) => p.category).filter(Boolean)])).sort();
+    box.innerHTML = cats.map((c) => `<label style="display:flex;align-items:center;gap:5px;border:1px solid #E8DCC8;border-radius:999px;padding:4px 12px;font-size:13px;margin:0;background:#fff;cursor:pointer"><input type="checkbox" value="${escapeHtml(c)}" ${keep.includes(c) ? "checked" : ""} style="width:auto;margin:0" /> ${escapeHtml(c)}</label>`).join("");
+  }
+  setTimeout(() => { renderPromoCats(); const sc = $("promo_scope"); if (sc) sc.addEventListener("focus", renderPromoCats); }, 0);
 
   function renderPromos() {
     const list = $("promoList");
@@ -1580,7 +1708,11 @@
     if (!(value > 0)) { msg.textContent = "Enter an amount above 0."; return; }
     if (type === "percent" && value > 90) { msg.textContent = "A percent discount can be at most 90%."; return; }
     if (promoCodes && promoCodes[code]) { msg.textContent = code + " already exists — delete it first to change it."; return; }
-    await savePromos({ ...(promoCodes || {}), [code]: { type, value, active: true } });
+    const mode = $("promo_scope").value; renderPromoCats();
+    const cats = [...$("promo_cats").querySelectorAll("input:checked")].map((i) => i.value);
+    if (mode !== "all" && !cats.length) { msg.textContent = "Tick at least one category, or choose “Everything”."; return; }
+    await savePromos({ ...(promoCodes || {}), [code]: { type, value, active: true, ...(mode !== "all" ? { mode, cats } : {}) } });
+    $("promo_scope").value = "all"; $("promo_cats").querySelectorAll("input").forEach((i) => { i.checked = false; });
     $("promo_code").value = "";
     $("promo_value").value = "";
     msg.className = "msg success";
@@ -1857,7 +1989,13 @@
         <button type="button" class="star-btn" title="Make main photo">${i === 0 ? "★" : "☆"}</button>
         <button type="button" class="remove-btn" title="Remove">×</button>
         <div class="item-label${i === 0 ? " main" : ""}">${i === 0 ? "Main" : ""}</div>
+        <div class="ph-move"><button type="button" data-ph="-1" title="Move earlier" ${i === 0 ? "disabled" : ""}>◀</button><button type="button" data-ph="1" title="Move later" ${i === photoItems.length - 1 ? "disabled" : ""}>▶</button></div>
       `;
+      div.querySelectorAll("[data-ph]").forEach((b) => b.addEventListener("click", () => {
+        const j = i + Number(b.getAttribute("data-ph"));
+        if (j < 0 || j >= photoItems.length) return;
+        const [m] = photoItems.splice(i, 1); photoItems.splice(j, 0, m); renderPhotoThumbs();
+      }));
       div.querySelector(".star-btn").addEventListener("click", () => {
         const [moved] = photoItems.splice(i, 1);
         photoItems.unshift(moved);
@@ -2068,14 +2206,18 @@
         msg.textContent = `Uploading photo ${uploadedSoFar} of ${newUploadCount}...`;
       }
 
-      const photos = [];
-      for (const item of photoItems) {
-        if (item.kind === "existing") {
-          photos.push(item.url);
-        } else {
-          photos.push(await uploadToCloudinary(item.file));
-          reportUploadProgress();
-        }
+      // Up to 5 photos upload at the same time; the order on screen is kept.
+      const photos = new Array(photoItems.length);
+      {
+        let next = 0;
+        const worker = async () => {
+          while (next < photoItems.length) {
+            const i = next++; const item = photoItems[i];
+            if (item.kind === "existing") { photos[i] = item.url; }
+            else { photos[i] = await uploadToCloudinary(item.file); reportUploadProgress(); }
+          }
+        };
+        await Promise.all([worker(), worker(), worker(), worker(), worker()]);
       }
 
       // Upload any newly chosen variant photos.
@@ -2174,15 +2316,16 @@
     ads: { title: "Ads", intro: "Picture ads for your own offers: a banner on the home page or a pop-up. Each ad has its own on/off.", groups: ["ads"] },
     hero: { title: "Heading & effects", intro: "The big heading at the top of the home page.", groups: ["hero"] },
     homesections: { title: "Home sections", intro: "Parts of the home page: reviews, tiles, stats, visit-store and their order.", groups: ["shuffle", "tiles", "bento", "visit", "sections"] },
-    cards: { title: "Product cards & filters", intro: "How products look and how customers find them.", groups: ["cards", "price", "wish", "recent", "explore"] },
+    cards: { title: "Product cards & filters", intro: "How products look and how customers find them.", groups: ["cards", "searchf", "price", "wish", "recent", "explore"] },
+    offers: { title: "Offers, FAQ & Instagram", intro: "Combo offers, cart extras, the FAQ & returns page and an Instagram strip. Each part has its own switch.", groups: ["bundlesf", "cartplusf", "faqf", "instaf"] },
     productpage: { title: "Product page", intro: "What customers see when they open a product. Fill the details of each product in Add / edit product.", groups: ["ppage"] },
     guide: { title: "Order guide", intro: "A “Complete order guide” bar under the top banner of the home page. Add, edit and re-order the steps.", groups: ["guidef", "guidesteps"] },
     look: { title: "Look & motion", intro: "Spacing, corners and the little animations. Colors and fonts are not touched.", groups: ["look", "motion"] },
     footer: { title: "Footer", intro: "A sorted footer with link columns, track-your-order, local time and social icons, plus links and the credit line.", groups: ["footerpro", "flinks", "designed"] },
     brand: { title: "Look & brand", intro: "Shop name, logo, address, colours, fonts, website text and shop photos.", groups: ["brandid", "brandcolors", "brandtext", "brandphotos"] },
-    i18n: { title: "Translations", intro: "English / اردو for the whole shop.", groups: ["i18n"] },
+    i18n: { title: "Translations", intro: "English / اردو for the whole shop.", groups: ["i18n", "i18nextra"] },
     shopinfo: { title: "Shop info & delivery", intro: "Maintenance page, free-delivery bar and shop timings.", groups: ["maint", "delivery", "timings"] },
-    orderflow: { title: "Order & checkout", intro: "How customers place and follow their orders.", groups: ["checkoutf", "trackingf"] },
+    orderflow: { title: "Order & checkout", intro: "How customers place and follow their orders.", groups: ["checkoutf", "ordnof", "trackingf"] },
     speed: { title: "Speed & app", intro: "Faster loading and the phone-app options.", groups: ["speed", "pwa"] },
   };
   const FEATURES = [
@@ -2194,10 +2337,11 @@
     ["cardLayout.on", "Card design", "cards"], ["priceFilter.on", "Price filter", "cards"], ["wishlist.on", "Wishlist", "cards"],
     ["recent.on", "Recently viewed", "cards"], ["exploreMore.on", "Explore more", "cards"],
     ["productPage.tabs", "Description / Details tabs", "productpage"], ["productPage.sizes", "Sizes available", "productpage"], ["productPage.colours", "Colours available", "productpage"], ["productPage.includes", "Price includes", "productpage"], ["guide.on", "Order guide", "guide"],
+    ["bundles.on", "Combo offers", "offers"], ["cartPlus.suggest", "Cart suggestions", "offers"], ["cartPlus.giftOn", "Free gift over Rs X", "offers"], ["faq.on", "FAQ & returns", "offers"], ["insta.on", "Instagram strip", "offers"],
     ["look.on", "Custom spacing & corners", "look"], ["motion.sections.on", "Scroll reveal", "look"], ["motion.cards.on", "Card motion", "look"], ["motion.overlays.on", "Cart & pop-up motion", "look"],
     ["brand.on", "Look & brand", "brand"], ["footer.on", "Sorted footer", "footer"], ["footerLinks.on", "Footer links", "footer"], ["designedBy.on", "Designed-by credit", "footer"], ["i18n.on", "Urdu / English", "i18n"],
     ["freeDelivery.on", "Free-delivery bar", "shopinfo"], ["timings.on", "Shop timings", "shopinfo"],
-    ["checkout.betterForm", "Better order form", "orderflow"], ["checkout.whatsappAuto", "WhatsApp after order", "orderflow"], ["tracking.on", "Order tracking", "orderflow"], ["speed.srcset", "Smaller photos", "speed"], ["speed.apiShop", "Fast shop data", "speed"], ["speed.sw", "Offline mode", "speed"],
+    ["checkout.betterForm", "Better order form", "orderflow"], ["checkout.whatsappAuto", "WhatsApp after order", "orderflow"], ["tracking.on", "Order tracking", "orderflow"], ["orders.numeric", "Numeric order numbers", "orderflow"], ["myOrders.on", "My orders", "orderflow"], ["search.suggest", "Search suggestions", "cards"], ["productPage.full", "Full product page", "productpage"], ["speed.srcset", "Smaller photos", "speed"], ["speed.apiShop", "Fast shop data", "speed"], ["speed.sw", "Offline mode", "speed"],
     ["pwa.install", "Install button", "speed"], ["pwa.safeArea", "Notch padding", "speed"],
   ];
   let S = null;        // the settings being edited
@@ -2425,11 +2569,15 @@
     G.cards = group("cards", "Product card design", "Pick one of 10 card designs for every product on the site.",
       sw("cardLayout.on", "Use the design below (off = the current design)") + sel("cardLayout.layout", "Design", layoutOpts, { type: "num" }));
     G.price = group("price", "Price filter", "Customers can set a lowest and highest price to narrow the product list.", sw("priceFilter.on", "Show the price filter"));
-    G.wish = group("wish", "Wishlist (hearts)", "A heart button on products. Customers' saved items are kept on their own phone, no login needed.", sw("wishlist.on", "Show heart buttons and the saved list"));
+    G.searchf = group("searchf", "Search box", "A list of matching products appears while the customer types (picture, name, price). Pressing Enter shows all results.",
+      sw("search.suggest", "Show suggestions under the search box"));
+    G.wish = group("wish", "Wishlist (hearts)", "A heart button on products. Customers' saved items are kept on their own phone, no login needed.", sw("wishlist.on", "Show heart buttons and the saved list") + sw("wishlist.reminders", "Reminders on saved items: “Sold out right now” and “Price dropped”"));
     G.recent = group("recent", "Recently viewed", "A strip with the products the customer opened lately, kept on their phone.",
       sw("recent.on", "Show the “recently viewed” strip") + tf("recent.max", "How many to remember", { type: "num", min: 1 }));
     G.explore = group("explore", "“Explore more” button", "Show only a few products first; one tap shows the rest (replaces the page numbers).",
-      sw("exploreMore.on", "Use “Explore more”") + tf("exploreMore.initial", "Products shown at first", { type: "num", min: 1 }));
+      sw("exploreMore.on", "Use “Explore more”") + tf("exploreMore.initial", "Products shown at first (computer)", { type: "num", min: 1 }) +
+      sw("exploreMore.perDevice", "Different number on tablet and phone") +
+      tf("exploreMore.initialTablet", "Tablet (screen 640–1023 px)", { type: "num", min: 1 }) + tf("exploreMore.initialMobile", "Phone (screen under 640 px)", { type: "num", min: 1 }));
 
     // ---- Look & motion ----
     G.look = group("look", "Spacing and corners", "Fine-tune spacing and roundness on the home page and product cards. Colors and fonts are not touched. The numbers below are today's look.",
@@ -2493,7 +2641,11 @@
       sw("productPage.tabs", "Description / Details tabs (and the short line under the name)", "Details rows come from the product. The Colour row follows the colour the customer picks.") +
       sw("productPage.sizes", "Show “Sizes available”") +
       sw("productPage.colours", "Show “Colours available”", "Uses the colour photos of the product, or the colours you typed.") +
-      sw("productPage.includes", "Show the “Price includes” box"));
+      sw("productPage.includes", "Show the “Price includes” box") +
+      sw("productPage.full", "Open a product as a full page (breadcrumb, big photos, details and reviews) instead of a pop-up") +
+      sw("productPage.related", "Show “You may also like” (same category) at the bottom") +
+      sw("productPage.notify", "Sold-out products: “Notify me when it's back” button (opens WhatsApp)") +
+      sw("productPage.seo", "Google-friendly product pages (page title, description and product data)"));
     G.guidef = group("guidef", "Complete order guide", "Turn the guide on, choose where it shows and edit the texts.",
       sw("guide.on", "Use the order guide on the shop") +
       sw("guide.home", "Show the guide bar under the top banner of the home page") +
@@ -2506,10 +2658,50 @@
         <label>Title</label>${listIn("guide.steps", i, "title", st.title, "text")}
         <label>What to do</label><textarea data-list="guide.steps" data-idx="${i}" data-prop="text" rows="2">${esc(st.text || "")}</textarea></div>`).join("") +
       `<button type="button" class="btn secondary" data-act="add-gstep" style="margin-top:6px">+ Add a step</button>`);
+    const bunds = v("bundles.items") || [];
+    G.bundlesf = group("bundlesf", "Combo offers", "Pick 2 or more products and give them one special price. The customer gets the combo price automatically when all of them are in the cart.",
+      sw("bundles.on", "Show combo offers on the home page") + tf("bundles.title", "Heading") +
+      bunds.map((b, i) => `<div class="lrow"><div class="lrow-head"><b>Combo ${i + 1}</b><span class="lrow-actions">${moveBtns("bun", i, bunds.length)}</span></div>
+        <div class="row2"><div><label>Name</label>${listIn("bundles.items", i, "name", b.name, "text", 'placeholder="Clip + keychain set"')}</div><div><label>Combo price (Rs)</label>${listIn("bundles.items", i, "price", b.price, "num")}</div></div>
+        <details><summary style="cursor:pointer;font-size:13px;font-weight:600">Products in this combo (${(b.productIds || []).length} chosen)</summary>
+        <div style="max-height:220px;overflow:auto;margin-top:6px">${currentProducts.map((p) => `<label class="sw" style="margin:2px 0"><input type="checkbox" data-bprod="${i}" value="${esc(p.id)}" ${(b.productIds || []).map(String).includes(String(p.id)) ? "checked" : ""} /><span>${esc(p.name)} — Rs${esc(p.price)}</span></label>`).join("")}</div></details></div>`).join("") +
+      `<button type="button" class="btn secondary" data-act="add-bun" style="margin-top:6px">+ Add a combo</button>`);
+    G.cartplusf = group("cartplusf", "Cart extras", "Small helpers inside the cart.",
+      sw("cartPlus.suggest", "“Goes well with your order”: show 3 products from the same categories") +
+      sw("cartPlus.giftOn", "Free gift when the order is big enough (written in the order notes)") +
+      tf("cartPlus.giftOver", "Order amount for the gift (Rs)", { type: "num", min: 1 }) + tf("cartPlus.giftText", "Gift text", { ph: "Free gift wrap" }));
+    const faqs = v("faq.items") || [];
+    G.faqf = group("faqf", "FAQ & returns page", "Questions and answers plus your returns / exchange rules. Customers open it from the footer, or at /faq.",
+      sw("faq.on", "Use the FAQ & returns page") + sw("faq.footer", "Show a link in the footer") + tf("faq.title", "Page heading") +
+      faqs.map((x, i) => `<div class="lrow"><div class="lrow-head"><b>Question ${i + 1}</b><span class="lrow-actions">${moveBtns("faq", i, faqs.length)}</span></div>
+        <label>Question</label>${listIn("faq.items", i, "q", x.q, "text")}<label>Answer</label><textarea data-list="faq.items" data-idx="${i}" data-prop="a" rows="2">${esc(x.a || "")}</textarea></div>`).join("") +
+      `<button type="button" class="btn secondary" data-act="add-faq" style="margin-top:6px">+ Add a question</button>` +
+      tf("faq.returnsTitle", "Returns box heading") + tf("faq.returns", "Returns & exchange rules (your own words)", { area: true, rows: 4 }));
+    const iposts = v("insta.posts") || [];
+    G.instaf = group("instaf", "Instagram strip", "Show up to 6 of your Instagram pictures under the reviews. Paste each picture's address and the post link.",
+      sw("insta.on", "Show the Instagram strip") + tf("insta.title", "Heading") + tf("insta.link", "Your Instagram page address", { ph: "https://www.instagram.com/twisttanglecrochet/" }) +
+      iposts.map((x, i) => `<div class="srow" style="grid-template-columns:1fr 1fr auto auto auto"><input type="text" data-list="insta.posts" data-idx="${i}" data-prop="image" value="${esc(x.image || "")}" placeholder="Picture address (https://…)" /><input type="text" data-list="insta.posts" data-idx="${i}" data-prop="link" value="${esc(x.link || "")}" placeholder="Post link (optional)" />${moveBtns("ipost", i, iposts.length)}</div>`).join("") +
+      (iposts.length < 6 ? `<button type="button" class="btn secondary" data-act="add-ipost" style="margin-top:6px">+ Add a picture</button>` : ""));
+    const xt = v("i18n.extra") || [];
+    G.i18nextra = group("i18nextra", "Other text (any English → Urdu)", "Any English text on the shop that is not in the list above (or that you add later): write it exactly as it shows, and its Urdu. When the shop is in Urdu it is replaced. Rows with an empty Urdu box are ignored.",
+      `<p class="hint"><b>${xt.filter((x) => !String(x.ur || "").trim()).length}</b> of ${xt.length} still need Urdu.</p>` +
+      xt.map((x, i) => `<div class="srow" style="grid-template-columns:1fr 1fr auto"><input type="text" data-list="i18n.extra" data-idx="${i}" data-prop="en" value="${esc(x.en || "")}" placeholder="English text" /><input type="text" dir="rtl" data-list="i18n.extra" data-idx="${i}" data-prop="ur" value="${esc(x.ur || "")}" placeholder="اردو" style="${String(x.ur || "").trim() ? "" : "border-color:#E0A800"}" /><button type="button" class="move-btn" data-act="rm-xtra" data-idx="${i}" title="Remove">✕</button></div>`).join("") +
+      `<button type="button" class="btn secondary" data-act="add-xtra" style="margin-top:6px">+ Add text</button>`);
     G.checkoutf = group("checkoutf", "Order form & WhatsApp", "Make the order form stricter and send the customer to WhatsApp after the thank-you screen.",
       sw("checkout.betterForm", "Better order form (first + last name, full address, city, postal code, email, “save for next time”)", "An order is only placed when the details are correct, so you get fewer wrong orders.") +
       sw("checkout.whatsappAuto", "After “Order placed”, open WhatsApp by itself with the order already written") +
-      tf("checkout.whatsappDelay", "Seconds before WhatsApp opens", { type: "num", min: 1 }));
+      tf("checkout.whatsappDelay", "Seconds before WhatsApp opens", { type: "num", min: 1 }) +
+      sw("checkout.giftNote", "Gift note box in the order form (printed in the order notes)"));
+    G.ordnof = group("ordnof", "Order numbers & “My orders”", "Short numeric order numbers and a “My orders” list for customers.",
+      sw("orders.numeric", "Order numbers like 2000, 2001, 2002… (4 digits) instead of TTC-K7F3Q", "Needs a small Firestore rule once (see below). If it can't be reached the old style number is used.") +
+      tf("orders.start", "First order number", { type: "num", min: 1 }) +
+      sw("orders.slipWA", "“Approve & send slip” button on each order", "You check the order, tap the button, and WhatsApp opens with the order slip ready to send to the customer. Nothing is ever sent automatically.") +
+      sw("myOrders.on", "“My orders” button for customers (orders placed on their own phone, with the latest step)") +
+      `<p class="hint" style="margin-top:12px">Rule for the counter (add inside the same rules, next to config/siteSettings):</p><pre style="background:var(--bg);padding:12px;border-radius:8px;font-size:12px;overflow:auto">match /config/orderCounter {
+  allow read: if true;
+  allow create: if request.resource.data.n is int &amp;&amp; request.resource.data.n &gt;= 1;
+  allow update: if isAdmin() || request.resource.data.n == resource.data.n + 1;
+}</pre>`);
     G.trackingf = group("trackingf", "Order tracking", "Customers type their order number on the shop (“Track your order”) and see the steps you set in Orders → Order tracking.",
       sw("tracking.on", "Show “Track your order” on the shop") +
       `<p class="hint" style="margin-top:12px">Needs a Firestore rule once. In Firebase Console → Firestore → Rules add:</p><pre style="background:var(--bg);padding:12px;border-radius:8px;font-size:12px;overflow:auto">match /tracking/{no} {
@@ -2540,7 +2732,7 @@
     // ---- Sorted footer ----
     const fc = v("footer.columns") || [];
     G.footerpro = group("footerpro", "Sorted footer", "Replaces the footer with a dark footer: big line and button, link columns, “track your order”, local time, social icons and credits.",
-      sw("footer.on", "Use the sorted footer") + tf("footer.headline", "Big line", { area: true, rows: 2 }) + tf("footer.button", "Round button text (empty = hide)") +
+      sw("footer.on", "Use the sorted footer") + sw("footer.officialIcons", "Social icons in their own colours (Instagram, Facebook, TikTok) in the Follow column") + sw("footer.floatRight", "Back-to-top button goes to the bottom right, just above the WhatsApp button") + tf("footer.headline", "Big line", { area: true, rows: 2 }) + tf("footer.button", "Round button text (empty = hide)") +
       sw("footer.shopColumn", "Show a “Shop” column with your categories") + sw("footer.track", "Show the “Track your order” box (needs Order tracking on)") +
       `<div style="margin-top:8px">${fc.map((c, i) => `<div class="lrow"><div class="lrow-head"><b>Column ${i + 1}</b><span class="lrow-actions"><button type="button" class="move-btn" data-act="rm-fcol" data-idx="${i}" title="Remove">✕</button></span></div>
         <label>Title</label><input type="text" data-fcol="${i}" data-f="title" value="${esc(c.title || "")}" />
@@ -2555,6 +2747,13 @@
     G.speed = group("speed", "Speed", "Safe to try: each one can be switched off again at any time.",
       sw("speed.srcset", "Smaller photos on phones (Cloudinary sizes)", "Photos load at the size the screen needs: less data, faster pages.") +
       sw("speed.apiShop", "Fast shop data", "Products load from a quick saved copy first, and the last good copy is shown if Firebase isn't reachable.") +
+      sw("speed.lightMotion", "Lighter motion on phones", "Switches off slides, fades and other animations on small screens: smoother on cheap phones.") +
+      sw("speed.lcp", "Show the first big photo first", "The top photo of the home page is fetched with priority and remembered, so it starts loading before the page code. Helps the mobile loading score most.") +
+      sw("speed.boot", "Quick loading screen", "A simple logo + bar shows while the shop opens, instead of a blank page. Seen from the second visit.") +
+      sw("speed.noLive", "Load shop data once (no live listeners)", "Products, reviews and settings are read once per visit instead of staying connected. Faster and lighter; a change you save shows up on the next visit or refresh.") +
+      sw("speed.cv", "Skip drawing parts below the screen", "The footer is drawn only when the customer scrolls near it: smoother on cheap phones.") +
+      sw("speed.resizeUploads", "Shrink big photos when I upload them", "Photos you upload here are made smaller first (looks the same, loads much faster). The original on your phone or computer is not touched.") +
+      tf("speed.uploadMax", "Longest side after shrinking (pixels)", { type: "num", min: 600 }) +
       sw("speed.sw", "Offline mode (service worker)", "After the first visit the site opens faster and works on a weak connection. Customers need one extra refresh after you turn this on or off."));
     G.pwa = group("pwa", "App on the phone", "Lets customers keep the shop on their home screen like an app (it uses your logo and the name Twist & Tangle Crochet).",
       sw("pwa.install", "Show an “Install app” button", "Works best together with “Offline mode” above.") +
@@ -2577,6 +2776,8 @@
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
           <button type="button" class="btn" data-act="save-settings">Save</button>
           <button type="button" class="btn secondary" data-act="reload-settings">Discard changes</button>
+          <button type="button" class="btn secondary" data-act="preview-settings">Preview before saving ↗</button>
+          <button type="button" class="btn secondary" data-act="undo-settings">Undo last save</button>
           <a class="btn secondary" href="/?preview=1" target="_blank" rel="noopener" style="text-decoration:none; display:inline-block;">Open shop ↗</a>
         </div>
         <div class="settingsMsg">${status}</div>
@@ -2603,6 +2804,12 @@
       return;
     }
     if (el.dataset.skin) { if (el.checked) applySkin(el.dataset.skin); return; }
+    if (el.dataset.themeColor) {
+      adminCustom = { ...themeColours(), [el.dataset.themeColor]: String(el.value).toUpperCase() };
+      adminThemeKey = "custom"; applyTheme();
+      document.querySelectorAll(".theme-tile").forEach((b) => b.setAttribute("aria-pressed", "false"));
+      return;
+    }
     if (el.dataset.upload !== undefined) { if (e.type === "change" && el.files && el.files[0]) uploadFor(el); return; }
     if (el.dataset.i18n) {
       const lang = el.dataset.i18n; const key = el.dataset.key;
@@ -2633,6 +2840,11 @@
         ad[el.dataset.prop] = t === "bool" ? el.checked : t === "num" ? cleanNumber(el.value) : el.value;
         if (el.dataset.prop === "closable" || el.dataset.prop === "size") renderSettings();
       }
+      return;
+    }
+    if (el.dataset.bprod !== undefined) {
+      const b = S.bundles.items[Number(el.dataset.bprod)]; if (!b) return;
+      b.productIds = (b.productIds || []).map(String).filter((x) => x !== el.value); if (el.checked) b.productIds.push(el.value);
       return;
     }
     if (el.dataset.list) {
@@ -2681,16 +2893,22 @@
     if (!btn || !btn.closest(".settings-pane")) return;
     const act = btn.dataset.act; const i = Number(btn.dataset.idx);
     if (act === "goto") { showView(btn.dataset.view); return; }
+    if (act === "theme") { adminThemeKey = btn.dataset.key; applyTheme(); refreshDash(); return; }
     if (act === "go-shop") { goShop(); return; }
     if (!S) return;
-    const L = { bento: S.bento.items, link: S.footerLinks.links, bar: S.announcements.bars, ad: S.ads.items, slide: S.carousel.slides, gstep: S.guide.steps };
-    const m = /^(up|down|rm)-(bento|link|bar|ad|slide|gstep)$/.exec(act);
+    const L = { bento: S.bento.items, link: S.footerLinks.links, bar: S.announcements.bars, ad: S.ads.items, slide: S.carousel.slides, gstep: S.guide.steps, bun: S.bundles.items, faq: S.faq.items, ipost: S.insta.posts };
+    const m = /^(up|down|rm)-(bento|link|bar|ad|slide|gstep|bun|faq|ipost)$/.exec(act);
     if (m) {
       const list = L[m[2]];
       if (m[1] === "rm") list.splice(i, 1); else swap(list, i, m[1] === "up" ? i - 1 : i + 1);
       renderSettings(); refreshDash(); return;
     }
     if (act === "add-bento") { S.bento.items.push({ value: 0, suffix: "", label: "" }); renderSettings(); }
+    else if (act === "add-bun") { S.bundles.items.push({ name: "", price: 0, productIds: [] }); renderSettings(); }
+    else if (act === "add-faq") { S.faq.items.push({ q: "", a: "" }); renderSettings(); }
+    else if (act === "add-ipost") { if (S.insta.posts.length < 6) S.insta.posts.push({ image: "", link: "" }); renderSettings(); }
+    else if (act === "add-xtra") { S.i18n.extra.push({ en: "", ur: "" }); renderSettings(); }
+    else if (act === "rm-xtra") { S.i18n.extra.splice(i, 1); renderSettings(); }
     else if (act === "add-gstep") { S.guide.steps.push({ title: "", text: "" }); renderSettings(); }
     else if (act === "add-link") { S.footerLinks.links.push({ label: "", url: "" }); renderSettings(); }
     else if (act === "add-bar") { S.announcements.bars.push({ on: true, text: "", textUr: "", link: "", linkLabel: "", tone: "maroon", dismissible: true }); renderSettings(); }
@@ -2722,6 +2940,17 @@
     }
     else if (act === "reset-look") { S.look = { ...S.look, ...SDEF.look, on: S.look.on }; renderSettings(); }
     else if (act === "reload-settings") { loadSettings(); }
+    else if (act === "preview-settings") {
+      try { localStorage.setItem("ttc_preview_settings", JSON.stringify(S)); window.open("/?previewSettings=1", "_blank"); }
+      catch (err) { setSettingsMsg("error:Couldn't open the preview (" + err.message + ")."); }
+    }
+    else if (act === "undo-settings") {
+      let h = []; try { h = JSON.parse(localStorage.getItem("ttc_settings_history") || "[]"); } catch (err) {}
+      if (!h.length) { setSettingsMsg("error:Nothing to undo yet. The last 5 saves made on this computer are remembered."); return; }
+      if (!confirm("Go back to the settings from before your last save (" + new Date(h[0].at).toLocaleString() + ")?")) return;
+      try { await setDoc(SETTINGS_REF, h[0].data); localStorage.setItem("ttc_settings_history", JSON.stringify(h.slice(1))); settingsStatus = "ok:Done. Your last save was undone."; await loadSettings(); }
+      catch (err) { setSettingsMsg("error:Couldn't undo (" + (err.code || err.message) + ")."); }
+    }
     else if (act === "save-settings") { saveSettings(); }
   });
 
@@ -2749,6 +2978,10 @@
     }).filter((a) => a.images.length);
     const badAd = out.ads.items.find((a) => a.images.some((x) => !/^https?:\/\//i.test(x.src) || (x.phone && !/^https?:\/\//i.test(x.phone))) || (a.link && !SAFE_LINK.test(a.link)));
     if (badAd) { setSettingsMsg("error:Every ad picture address must start with https:// and the link with https:// or /"); return; }
+    out.bundles.items = (out.bundles.items || []).map((b) => ({ name: String(b.name || "").trim(), price: Number(b.price) || 0, productIds: (b.productIds || []).map(String) })).filter((b) => b.productIds.length >= 2 && b.price > 0);
+    out.faq.items = (out.faq.items || []).map((x) => ({ q: String(x.q || "").trim(), a: String(x.a || "").trim() })).filter((x) => x.q && x.a);
+    out.insta.posts = (out.insta.posts || []).map((x) => ({ image: String(x.image || "").trim(), link: String(x.link || "").trim() })).filter((x) => /^https?:\/\//i.test(x.image)).slice(0, 6);
+    out.i18n.extra = (out.i18n.extra || []).map((x) => ({ en: String(x.en || "").trim(), ur: String(x.ur || "").trim() })).filter((x) => x.en);
     out.guide.steps = (out.guide.steps || []).map((x) => ({ title: String(x.title || "").trim(), text: String(x.text || "").trim() })).filter((x) => x.title || x.text);
     out.guide.tips = (out.guide.tips || []).map((x) => String(x).trim()).filter(Boolean);
     out.brand.colors = out.brand.colors || {};
@@ -2772,6 +3005,10 @@
     const buttons = document.querySelectorAll("[data-act='save-settings']");
     buttons.forEach((b) => { b.disabled = true; b.textContent = "Saving…"; });
     try {
+      try {
+        const prev = await getDoc(SETTINGS_REF);
+        if (prev.exists()) { const h = JSON.parse(localStorage.getItem("ttc_settings_history") || "[]"); h.unshift({ at: Date.now(), data: prev.data() }); localStorage.setItem("ttc_settings_history", JSON.stringify(h.slice(0, 5))); }
+      } catch (e) {}
       await setDoc(SETTINGS_REF, out);
       S = mergeDefaults(SDEF, out);
       settingsStatus = "ok:Saved. The shop now uses these settings (customers may need to refresh once).";
@@ -2836,6 +3073,13 @@
           ${tile(S ? (S.carousel.slides || []).length : "–", "carousel photos", "carousel", "t-blue")}
         </div>
       </div>
+      ${appTiles()}
+      ${(() => {
+        const old = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled" && tsMs(o.createdAt) && Date.now() - tsMs(o.createdAt) > 3 * 864e5).length;
+        const noTrack = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled" && !(o.tracking && o.tracking.stage)).length;
+        const items = [[fresh, "new orders to confirm", "orders"], [noTrack, "open orders without a tracking step", "orders"], [old, "orders open for more than 3 days", "orders"], [pending, "reviews waiting for approval", "reviews"]].filter((x) => x[0] > 0);
+        return `<div class="card"><h2>Today's work</h2>${items.length ? items.map(([n, l, v]) => `<button type="button" class="pill" data-act="goto" data-view="${v}" style="margin:0 8px 8px 0"><b>${n}</b> ${l} →</button>`).join("") : '<p class="hint" style="margin:0">All caught up ✓ Nothing is waiting for you.</p>'}</div>`;
+      })()}
       <div class="card"><h2>Switched on in the shop</h2>
         ${S ? (on.length ? `<div class="pills">${on.map((f) => `<button type="button" class="pill" data-act="goto" data-view="${f[2]}">${esc(f[1])}</button>`).join("")}</div>` : '<p class="hint">Nothing is switched on yet, so the shop looks exactly like before. Use the menu to turn features on.</p>') : '<p class="hint">Loading…</p>'}
       </div>
@@ -2848,6 +3092,7 @@
           <button type="button" class="pill" data-act="goto" data-view="ads">Ads</button>
         </div>
       </div>
+      ${themeCard()}
       <div class="card"><h2>Admin look</h2>
         <p class="hint">Only you see this. The shop is not affected.</p>
         <label class="sw"><input type="radio" name="skin" data-skin="classic" ${skin === "classic" ? "checked" : ""} /><span>Classic</span></label>
@@ -2905,6 +3150,56 @@
   if (pf) pf.addEventListener("input", () => renderList());
 
   // ---- admin panel look: Classic / New ----
+  // ---- Admin colour themes (only you see these; saved in this browser). Lavender is the default. ----
+  const ADMIN_THEMES = {
+    lavender: { n: "Lavender", c: { main: "#6D5CA0", dark: "#352F5C", cream: "#F7F3FC", bg: "#ECE6F5", soft: "#E1D9EE", ink: "#25222E", gold: "#C99560" } },
+    maroon: { n: "Maroon (old)", c: { main: "#6E1E36", dark: "#3F1220", cream: "#FBF6F0", bg: "#F3E9E2", soft: "#EDE0D8", ink: "#2B2420", gold: "#B98A2E" } },
+    sage: { n: "Sage & Cream", c: { main: "#4F6F55", dark: "#2C4333", cream: "#F6F3EA", bg: "#E9EDE3", soft: "#DDE4D6", ink: "#232A25", gold: "#B8923C" } },
+    rose: { n: "Rose & Mocha", c: { main: "#A8505C", dark: "#4A2E29", cream: "#FCF3F0", bg: "#F5E6E2", soft: "#EDD8D3", ink: "#2E2321", gold: "#C8935A" } },
+    terracotta: { n: "Terracotta & Sand", c: { main: "#B0502F", dark: "#3A3F48", cream: "#FBF3E8", bg: "#F2E4D2", soft: "#EAD6BE", ink: "#2B2420", gold: "#C8942F" } },
+    teal: { n: "Teal & Coral", c: { main: "#25777A", dark: "#17384F", cream: "#F1F8F7", bg: "#E2EFEE", soft: "#D2E5E3", ink: "#1F2A2B", gold: "#E07E62" } },
+  };
+  const THEME_VARS = { main: "--maroon", dark: "--maroon-dark", cream: "--cream", bg: "--bg", soft: "--bg-soft", ink: "--charcoal", gold: "--gold" };
+  const THEME_LABELS = { main: "Main colour", dark: "Top bar", cream: "Boxes & fields", bg: "Page background", soft: "Soft background", ink: "Text", gold: "Accent" };
+  let adminThemeKey = "lavender", adminCustom = null;
+  function themeColours() { return adminThemeKey === "custom" && adminCustom ? adminCustom : (ADMIN_THEMES[adminThemeKey] || ADMIN_THEMES.lavender).c; }
+  function applyTheme() {
+    const c = themeColours();
+    Object.keys(THEME_VARS).forEach((k) => document.documentElement.style.setProperty(THEME_VARS[k], c[k]));
+    try { localStorage.setItem("ttcAdminTheme", adminThemeKey); if (adminCustom) localStorage.setItem("ttcAdminCustom", JSON.stringify(adminCustom)); } catch (e) {}
+  }
+  (function initTheme() {
+    try {
+      const k = localStorage.getItem("ttcAdminTheme"); const cu = JSON.parse(localStorage.getItem("ttcAdminCustom") || "null");
+      if (cu && typeof cu === "object") adminCustom = cu;
+      if (k === "custom" ? adminCustom : ADMIN_THEMES[k]) adminThemeKey = k;
+    } catch (e) {}
+    applyTheme();
+  })();
+  // "Open anything": every page of the admin as a big, colourful tile (built from the menu, so it never goes out of date).
+  function appTiles() {
+    let out = "", group = "", n = 0, open = false;
+    document.querySelectorAll("#sidebar .nav-group, #sidebar .nav-item[data-view]").forEach((el) => {
+      if (el.classList.contains("nav-group")) { if (open) out += "</div>"; group = el.textContent.trim(); out += `<div class="app-tiles-h">${esc(group)}</div><div class="app-tiles">`; open = true; return; }
+      const view = el.getAttribute("data-view"); if (view === "dashboard") return;
+      const label = (el.querySelector(".nav-label") || {}).textContent || view;
+      const ic = el.querySelector(".nav-ic"); const bd = el.querySelector(".nav-badge");
+      const count = bd && !bd.classList.contains("hidden") && bd.textContent.trim() && bd.textContent.trim() !== "0" ? bd.textContent.trim() : "";
+      if (!open) { out += '<div class="app-tiles">'; open = true; }
+      out += `<button type="button" class="app-tile" style="--i:${n++}" data-act="goto" data-view="${view}">${ic ? `<span class="${ic.className}">${ic.innerHTML}</span>` : ""}${esc(label)}${count ? `<span class="app-badge">${esc(count)}</span>` : ""}</button>`;
+    });
+    if (open) out += "</div>";
+    return `<div class="card"><h2>Open anything</h2><p class="hint" style="margin-top:0">Tap a tile to go there.</p>${out}</div>`;
+  }
+  function themeCard() {
+    const c = themeColours();
+    return `<div class="card"><h2>Admin colours</h2>
+      <p class="hint">Pick a theme for this admin panel, or make your own. Only you see this. The shop is not affected.</p>
+      <div class="theme-grid">${Object.keys(ADMIN_THEMES).map((k) => { const t = ADMIN_THEMES[k].c; return `<button type="button" class="theme-tile" data-act="theme" data-key="${k}" aria-pressed="${adminThemeKey === k}"><span class="theme-dots"><i style="background:${t.main}"></i><i style="background:${t.dark}"></i><i style="background:${t.bg}"></i><i style="background:${t.gold}"></i></span>${esc(ADMIN_THEMES[k].n)}</button>`; }).join("")}</div>
+      <p class="hint" style="margin-bottom:6px"><b>My own colours</b>${adminThemeKey === "custom" ? " (in use)" : ""}: move any colour and the whole admin changes at once.</p>
+      <div class="theme-pickers">${Object.keys(THEME_VARS).map((k) => `<label>${THEME_LABELS[k]}<input type="color" data-theme-color="${k}" value="${c[k]}" /></label>`).join("")}</div>
+    </div>`;
+  }
   function applySkin(skin) {
     document.body.classList.toggle("skin-new", skin === "new");
     try { localStorage.setItem("ttcAdminSkin", skin === "new" ? "new" : "classic"); } catch (e) {}
@@ -2912,8 +3207,8 @@
     if (b) b.textContent = skin === "new" ? "Classic look" : "New look";
   }
   (function initSkin() {
-    let skin = "classic";
-    try { if (localStorage.getItem("ttcAdminSkin") === "new") skin = "new"; } catch (e) {}
+    let skin = "new"; // the New look (with the colour themes) is the default now; Classic stays available
+    try { if (localStorage.getItem("ttcAdminSkin") === "classic") skin = "classic"; } catch (e) {}
     applySkin(skin);
     $("skinBtn").addEventListener("click", () => {
       applySkin(document.body.classList.contains("skin-new") ? "classic" : "new");
@@ -2984,6 +3279,17 @@
     for (let i = 0; i < 5; i++) out += chars[pick[i] % chars.length];
     return "TTC-" + out;
   }
+  // Numeric order numbers (2000, 2001, …) when switched on in Order & checkout.
+  async function nextOrderNoAdmin() {
+    try {
+      let cfg = S && S.orders;
+      if (!cfg) { const snap = await getDoc(SETTINGS_REF); cfg = (snap.exists() && snap.data().orders) || {}; }
+      if (!cfg.numeric) return makeOrderNoAdmin();
+      const ref = doc(db, "config", "orderCounter"); const start = Math.max(1, Math.floor(Number(cfg.start) || 2000));
+      const n = await runTransaction(db, async (tx) => { const sn = await tx.get(ref); const last = sn.exists() ? Number(sn.data().n) || 0 : 0; const next = Math.max(start, last + 1); tx.set(ref, { n: next }); return next; });
+      return String(n);
+    } catch (e) { return makeOrderNoAdmin(); }
+  }
   const trackLink = (no) => location.origin + "/?track=" + encodeURIComponent(no);
   function trackMessage(o) {
     const t = o.tracking || {}; const c = o.customer || {};
@@ -3013,8 +3319,47 @@
     </div>`;
   }
   function orderCardExtraActions(o) {
-    return `<button type="button" class="chip" data-order-print="${o.id}">Print slip</button>`;
+    const cur = (o.tracking && o.tracking.stage) || "placed";
+    const quick = o.status === "done" || cur === "cancelled" ? "" : [["confirmed", "✔ Confirmed"], ["onway", "🚚 On the way"], ["delivered", "📦 Delivered"]].filter(([k]) => k !== cur).map(([k, l]) => `<button type="button" class="chip" data-quick-stage="${o.id}|${k}">${l}</button>`).join("");
+    const wa = phoneKey(o.customer && o.customer.phone).replace(/^0/, "92");
+    const waChip = wa.length >= 11 ? `<a class="chip" target="_blank" rel="noopener" style="text-decoration:none" href="https://wa.me/${wa}?text=${encodeURIComponent(trackMessage(o))}">WhatsApp customer</a>` : "";
+    const slipChip = S && S.orders && S.orders.slipWA && wa.length >= 11 && o.status !== "cancelled"
+      ? (o.slipSentAt ? `<button type="button" class="chip" data-slip-send="${o.id}" title="Already sent. Tap to send again">✔ Slip sent · send again</button>`
+        : `<button type="button" class="chip active" data-slip-send="${o.id}">✔ Approve &amp; send slip</button>`) : "";
+    return quick + waChip + slipChip + `<button type="button" class="chip" data-order-print="${o.id}">Print slip</button>`;
   }
+  // The order slip as a WhatsApp message (admin approves each order first; nothing is sent automatically).
+  function slipMessage(o) {
+    const c = o.customer || {}; const items = Array.isArray(o.items) ? o.items : [];
+    const shop = (S && S.brand && S.brand.on && S.brand.shopName) || "Twist & Tangle Crochet";
+    const lines = items.map((i) => `• ${i.name || ""}${i.variant ? " (" + i.variant + ")" : ""} × ${i.qty || 1} = Rs${(Number(i.price) || 0) * (Number(i.qty) || 1)}`);
+    const disc = Number(o.discount) || 0, dc = Number(o.deliveryCharge);
+    return `Assalam o Alaikum ${(c.name || "").split(" ")[0] || ""}! Your order is confirmed ✅\n\nOrder no: ${o.orderNo || ""}\n${lines.join("\n")}` +
+      (disc ? `\nDiscount: -Rs${disc}` : "") + (dc > 0 ? `\nDelivery: Rs${dc}` : "") +
+      `\n*Total: Rs${Number(o.total) || 0}*${dc > 0 ? "" : " (delivery charged separately)"}` + (c.address ? `\n\nDeliver to: ${c.address}` : "") +
+      (o.orderNo ? `\n\nTrack your order: ${trackLink(o.orderNo)}` : "") + `\n\nThank you for shopping with ${shop} 🧶`;
+  }
+  pageRoot.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-slip-send]"); if (!b) return;
+    const o = currentOrders.find((x) => x.id === b.getAttribute("data-slip-send")); if (!o) return;
+    const num = waNumber((o.customer || {}).phone); if (num.length < 11) { alert("This order has no usable phone number."); return; }
+    // Open WhatsApp first (a popup is allowed only straight after the tap), then remember it was sent.
+    window.open("https://wa.me/" + num + "?text=" + encodeURIComponent(slipMessage(o)), "_blank", "noopener");
+    try { await updateDoc(doc(db, "orders", o.id), { slipSentAt: serverTimestamp(), slipApproved: true }); } catch (err) { alert("WhatsApp opened, but couldn't mark it as sent: " + (err.code || err.message)); }
+  });
+  // One-click order steps: sets the tracking step (and moves to Done when delivered).
+  pageRoot.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-quick-stage]"); if (!b) return;
+    const [id, stage] = b.dataset.quickStage.split("|"); const o = currentOrders.find((x) => x.id === id); if (!o) return;
+    b.disabled = true;
+    try {
+      const orderNo = o.orderNo || makeOrderNoAdmin();
+      const upd = { orderNo, tracking: { ...(o.tracking || {}), stage } };
+      if (stage === "delivered") { upd.status = "done"; upd.doneAt = serverTimestamp(); }
+      await updateDoc(doc(db, "orders", id), upd);
+      await setDoc(doc(db, "tracking", orderNo), { stage, updatedAt: serverTimestamp() }, { merge: true });
+    } catch (err) { b.disabled = false; alert("Couldn't update: " + (err.code || err.message)); }
+  });
   pageRoot.addEventListener("change", async (e) => {
     const sel = e.target.closest("[data-order-channel]");
     if (sel) { updateOrder(sel.getAttribute("data-order-channel"), { channel: sel.value }); }
@@ -3196,8 +3541,8 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     if (items.some((i) => !(i.price > 0))) { msg.textContent = "Every item needs a price above 0."; return; }
     const delivery = Number($("mo_delivery").value) || 0; const discount = Number($("mo_discount").value) || 0;
     const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
-    const orderNo = makeOrderNoAdmin();
     $("mo_place").disabled = true;
+    const orderNo = await nextOrderNoAdmin();
     try {
       await addDoc(collection(db, "orders"), {
         orderNo, items, subtotal, discount, deliveryCharge: delivery, total: Math.max(0, subtotal + delivery - discount), promo: null,
@@ -3213,8 +3558,20 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
 
   // ---- sales (done orders only) ----
   let salesRange = "month";
+  let salesFrom = "", salesTo = "";
+  // Expenses (ads, product cost, delivery, …) are kept in the "expenses" collection (admins only).
+  let expenses = []; let expUnsub = null; let expErr = "";
+  const EXP_TYPES = [["ads", "Ads (Facebook / Instagram)"], ["product", "Product cost (yarn, stock)"], ["delivery", "Delivery / courier"], ["packaging", "Packaging"], ["tools", "Tools & equipment"], ["staff", "Helper / salary"], ["other", "Other"]];
+  const expLabel = (k) => (EXP_TYPES.find((t) => t[0] === k) || [0, "Other"])[1];
+  function startExpenses() {
+    if (expUnsub) return;
+    expUnsub = onSnapshot(query(collection(db, "expenses"), orderBy("date", "desc")), (snap) => { expenses = snap.docs.map((d) => ({ id: d.id, ...d.data() })); expErr = ""; renderSales(); },
+      (err) => { expErr = err.code === "permission-denied" ? "Add the Firestore rule for “expenses” (see firestore.rules) to save costs." : "Couldn't load costs (" + err.message + ")."; renderSales(); });
+  }
+  function salesUpper() { return salesRange === "custom" && salesTo ? new Date(salesTo + "T23:59:59").getTime() : Infinity; }
   function salesRangeStart() {
     const now = new Date();
+    if (salesRange === "custom") return salesFrom ? new Date(salesFrom + "T00:00:00").getTime() : 0;
     if (salesRange === "today") return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     if (salesRange === "7d") return Date.now() - 7 * 864e5;
     if (salesRange === "30d") return Date.now() - 30 * 864e5;
@@ -3225,8 +3582,14 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
   function renderSales() {
     const pane = $("salesRoot"); if (!pane) return;
     const from = salesRangeStart();
-    const done = currentOrders.filter((o) => o.status === "done" && (tsMs(o.doneAt) || tsMs(o.createdAt)) >= from);
-    const other = currentOrders.filter((o) => o.status !== "done" && tsMs(o.createdAt) >= from);
+    startExpenses();
+    const upto = salesUpper();
+    const done = currentOrders.filter((o) => { const t = tsMs(o.doneAt) || tsMs(o.createdAt); return o.status === "done" && t >= from && t <= upto; });
+    const other = currentOrders.filter((o) => o.status !== "done" && tsMs(o.createdAt) >= from && tsMs(o.createdAt) <= upto);
+    const dayMs = (d) => new Date(String(d) + "T12:00:00").getTime();
+    const exps = expenses.filter((e) => { const t = dayMs(e.date); return t >= from - 43200000 && t <= (upto === Infinity ? Infinity : upto); });
+    const expTotal = exps.reduce((n, e) => n + (Number(e.amount) || 0), 0);
+    const byType = {}; exps.forEach((e) => { byType[e.type] = (byType[e.type] || 0) + (Number(e.amount) || 0); });
     const total = done.reduce((n, o) => n + (Number(o.total) || 0), 0);
     const itemsSold = done.reduce((n, o) => n + (Array.isArray(o.items) ? o.items.reduce((m, i) => m + (Number(i.qty) || 1), 0) : 0), 0);
     const avg = done.length ? Math.round(total / done.length) : 0;
@@ -3234,12 +3597,13 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     const top = {}; done.forEach((o) => (o.items || []).forEach((i) => { const r = top[i.name] || (top[i.name] = { q: 0, rs: 0 }); r.q += Number(i.qty) || 1; r.rs += (Number(i.price) || 0) * (Number(i.qty) || 1); }));
     const topRows = Object.entries(top).sort((a, b) => b[1].rs - a[1].rs).slice(0, 8);
     const fmt = (n) => "Rs. " + Number(n).toLocaleString("en-PK");
-    const chips = [["today", "Today"], ["7d", "Last 7 days"], ["month", "This month"], ["30d", "Last 30 days"], ["all", "All time"]];
+    const chips = [["today", "Today"], ["7d", "Last 7 days"], ["month", "This month"], ["30d", "Last 30 days"], ["all", "All time"], ["custom", "Pick dates"]];
     const label = (chips.find((c) => c[0] === salesRange) || [])[1].toLowerCase();
     const maxCh = Math.max(1, ...Object.values(byCh));
     pane.innerHTML = `<div class="card"><h2>Sales</h2>
       <p class="hint">Only orders you moved to <b>Done</b> are counted here. New and open orders, cancelled orders and your own test orders are never added. <b>Test order?</b> Cancel it instead of moving it to Done.</p>
       <div class="chips">${chips.map(([k, l]) => `<button type="button" class="chip ${k === salesRange ? "active" : ""}" data-sales="${k}">${l}</button>`).join("")}</div>
+      ${salesRange === "custom" ? `<div class="row2" style="margin-top:10px"><div><label>From</label><input type="date" id="sales_from" value="${esc(salesFrom)}" /></div><div><label>To</label><input type="date" id="sales_to" value="${esc(salesTo)}" /></div></div>` : ""}
       <div class="sales-grid">
         <div class="sale-tile"><span>Total sales</span><b>${fmt(total)}</b><small>${label}</small></div>
         <div class="sale-tile"><span>Done orders</span><b>${done.length}</b><small>${itemsSold} items sold</small></div>
@@ -3248,11 +3612,131 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
       </div>
       ${done.length === 0 ? `<p class="empty">No done orders ${label}. When you deliver an order, open Orders and press <b>Move to done</b>.</p>` : ""}
     </div>
+    <div class="card"><h2>Costs &amp; profit <span class="hint" style="font-weight:400">· ${label}</span></h2>
+      <div class="sales-grid">
+        <div class="sale-tile"><span>Sales</span><b>${fmt(total)}</b><small>done orders</small></div>
+        <div class="sale-tile"><span>Costs</span><b>${fmt(expTotal)}</b><small>${exps.length} entries</small></div>
+        <div class="sale-tile" style="${total - expTotal < 0 ? "border-color:#C0392B" : ""}"><span>${total - expTotal < 0 ? "Loss" : "Profit"}</span><b style="${total - expTotal < 0 ? "color:#C0392B" : "color:#1B6B3A"}">${fmt(total - expTotal)}</b><small>${total ? Math.round(((total - expTotal) / total) * 100) + "% of sales" : "no sales yet"}</small></div>
+      </div>
+      ${expErr ? `<div class="msg error">${esc(expErr)}</div>` : ""}
+      ${Object.keys(byType).length ? Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div class="bar-row"><span>${esc(expLabel(k))}</span><div class="bar"><i style="width:${Math.round((v / Math.max(1, expTotal)) * 100)}%"></i></div><b>${fmt(v)}</b></div>`).join("") : '<p class="empty">No costs for this time. Add one below.</p>'}
+      <h3 style="margin:16px 0 6px;font-size:15px">Add a cost</h3>
+      <div class="row2"><div><label>Date</label><input type="date" id="ex_date" value="${new Date().toISOString().slice(0, 10)}" /></div><div><label>Type</label><select id="ex_type">${EXP_TYPES.map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join("")}</select></div></div>
+      <div class="row2"><div><label>Amount (Rs)</label><input type="number" min="1" id="ex_amount" placeholder="e.g. 3000" /></div><div><label>Note (optional)</label><input type="text" id="ex_note" placeholder="e.g. Instagram ad, 5 days" /></div></div>
+      <button type="button" class="btn" id="ex_add">Add cost</button><div id="ex_msg" class="msg"></div>
+      ${exps.length ? `<h3 style="margin:16px 0 6px;font-size:15px">Costs in this time</h3>` + exps.map((e) => `<div class="bar-row"><span>${esc(e.date)} · ${esc(expLabel(e.type))}${e.note ? " · " + esc(e.note) : ""}</span><b>${fmt(Number(e.amount) || 0)}</b><button type="button" class="del-link" data-ex-del="${esc(e.id)}">Delete</button></div>`).join("") : ""}
+    </div>
     ${done.length ? `<div class="card"><h2>By channel</h2>${Object.entries(byCh).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div class="bar-row"><span>${esc(channelLabel(k))}</span><div class="bar"><i style="width:${Math.round(v / maxCh * 100)}%"></i></div><b>${fmt(v)}</b></div>`).join("")}</div>
     <div class="card"><h2>Best sellers</h2>${topRows.map(([n, r]) => `<div class="bar-row"><span>${esc(n)}</span><span class="hint" style="margin:0">× ${r.q}</span><b>${fmt(r.rs)}</b></div>`).join("")}</div>` : ""}`;
   }
   pageRoot.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-sales]"); if (b) { salesRange = b.dataset.sales; renderSales(); }
+    const b = e.target.closest("[data-sales]"); if (b) { salesRange = b.dataset.sales; renderSales(); return; }
+    const del = e.target.closest("[data-ex-del]");
+    if (del) { if (!confirm("Delete this cost?")) return; deleteDoc(doc(db, "expenses", del.dataset.exDel)).catch((err) => alert("Couldn't delete: " + err.message)); return; }
+    if (e.target.id === "ex_add") {
+      const amount = Number($("ex_amount").value); const date = $("ex_date").value; const m = $("ex_msg");
+      if (!(amount > 0) || !date) { m.className = "msg error"; m.textContent = "Please enter the date and an amount above 0."; return; }
+      addDoc(collection(db, "expenses"), { date, type: $("ex_type").value, amount, note: $("ex_note").value.trim().slice(0, 120), createdAt: serverTimestamp() })
+        .catch((err) => { expErr = err.code === "permission-denied" ? "Add the Firestore rule for “expenses” (see firestore.rules) to save costs." : "Couldn't save (" + err.message + ")."; renderSales(); });
+    }
+  });
+  pageRoot.addEventListener("change", (e) => {
+    if (e.target.id === "sales_from") { salesFrom = e.target.value; renderSales(); }
+    else if (e.target.id === "sales_to") { salesTo = e.target.value; renderSales(); }
+  });
+
+  // ---- customers, CSV export, courier labels ----
+  const phoneKey = (p) => String(p || "").replace(/\D/g, "").replace(/^92/, "0").slice(-11);
+  function downloadFile(name, text, type) {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: type || "text/csv;charset=utf-8" })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  const csvCell = (v) => { const t = String(v === undefined || v === null ? "" : v).replace(/"/g, '""'); return /[",\n]/.test(t) ? `"${t}"` : t; };
+  function customersList() {
+    const m = {};
+    currentOrders.filter((o) => o.status !== "cancelled").forEach((o) => {
+      const c = o.customer || {}; const k = phoneKey(c.phone) || ("x" + o.id); const r = m[k] || (m[k] = { name: c.name || "", phone: c.phone || "", city: c.city || "", orders: 0, spent: 0, last: 0 });
+      r.orders++; if (o.status === "done") r.spent += Number(o.total) || 0; r.last = Math.max(r.last, tsMs(o.createdAt)); if (c.name) r.name = c.name;
+    });
+    return Object.values(m).sort((a, b) => b.orders - a.orders || b.last - a.last);
+  }
+  let custQuery = "";
+  function renderCustomers() {
+    const pane = $("custRoot"); if (!pane) return;
+    const all = customersList(); const q = custQuery.trim().toLowerCase();
+    const list = q ? all.filter((c) => (c.name + " " + c.phone).toLowerCase().includes(q)) : all;
+    const repeat = all.filter((c) => c.orders > 1).length;
+    pane.innerHTML = `<div class="card"><h2>Customers</h2>
+      <p class="hint">Made from your orders (cancelled ones are left out). <b>${all.length}</b> customers, <b>${repeat}</b> came back for another order.</p>
+      <input type="search" id="cust_q" placeholder="Search by name or phone…" value="${esc(custQuery)}" />
+      <div style="margin-top:10px">${list.slice(0, 200).map((c) => `<div class="bar-row"><span><b>${esc(c.name || "—")}</b> ${c.orders > 1 ? '<span class="pill" style="padding:1px 8px;font-size:11px">Repeat ×' + c.orders + "</span>" : ""}<br><small class="hint" style="margin:0">${esc(c.phone)}${c.city ? " · " + esc(c.city) : ""}</small></span><span class="hint" style="margin:0">${c.orders} order${c.orders === 1 ? "" : "s"}</span><b>Rs. ${c.spent.toLocaleString("en-PK")}</b></div>`).join("") || '<p class="empty">No customers found.</p>'}</div>
+      <button type="button" class="btn secondary" id="cust_csv" style="margin-top:10px">Download customers (Excel / CSV)</button>
+    </div>
+    <div class="card"><h2>Orders &amp; courier labels</h2>
+      <p class="hint">Download all orders as a file you can open in Excel, or print address labels for the open orders (for the courier).</p>
+      <button type="button" class="btn secondary" id="ord_csv">Download orders (Excel / CSV)</button>
+      <button type="button" class="btn secondary" id="ord_labels">Print courier labels (open orders)</button>
+    </div>`;
+  }
+  pageRoot.addEventListener("input", (e) => { if (e.target.id === "cust_q") { custQuery = e.target.value; const pos = e.target.selectionStart; renderCustomers(); const el = $("cust_q"); if (el) { el.focus(); el.setSelectionRange(pos, pos); } } });
+  pageRoot.addEventListener("click", (e) => {
+    const id = e.target.id;
+    if (id === "cust_csv") downloadFile("customers.csv", "\ufeff" + ["Name,Phone,City,Orders,Spent (done)"].concat(customersList().map((c) => [c.name, c.phone, c.city, c.orders, c.spent].map(csvCell).join(","))).join("\n"));
+    else if (id === "ord_csv") {
+      const head = "Order no,Date,Status,Channel,Name,Phone,Address,City,Items,Total,Payment,Notes";
+      const rows = currentOrders.map((o) => { const c = o.customer || {}; const d = tsMs(o.createdAt) ? new Date(tsMs(o.createdAt)).toISOString().slice(0, 10) : "";
+        return [o.orderNo, d, o.status, o.channel, c.name, c.phone, c.address, c.city, (o.items || []).map((i) => (i.qty || 1) + "x " + i.name + (i.variant ? " (" + i.variant + ")" : "")).join("; "), o.total, o.paymentMethod, c.notes].map(csvCell).join(","); });
+      downloadFile("orders.csv", "\ufeff" + [head].concat(rows).join("\n"));
+    } else if (id === "ord_labels") {
+      const open = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled");
+      if (!open.length) { alert("No open orders to print."); return; }
+      const w = window.open("", "_blank"); if (!w) { alert("Please allow pop-ups to print."); return; }
+      const lab = open.map((o) => { const c = o.customer || {}; const cod = /cash/i.test(o.paymentMethod || "") ? `<div class="cod">Collect Rs${Number(o.total) || 0}</div>` : "";
+        return `<div class="l"><b>${esc(c.name || "")}</b><div>${esc(c.phone || "")}</div><div>${esc(c.address || "")}</div><div class="s">Order ${esc(o.orderNo || "")} · ${(o.items || []).map((i) => (i.qty || 1) + "x " + esc(i.name)).join(", ")}</div>${cod}</div>`; }).join("");
+      w.document.write(`<!doctype html><title>Labels</title><style>body{font-family:system-ui,sans-serif;margin:10px}.bar{margin-bottom:10px}.g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.l{border:1.5px dashed #6E1E36;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.45;break-inside:avoid}.s{font-size:11.5px;color:#555;margin-top:4px}.cod{margin-top:4px;font-weight:800;color:#6E1E36}@media print{.bar{display:none}}</style><div class="bar"><button onclick="window.print()">Print</button></div><div class="g">${lab}</div>`);
+      w.document.close();
+    }
+  });
+
+  // ---- backup & restore ----
+  let backupMsg = "";
+  function renderBackup() {
+    const pane = $("backupRoot"); if (!pane) return;
+    pane.innerHTML = `<div class="card"><h2>Backup</h2>
+      <p class="hint">Saves your <b>settings, promo codes, products and costs</b> in one file on this computer (it goes to your Downloads folder). Keep it on Google Drive or your phone too. Orders are not inside: use “Customers &amp; export” for them.</p>
+      <button type="button" class="btn" id="bk_make">Download backup</button></div>
+    <div class="card"><h2>Restore</h2>
+      <p class="hint">Choose a backup file. Everything in the file is put back (products and settings with the same names are replaced). Do a fresh backup first if you are not sure.</p>
+      <input type="file" id="bk_file" accept=".json,application/json" />
+      <div class="msg" id="bk_msg">${esc(backupMsg)}</div></div>`;
+  }
+  const plainForBackup = (v) => JSON.parse(JSON.stringify(v));
+  const reviveStamps = (v) => { if (Array.isArray(v)) return v.map(reviveStamps); if (v && typeof v === "object") { if (typeof v.seconds === "number" && typeof v.nanoseconds === "number") return new Date(v.seconds * 1000); const o = {}; Object.keys(v).forEach((k) => { o[k] = reviveStamps(v[k]); }); return o; } return v; };
+  pageRoot.addEventListener("click", async (e) => {
+    if (e.target.id !== "bk_make") return;
+    e.target.disabled = true;
+    try {
+      const st = await getDoc(SETTINGS_REF); const pr = await getDoc(doc(db, "config", "promoCodes"));
+      let ex = []; try { ex = expenses.map((x) => plainForBackup(x)); } catch (err) {}
+      const data = { app: "ttc-backup", version: 1, createdAt: new Date().toISOString(), settings: st.exists() ? plainForBackup(st.data()) : null, promoCodes: pr.exists() ? plainForBackup(pr.data()) : null, products: currentProducts.map((p) => plainForBackup(p)), expenses: ex };
+      downloadFile("ttc-backup-" + new Date().toISOString().slice(0, 10) + ".json", JSON.stringify(data), "application/json");
+      backupMsg = "Backup saved: " + data.products.length + " products."; 
+    } catch (err) { backupMsg = "Couldn't make the backup (" + (err.code || err.message) + ")."; }
+    renderBackup();
+  });
+  pageRoot.addEventListener("change", async (e) => {
+    if (e.target.id !== "bk_file" || !e.target.files[0]) return;
+    const m = $("bk_msg"); m.className = "msg error";
+    let data; try { data = JSON.parse(await e.target.files[0].text()); } catch (err) { m.textContent = "This file can't be read. Choose a backup made here."; return; }
+    if (!data || data.app !== "ttc-backup" || !Array.isArray(data.products)) { m.textContent = "This is not a backup file from this admin."; return; }
+    if (!confirm("Restore " + data.products.length + " products" + (data.settings ? ", the settings" : "") + (data.promoCodes ? ", the promo codes" : "") + " from " + (data.createdAt || "this file") + "?")) return;
+    m.className = "msg"; m.textContent = "Restoring… please wait.";
+    try {
+      if (data.settings) await setDoc(SETTINGS_REF, reviveStamps(data.settings));
+      if (data.promoCodes) await setDoc(doc(db, "config", "promoCodes"), reviveStamps(data.promoCodes));
+      for (const p of data.products) { const { id, ...rest } = p; if (id) await setDoc(doc(db, "products", id), reviveStamps(rest)); }
+      for (const x of (data.expenses || [])) { const { id, ...rest } = x; if (id) await setDoc(doc(db, "expenses", id), rest); }
+      backupMsg = "Done. " + data.products.length + " products restored. Refresh this page to see everything."; m.className = "msg success"; m.textContent = backupMsg;
+    } catch (err) { m.className = "msg error"; m.textContent = "Couldn't restore (" + (err.code || err.message) + "). Nothing more was changed after this point."; }
   });
 
   // ---- important links ----
@@ -3312,6 +3796,9 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     _showView(name, opts);
     if (name === "neworder") renderManual();
     if (name === "sales") renderSales();
+    if (name === "orders") renderOrders();
+    if (name === "customers") renderCustomers();
+    if (name === "backup") renderBackup();
     if (name === "links") renderLinks();
     scheduleOnThisPage();
   };

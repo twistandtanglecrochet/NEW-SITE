@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
-import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star, ArrowUp, CheckCircle2, Clock, Shuffle } from "lucide-react";
-import { collection, doc, onSnapshot, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
+import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star, ArrowUp, CheckCircle2, Clock, Shuffle, Package } from "lucide-react";
+import { watch, loadOnce } from "./lib/live";
+import { collection, doc, query, orderBy, addDoc, serverTimestamp, runTransaction } from "firebase/firestore";
 import { db } from "./firebase";
 import { COLORS } from "./data/colors.js";
 import { LOGO_SRC, BG_SRC } from "./data/siteImages.js";
@@ -20,7 +21,7 @@ import Reveal from "./components/Reveal.jsx";
 import HeroHeading from "./components/HeroHeading.jsx";
 import { FreeDeliveryBar, PriceFilter, LangToggle, InstallButton, useInstallPrompt } from "./components/UiBits.jsx";
 import { SpeedContext, Img } from "./lib/cloudinary.jsx";
-import { useSiteSettings, useI18n, useIdList } from "./hooks/useSiteSettings.js";
+import { useSiteSettings, useI18n, useIdList, useExtraTranslations } from "./hooks/useSiteSettings.js";
 import { SECTION_IDS, SETTINGS_CACHE_KEY, normalizedOrder, readCachedSettings } from "./data/siteSettings.js";
 import { applyManifest, applySafeArea, applyServiceWorker } from "./lib/pwa.js";
 
@@ -62,6 +63,13 @@ const GuidePage = lazy(() => import("./components/OrderGuide.jsx").then((m) => (
 const GuideBar = lazy(() => import("./components/OrderGuide.jsx").then((m) => ({ default: m.GuideBar })));
 const ProductTabs = lazy(() => import("./components/ProductInfo.jsx").then((m) => ({ default: m.ProductTabs })));
 const ProductMeta = lazy(() => import("./components/ProductInfo.jsx").then((m) => ({ default: m.ProductMeta })));
+const MyOrders = lazy(() => import("./components/MyOrders.jsx"));
+import { rememberOrder } from "./components/MyOrders.jsx";
+const FaqPage = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.FaqPage })));
+const ComboStrip = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.ComboStrip })));
+const InstaStrip = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.InstaStrip })));
+const CartSuggest = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.CartSuggest })));
+const SearchSuggest = lazy(() => import("./components/SearchSuggest.jsx"));
 const SiteFooter = lazy(() => import("./components/SiteFooter.jsx"));
 const TrackOrder = lazy(() => import("./components/TrackOrder.jsx"));
 
@@ -77,6 +85,24 @@ function makeOrderNo() {
   try { crypto.getRandomValues(pick); } catch (e) { for (let i = 0; i < 5; i++) pick[i] = Math.floor(Math.random() * 1e9); }
   for (let i = 0; i < 5; i++) out += ORDER_CODE_CHARS[pick[i] % ORDER_CODE_CHARS.length];
   return "TTC-" + out;
+}
+// Plain numeric order numbers (2000, 2001, …) from a counter in Firestore
+// (Admin → Order & checkout). Falls back to the TTC-XXXXX style if the counter can't be reached.
+async function nextOrderNo(cfg) {
+  if (!cfg || !cfg.numeric) return makeOrderNo();
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return makeOrderNo();
+  try {
+    const ref = doc(db, "config", "orderCounter");
+    const start = Math.max(1, Math.floor(Number(cfg.start) || 2000));
+    const n = await withTimeout(runTransaction(db, async (tx) => {
+      const snap = await tx.get(ref);
+      const last = snap.exists() ? Number(snap.data().n) || 0 : 0;
+      const next = Math.max(start, last + 1);
+      tx.set(ref, { n: next });
+      return next;
+    }), 8000);
+    return String(n);
+  } catch (e) { return makeOrderNo(); }
 }
 // Pakistani mobile numbers: 0300 1234567, 0300-1234567, +92 300 1234567, 92300…
 function isValidPkMobile(phone) {
@@ -435,7 +461,7 @@ function Slideshow({ slides, fx, speed, autoplay = true, onOpen }) {
               style={{ cursor: sl.productId && onOpen ? "pointer" : "default" }}
             >
               {sl.photo ? (
-                <Img src={sl.photo} alt={sl.name || "Twist & Tangle Crochet — handmade crochet product"} sizes="(max-width: 700px) 92vw, 460px" widths={[480, 720, 960]} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <Img priority={i === 0} src={sl.photo} alt={sl.name || "Twist & Tangle Crochet — handmade crochet product"} sizes="(max-width: 700px) 92vw, 460px" widths={[480, 720, 960]} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
                 <ProductSwatch colors={sl.colors} real={sl.real} />
               )}
@@ -451,7 +477,7 @@ function Slideshow({ slides, fx, speed, autoplay = true, onOpen }) {
     <div style={{ position: "relative" }}>
       {slides[index].photo ? (
         <div style={{ width: "100%", aspectRatio: "4/5", borderRadius: 14, overflow: "hidden", background: "#fff" }}>
-          <Img src={slides[index].photo} alt="Twist & Tangle Crochet — handmade crochet product" sizes="(max-width: 700px) 92vw, 460px" widths={[480, 720, 960]} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <Img priority={index === 0} src={slides[index].photo} alt="Twist & Tangle Crochet — handmade crochet product" sizes="(max-width: 700px) 92vw, 460px" widths={[480, 720, 960]} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         </div>
       ) : (
         <ProductSwatch colors={slides[index].colors} real={slides[index].real} />
@@ -510,6 +536,7 @@ export default function App() {
   const [settings, applySettingsSeed] = useSiteSettings();
   applyBrandColors(settings.brand);
   const { lang, setLang, t: t0, enabled: i18nOn } = useI18n(settings);
+  useExtraTranslations(i18nOn ? lang : "en", settings.i18n.extra);
   const brandOn = !!settings.brand.on;
   const brandAddr = [settings.brand.address1, settings.brand.address2, settings.brand.area].map((x) => String(x || "").trim()).filter(Boolean);
   const t = brandOn ? (k) => {
@@ -529,7 +556,10 @@ export default function App() {
   }, [brandOn, settings.brand.fonts]);
   const [wishIds, wishApi] = useIdList("ttc_wishlist", 200);
   const [recentIds, recentApi] = useIdList("ttc_recent", Math.max(1, Number(settings.recent.max) || 10));
-  const wish = { on: settings.wishlist.on, has: wishApi.has, toggle: wishApi.toggle };
+  const wish = { on: settings.wishlist.on, has: wishApi.has, toggle: (id) => {
+    if (settings.wishlist.reminders && !wishApi.has(id)) { try { const m = JSON.parse(localStorage.getItem("ttc_wish_prices") || "{}"); const p = products.find((x) => String(x.id) === String(id)); if (p) { m[String(id)] = Number(p.price) || 0; localStorage.setItem("ttc_wish_prices", JSON.stringify(m)); } } catch (e) {} }
+    wishApi.toggle(id);
+  } };
   const [wishOpen, setWishOpen] = useState(false);
   const [iosHelp, setIosHelp] = useState(false);
   const installPrompt = useInstallPrompt(!!settings.pwa.install);
@@ -538,7 +568,7 @@ export default function App() {
   const [showAll, setShowAll] = useState(false);
   const [shuffleSeed] = useState(() => Math.random());
   const [reviewTick, setReviewTick] = useState(0);
-  const speedCtx = useMemo(() => ({ srcset: !!settings.speed.srcset }), [settings.speed.srcset]);
+  const speedCtx = useMemo(() => ({ srcset: !!settings.speed.srcset, lcp: !!settings.speed.lcp }), [settings.speed.srcset, settings.speed.lcp]);
   const apiShopRef = useRef(false);
   apiShopRef.current = !!settings.speed.apiShop;
   const liveProductsRef = useRef(false);
@@ -615,6 +645,11 @@ export default function App() {
   const [form, setForm] = useState({ name: "", phone: "", address: "", notes: "", payment: PAYMENT_METHODS[0], apt: "", city: "", postal: "", email: "" });
   const [touched, setTouched] = useState({});
   const [guideOpen, setGuideOpen] = useState(false);
+  const [myOrdersOpen, setMyOrdersOpen] = useState(false);
+  const [faqOpen, setFaqOpen] = useState(false);
+  function openFaq() { setFaqOpen(true); try { if (window.location.pathname !== "/faq") window.history.pushState({}, "", "/faq"); } catch (e) {} }
+  function closeFaq() { setFaqOpen(false); try { if (window.location.pathname === "/faq") window.history.pushState({}, "", "/"); } catch (e) {} }
+  const [giftNote, setGiftNote] = useState("");
   function openGuide() { setGuideOpen(true); try { if (window.location.pathname !== "/guide") window.history.pushState({}, "", "/guide"); } catch (e) {} }
   function closeGuide() { setGuideOpen(false); try { if (window.location.pathname === "/guide") window.history.pushState({}, "", "/"); } catch (e) {} }
   const [saveInfo, setSaveInfo] = useState(true);
@@ -737,6 +772,9 @@ export default function App() {
         window.history.replaceState({}, "", "/");
         routeAppliedRef.current = true;
       }
+    } else if (path === "/faq" && settings.faq.on) {
+      setFaqOpen(true);
+      routeAppliedRef.current = true;
     } else if (path === "/guide" && settings.guide.on) {
       setGuideOpen(true);
       routeAppliedRef.current = true;
@@ -760,12 +798,15 @@ export default function App() {
         const found = cats.find((c) => categorySlug(c) === slug);
         setActiveCategory(found || "All");
         setQuickViewId(null);
+      } else if (path === "/faq") {
+        setFaqOpen(true);
       } else if (path === "/guide") {
         setGuideOpen(true);
       } else {
         setActiveCategory("All");
         setQuickViewId(null);
         setGuideOpen(false);
+        setFaqOpen(false);
       }
     }
     window.addEventListener("popstate", onPopState);
@@ -826,7 +867,7 @@ export default function App() {
   // Live promo codes from the admin panel. Only active codes are usable; if
   // the admin hasn't saved the list yet, the built-in PROMO_CODES stay.
   useEffect(() => {
-    const unsub = onSnapshot(
+    const unsub = watch(
       doc(db, "config", "promoCodes"),
       (snap) => {
         if (!snap.exists()) return;
@@ -834,21 +875,22 @@ export default function App() {
         const active = {};
         for (const [code, p] of Object.entries(all)) {
           if (p && p.active !== false && (p.type === "percent" || p.type === "flat") && Number(p.value) > 0) {
-            active[code.toUpperCase()] = { type: p.type, value: Number(p.value) };
+            active[code.toUpperCase()] = { type: p.type, value: Number(p.value), mode: p.mode === "only" || p.mode === "except" ? p.mode : "all", cats: Array.isArray(p.cats) ? p.cats : [] };
           }
         }
         setPromoCodes(active);
         // A code the customer already applied that's since been switched off.
         setAppliedPromo((current) => (current && !active[current] ? null : current));
       },
-      () => {} // keep the built-in codes if this can't be read
+      () => {}, // keep the built-in codes if this can't be read
+      loadOnce()
     );
     return () => unsub();
   }, []);
 
   useEffect(() => {
     const q = query(collection(db, "products"));
-    const unsub = onSnapshot(
+    const unsub = watch(
       q,
       (snap) => {
         // Keep the built-in starter catalog, plus anything from the admin
@@ -884,7 +926,8 @@ export default function App() {
         // or, with "Fast shop data" on, to the last list we saved.
         setProducts((cur) => (apiShopRef.current && readShopCache() ? cur : SEED_PRODUCTS));
         setProductsLoaded(true);
-      }
+      },
+      loadOnce()
     );
     return () => unsub();
   }, []);
@@ -897,10 +940,11 @@ export default function App() {
   // break this the first time it ran in production.
   useEffect(() => {
     const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(
+    const unsub = watch(
       q,
       (snap) => setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
-      () => setReviews([])
+      () => setReviews([]),
+      loadOnce()
     );
     return () => unsub();
   }, []);
@@ -910,8 +954,10 @@ export default function App() {
   useEffect(() => {
     if (!settings.speed.apiShop) return undefined;
     let dead = false;
-    fetch("/api/shop")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("api " + r.status))))
+    // index.html may already have started this request ("Fast shop data" on): reuse it (safe to read twice).
+    let early = null;
+    try { early = window.__ttcEarly || null; } catch (e) {}
+    (early || fetch("/api/shop").then((r) => (r.ok ? r.json() : Promise.reject(new Error("api " + r.status)))))
       .then((data) => {
         if (dead || !data) return;
         if (Array.isArray(data.products) && !liveProductsRef.current) {
@@ -1005,7 +1051,26 @@ export default function App() {
   const totalPages = Math.max(1, Math.ceil(visibleProducts.length / PRODUCTS_PER_PAGE));
   // "Explore more": show a few products first, the rest after one tap.
   const exploreOn = !!settings.exploreMore.on;
-  const exploreInitial = Math.max(1, Number(settings.exploreMore.initial) || 8);
+  const [vw, setVw] = useState(() => (typeof window !== "undefined" ? window.innerWidth : 1200));
+  useEffect(() => { const f = () => setVw(window.innerWidth); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
+  const exploreCfg = settings.exploreMore;
+  const exploreInitial = Math.max(1, Number(exploreCfg.perDevice ? (vw < 640 ? exploreCfg.initialMobile : vw < 1024 ? exploreCfg.initialTablet : exploreCfg.initial) : exploreCfg.initial) || 8);
+  // Lighter motion on phones (Admin → Speed): animations and transitions are cut to save battery and CPU.
+  useEffect(() => {
+    if (!settings.speed.lightMotion) return undefined;
+    const st = document.createElement("style");
+    st.textContent = "@media (max-width: 767px) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }";
+    document.head.appendChild(st);
+    return () => st.remove();
+  }, [settings.speed.lightMotion]);
+  // "Skip drawing parts below the screen" (Admin → Speed): the footer is only drawn when it gets near the screen.
+  useEffect(() => {
+    if (!settings.speed.cv) return undefined;
+    const st = document.createElement("style");
+    st.textContent = "footer { content-visibility: auto; contain-intrinsic-size: auto 520px; }";
+    document.head.appendChild(st);
+    return () => st.remove();
+  }, [settings.speed.cv]);
   const pagedProducts = useMemo(
     () => (exploreOn
       ? (showAll ? visibleProducts : visibleProducts.slice(0, exploreInitial))
@@ -1039,10 +1104,33 @@ export default function App() {
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
   const subtotal = cartItems.reduce((s, i) => s + i.qty * i.price, 0);
 
-  function calcDiscount(subtotalAmount) {
+  // Promo codes can be limited to some categories (Admin → Promo codes).
+  function promoBase(promo, items, fallback) {
+    if (!promo || !promo.mode || promo.mode === "all" || !Array.isArray(promo.cats) || !promo.cats.length || !items) return fallback;
+    return items.filter((i) => (promo.mode === "only") === promo.cats.includes(i.category)).reduce((n, i) => n + i.qty * i.price, 0);
+  }
+  // Combo offers: when every product of a combo is in the cart, the customer gets the combo price.
+  function bundleDiscount(items) {
+    if (!settings.bundles.on || !items) return 0;
+    let d = 0;
+    for (const b of settings.bundles.items || []) {
+      const ids = (b.productIds || []).map(String);
+      if (ids.length < 2 || !(Number(b.price) > 0)) continue;
+      const sets = Math.min(...ids.map((id) => items.filter((i) => String(i.id) === id).reduce((n, i) => n + i.qty, 0)));
+      if (sets < 1) continue;
+      const full = ids.reduce((n, id) => n + ((items.find((i) => String(i.id) === id) || {}).price || 0), 0);
+      d += sets * Math.max(0, full - Number(b.price));
+    }
+    return d;
+  }
+  function calcDiscount(subtotalAmount, items) {
+    return Math.min(subtotalAmount, calcPromoDiscount(subtotalAmount, items) + bundleDiscount(items));
+  }
+  function calcPromoDiscount(subtotalAmount, items) {
     if (!appliedPromo) return 0;
     const promo = promoCodes[appliedPromo];
     if (!promo) return 0;
+    subtotalAmount = promoBase(promo, items, subtotalAmount);
     if (promo.type === "percent") return Math.round((subtotalAmount * promo.value) / 100);
     return Math.min(promo.value, subtotalAmount);
   }
@@ -1050,7 +1138,7 @@ export default function App() {
   // everything currently in the cart. The checkout modal uses its own
   // checkoutSubtotal/checkoutDiscount/checkoutTotal below instead, so that a
   // "Buy Now" purchase never mixes in whatever else happens to be in the cart.
-  const discount = useMemo(() => calcDiscount(subtotal), [appliedPromo, subtotal, promoCodes]);
+  const discount = useMemo(() => calcDiscount(subtotal, cartItems), [appliedPromo, subtotal, promoCodes, cartItems, settings.bundles]);
   const total = Math.max(0, subtotal - discount);
 
   // What the checkout modal actually orders: just the one "Buy Now" item
@@ -1071,13 +1159,18 @@ export default function App() {
     return cartItems;
   }, [directBuyItem, cartItems, products]);
   const checkoutSubtotal = checkoutItems.reduce((s, i) => s + i.qty * i.price, 0);
-  const checkoutDiscount = useMemo(() => calcDiscount(checkoutSubtotal), [appliedPromo, checkoutSubtotal, promoCodes]);
+  const checkoutDiscount = useMemo(() => calcDiscount(checkoutSubtotal, checkoutItems), [appliedPromo, checkoutSubtotal, promoCodes, checkoutItems, settings.bundles]);
   const checkoutTotal = Math.max(0, checkoutSubtotal - checkoutDiscount);
+  const giftFree = !!(settings.cartPlus.giftOn && Number(settings.cartPlus.giftOver) > 0 && checkoutSubtotal >= Number(settings.cartPlus.giftOver));
+  const notesAll = (form.notes.trim() + (giftFree ? (form.notes.trim() ? "\n" : "") + settings.cartPlus.giftText : "") + (settings.checkout.giftNote && giftNote.trim() ? (form.notes.trim() ? "\n" : "") + "Gift note: " + giftNote.trim() : "")).trim();
 
   function applyPromo() {
     const code = promoInput.trim().toUpperCase();
     if (!code) return;
-    if (promoCodes[code]) {
+    if (promoCodes[code] && promoBase(promoCodes[code], cartItems, 1) === 0) {
+      setAppliedPromo(null);
+      setPromoError(promoCodes[code].mode === "only" ? "This code only works on: " + promoCodes[code].cats.join(", ") : "This code doesn't work on the items in your cart");
+    } else if (promoCodes[code]) {
       setAppliedPromo(code);
       setPromoError("");
     } else {
@@ -1127,6 +1220,20 @@ export default function App() {
     setTouched({});
     setWaCountdown(null);
   }
+  useEffect(() => {
+    if (!settings.productPage.seo || !quickViewId) return undefined;
+    const p = products.find((x) => x.id === quickViewId); if (!p) return undefined;
+    const oldTitle = document.title;
+    let meta = document.querySelector('meta[name="description"]'); const hadMeta = !!meta; const oldDesc = meta ? meta.getAttribute("content") : "";
+    if (!meta) { meta = document.createElement("meta"); meta.setAttribute("name", "description"); document.head.appendChild(meta); }
+    document.title = `${p.name} | ${brandShop}`;
+    meta.setAttribute("content", String(p.shortLine || p.desc || "").replace(/\s+/g, " ").slice(0, 155));
+    const ld = document.createElement("script"); ld.type = "application/ld+json";
+    ld.text = JSON.stringify({ "@context": "https://schema.org", "@type": "Product", name: p.name, image: (p.photos || []).slice(0, 4), description: String(p.desc || "").slice(0, 300), offers: { "@type": "Offer", priceCurrency: "PKR", price: Number(p.price) || 0, availability: p.tag === "Sold Out" ? "https://schema.org/OutOfStock" : "https://schema.org/InStock" } });
+    document.head.appendChild(ld);
+    return () => { document.title = oldTitle; if (hadMeta) meta.setAttribute("content", oldDesc); else meta.remove(); ld.remove(); };
+  }, [quickViewId, settings.productPage.seo, products]); // eslint-disable-line
+
   function openQuickView(id, push = true) {
     const p = products.find((pr) => pr.id === id);
     setQuickViewId(id);
@@ -1161,7 +1268,7 @@ export default function App() {
       (orderNo ? `(Website order ${orderNo} didn't go through, so I'm sending it here.)\n` : "") +
       `\n${lines}\n\nSubtotal: Rs${checkoutSubtotal}\n${promoLine}Total: Rs${checkoutTotal}\n\n` +
       `Name: ${form.name}\nPhone: ${form.phone}\nAddress: ${form.address}\nPayment: ${form.payment}\n` +
-      (form.notes ? `Notes: ${form.notes}\n` : "")
+      (notesAll ? `Notes: ${notesAll}\n` : "")
     );
   }
 
@@ -1205,7 +1312,7 @@ export default function App() {
         name: form.name.trim(),
         phone: form.phone.trim(),
         address: form.address.trim(),
-        notes: form.notes.trim(),
+        notes: notesAll,
       },
       paymentMethod: form.payment || PAYMENT_METHODS[0],
       channel,
@@ -1268,7 +1375,7 @@ export default function App() {
       return;
     }
 
-    const orderNo = makeOrderNo();
+    const orderNo = await nextOrderNo(settings.orders);
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       setPlaceError({ text: "You seem to be offline, so your order couldn't be placed.", offerWhatsApp: true, orderNo });
       return;
@@ -1290,13 +1397,13 @@ export default function App() {
             name: form.name.trim(),
             phone: form.phone.trim(),
             address: [form.address.trim(), form.apt.trim(), form.city.trim() + (form.postal.trim() ? " " + form.postal.trim() : "")].filter(Boolean).join(", "),
-            notes: form.notes.trim(),
+            notes: notesAll,
             email: form.email.trim(), city: form.city.trim(), postal: form.postal.trim(), apartment: form.apt.trim(),
           } : {
             name: form.name.trim(),
             phone: form.phone.trim(),
             address: form.address.trim(),
-            notes: form.notes.trim(),
+            notes: notesAll,
           },
           paymentMethod: form.payment || PAYMENT_METHODS[0],
           channel: "website",
@@ -1307,6 +1414,7 @@ export default function App() {
         15000
       );
       writeLastOrderAt(Date.now());
+      rememberOrder(orderNo, checkoutTotal);
       if (betterOn) { try { if (saveInfo) localStorage.setItem("ttc_checkout_info", JSON.stringify({ name: form.name, phone: form.phone, address: form.address, apt: form.apt, city: form.city, postal: form.postal, email: form.email })); else localStorage.removeItem("ttc_checkout_info"); } catch (e) {} }
       setPlacedOrder({ ...summary, orderNo, waText: placedText(orderNo) });
       if (!directBuyItem) setCart({});
@@ -1347,7 +1455,7 @@ export default function App() {
   function buildPlacedText(orderNo) {
     const lines = checkoutItems.map((i) => `• ${i.name}${i.variantName ? ` (${i.variantName})` : ""} x${i.qty} — Rs${i.price * i.qty}`).join("\n");
     const addr = betterOn ? [form.address.trim(), form.apt.trim(), form.city.trim()].filter(Boolean).join(", ") : form.address;
-    return `Hi TTC! I placed an order on the website.\nOrder number: ${orderNo}\n\n${lines}\n\nTotal: Rs${checkoutTotal}\n\nName: ${form.name}\nPhone: ${form.phone}\nAddress: ${addr}\nPayment: ${form.payment}\n` + (form.notes ? `Notes: ${form.notes}\n` : "");
+    return `Hi TTC! I placed an order on the website.\nOrder number: ${orderNo}\n\n${lines}\n\nTotal: Rs${checkoutTotal}\n\nName: ${form.name}\nPhone: ${form.phone}\nAddress: ${addr}\nPayment: ${form.payment}\n` + (notesAll ? `Notes: ${notesAll}\n` : "");
   }
   // After the thank-you screen: open WhatsApp by itself a moment later, with the order already written.
   const waAuto = !!(placedOrder && settings.checkout.whatsappAuto && placedOrder.waText);
@@ -1391,6 +1499,20 @@ export default function App() {
     : [];
   const designedByName = settings.designedBy.on ? String(settings.designedBy.name || "").trim() : "";
   const designedByHref = settings.designedBy.on ? safeHref(settings.designedBy.url) : "";
+  function goToShop() { setTimeout(() => { const el = document.getElementById("shop"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); }
+  const searchBox = (width) => (
+    <Suspense fallback={null}>
+      <SearchSuggest products={products} value={searchQuery} onChange={setSearchQuery} width={width} placeholder={t("nav.search")}
+        onBlurEmpty={() => { if (!searchQuery) setSearchOpen(false); }}
+        onPick={(p) => { setSearchQuery(""); setSearchOpen(false); openQuickView(p.id); }}
+        onSubmit={() => { setActiveCategory("All"); goToShop(); }} />
+    </Suspense>
+  );
+  const ordersButton = settings.myOrders.on ? (
+    <button onClick={() => setMyOrdersOpen(true)} aria-label="My orders" title="My orders" style={{ background: "none", border: "none", color: COLORS.navy, padding: 2, display: "flex", flexShrink: 0 }}>
+      <Package size={19} />
+    </button>
+  ) : null;
   const wishButton = settings.wishlist.on ? (
     <button
       onClick={() => setWishOpen(true)}
@@ -1716,11 +1838,12 @@ export default function App() {
       ) : null, "underTiles"),
       ads: settings.ads.on ? <AdBanners cfg={settings.ads} t={t} /> : null,
       bento: settings.bento.on ? lazyBox(<BentoStats items={arr(settings.bento.items)} />) : null,
-      shop: withAds(shopNode, "betweenProducts"),
+      shop: withAds(settings.bundles.on ? <>
+        <Suspense fallback={null}><ComboStrip cfg={settings.bundles} products={products} onAdd={(list) => list.forEach((p) => addToCart(p.id, 1, p.variants && p.variants[0] ? p.variants[0].name : null))} /></Suspense>{shopNode}</> : shopNode, "betweenProducts"),
       recent: settings.recent.on && recentIds.length > 0 ? lazyBox(
         <RecentStrip ids={recentIds} products={products} onOpen={(id) => openQuickView(id)} urlFor={urlForProduct} t={t} />
       ) : null,
-      reviews: homepageReviews.length > 0 ? reviewsNode : null,
+      reviews: homepageReviews.length > 0 || settings.insta.on ? <>{homepageReviews.length > 0 ? reviewsNode : null}{settings.insta.on ? <Suspense fallback={null}><InstaStrip cfg={settings.insta} /></Suspense> : null}</> : null,
       visit: settings.visit.on ? lazyBox(
         <VisitStore
           visit={{ ...settings.visit, address: String(settings.visit.address || "").trim() || (brandOn ? brandAddr.join("\n") : ""), title: t("visit.title") === "Visit our store" ? settings.visit.title : t("visit.title"), buttonLabel: t("visit.map") === "Open in Maps" ? settings.visit.buttonLabel : t("visit.map") }}
@@ -1764,7 +1887,6 @@ export default function App() {
       overflowX: "hidden", width: "100%", ...lookVars,
     }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;700&family=Caveat:wght@600&display=swap');
         * { box-sizing: border-box; }
         button { font-family: inherit; cursor: pointer; }
         input, textarea { font-family: inherit; }
@@ -1935,10 +2057,10 @@ export default function App() {
 
           {i18nOn && <LangToggle lang={lang} onChange={setLang} />}
           <InstallButton pwa={installPrompt} t={t} onIosHelp={() => setIosHelp(true)} />
-          {wishButton}
+          {wishButton}{ordersButton}
 
           <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-            {searchOpen ? (
+            {searchOpen ? (settings.search.suggest ? searchBox(130) :
               <input
                 autoFocus
                 value={searchQuery}
@@ -2036,8 +2158,8 @@ export default function App() {
 
           <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
             {i18nOn && <LangToggle lang={lang} onChange={setLang} compact />}
-            {wishButton}
-            {searchOpen ? (
+            {wishButton}{ordersButton}
+            {searchOpen ? (settings.search.suggest ? searchBox(110) :
               <input
                 autoFocus
                 value={searchQuery}
@@ -2105,7 +2227,7 @@ export default function App() {
         </div>
       )}
 
-      {renderSections()}
+      <main style={{ display: "contents" }}>{renderSections()}</main>
 
       {/* Footer */}
       {settings.ads.on && <AdBanners cfg={settings.ads} place="aboveFooter" t={t} />}
@@ -2114,7 +2236,7 @@ export default function App() {
           <SiteFooter
             cfg={settings.footer} shopName={brandShop} logo={CURRENT_LOGO} categories={categories.filter((c) => c !== "All")} whatsapp={WHATSAPP_NUMBER}
             designedBy={designedByName ? { label: t("footer.designedBy"), name: designedByName, url: designedByHref } : null}
-            footerLinks={footerLinks} guide={settings.guide.on && settings.guide.footer ? { label: settings.guide.buttonText, open: openGuide } : null} trackOn={!!settings.tracking.on} onTrack={(no) => setTrackOpen(no || true)}
+            footerLinks={footerLinks} guide={settings.guide.on && settings.guide.footer ? { label: settings.guide.buttonText, open: openGuide } : null} trackOn={!!settings.tracking.on} myOrders={settings.myOrders.on ? () => setMyOrdersOpen(true) : null} faq={settings.faq.on && settings.faq.footer ? { label: settings.faq.title, open: openFaq } : null} onTrack={(no) => setTrackOpen(no || true)}
             onTop={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           />
         </Suspense>
@@ -2171,6 +2293,8 @@ export default function App() {
 
           <div style={{ fontSize: 12, color: "#7A6E64", marginBottom: 22 }}>{t("footer.location")}</div>
           {settings.guide.on && settings.guide.footer && <button type="button" onClick={openGuide} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>{settings.guide.buttonText}</button>}
+          {settings.faq.on && settings.faq.footer && <button type="button" onClick={openFaq} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>{settings.faq.title}</button>}
+          {settings.myOrders.on && <button type="button" onClick={() => setMyOrdersOpen(true)} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>My orders</button>}
           {settings.tracking.on && <button type="button" onClick={() => setTrackOpen(true)} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22 }}>Track your order</button>}
 
           {timingsText && (
@@ -2257,7 +2381,7 @@ export default function App() {
           className="ttc-fab-top"
           aria-label="Back to top"
           style={{
-            position: "fixed", left: 20, bottom: 20, zIndex: 45,
+            position: "fixed", ...(settings.footer.floatRight ? { right: 25, bottom: 86 } : { left: 20, bottom: 20 }), zIndex: 45,
             width: 48, height: 48, borderRadius: "50%",
             background: COLORS.navy, color: COLORS.cream, border: "none",
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -2348,6 +2472,12 @@ export default function App() {
 
             <div style={{ borderTop: `1px solid ${COLORS.bgSoft}`, paddingTop: 14, marginTop: 14 }}>
               <FreeDeliveryBar threshold={settings.freeDelivery.on ? settings.freeDelivery.threshold : 0} subtotal={total} t={t} />
+              {settings.cartPlus.giftOn && Number(settings.cartPlus.giftOver) > 0 && cartItems.length > 0 && (
+                <div style={{ background: subtotal >= Number(settings.cartPlus.giftOver) ? "#E8F6EC" : "#FBF0D4", border: "1px solid " + (subtotal >= Number(settings.cartPlus.giftOver) ? "#BFE3CB" : "#E8CF8C"), borderRadius: 10, padding: "8px 12px", fontSize: 12.5, marginBottom: 12, color: "#3E3A36" }}>
+                  🎁 {subtotal >= Number(settings.cartPlus.giftOver) ? `${settings.cartPlus.giftText}: yours with this order!` : `Add Rs${Number(settings.cartPlus.giftOver) - subtotal} more to get: ${settings.cartPlus.giftText}`}
+                </div>
+              )}
+              {settings.cartPlus.suggest && cartItems.length > 0 && <Suspense fallback={null}><CartSuggest cartItems={cartItems} products={products} onAdd={(p) => addToCart(p.id, 1, p.variants && p.variants[0] ? p.variants[0].name : null)} /></Suspense>}
               {cartItems.length > 0 && (
                 <div style={{ marginBottom: 14 }}>
                   {appliedPromo ? (
@@ -2396,6 +2526,7 @@ export default function App() {
                 <span>{t("cart.subtotal")}</span>
                 <span>Rs{subtotal}</span>
               </div>
+              {bundleDiscount(cartItems) > 0 && <div style={{ fontSize: 12, color: "#1B6B3A", fontWeight: 700, marginBottom: 4 }}>🎁 Combo price applied</div>}
               {discount > 0 && (
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: COLORS.maroon, marginBottom: 4 }}>
                   <span>{t("cart.discount")}</span>
@@ -2427,7 +2558,7 @@ export default function App() {
       {wishOpen && (
         <Suspense fallback={null}>
           <WishlistPanel
-            ids={wishIds} products={products} t={t}
+            ids={wishIds} products={products} t={t} reminders={!!settings.wishlist.reminders}
             onClose={() => setWishOpen(false)}
             onOpen={(id) => openQuickView(id)}
             onAdd={(p) => addToCart(p.id, 1, p.variants && p.variants[0] ? p.variants[0].name : null)}
@@ -2446,12 +2577,25 @@ export default function App() {
       {quickViewId && (() => {
         const p = products.find((pr) => pr.id === quickViewId);
         if (!p) return null;
+        const fullPage = !!settings.productPage.full;
         const qvSelectedIndex = variantIndex[p.id] ?? 0;
         const qvSelectedVariant = p.variants ? p.variants[qvSelectedIndex] : null;
         return (
-          <div className="ttc-modal" style={{ position: "fixed", inset: 0, zIndex: 55, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-            <div className="ttc-backdrop" onClick={() => closeQuickView()} style={{ position: "absolute", inset: 0, background: "rgba(43,36,32,0.55)" }} />
-            <div className="ttc-modal-inner" style={{
+          <div className={"ttc-modal" + (fullPage ? " ttc-qv-page" : "")} style={fullPage
+            ? { position: "fixed", inset: 0, zIndex: 55, display: "block", overflowY: "auto", background: COLORS.bg, padding: "0 16px 40px" }
+            : { position: "fixed", inset: 0, zIndex: 55, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+            {!fullPage && <div className="ttc-backdrop" onClick={() => closeQuickView()} style={{ position: "absolute", inset: 0, background: "rgba(43,36,32,0.55)" }} />}
+            {fullPage && (
+              <nav aria-label="Breadcrumb" style={{ maxWidth: 1040, margin: "0 auto", padding: "16px 4px 12px", fontSize: 12.5, color: "#7A6E64" }}>
+                <button type="button" onClick={() => closeQuickView()} style={{ background: "none", border: "none", color: COLORS.maroon, fontWeight: 700, cursor: "pointer", padding: 0, font: "inherit" }}>Home</button>
+                {" / "}
+                <button type="button" onClick={() => { closeQuickView(); selectCategory(p.category); goToShop(); }} style={{ background: "none", border: "none", color: COLORS.maroon, fontWeight: 700, cursor: "pointer", padding: 0, font: "inherit" }}>{p.category}</button>
+                {" / "}<span>{p.name}</span>
+              </nav>
+            )}
+            <div className="ttc-modal-inner" style={fullPage ? {
+              position: "relative", background: COLORS.cream, borderRadius: 20, width: 1040, maxWidth: "100%", margin: "0 auto",
+            } : {
               position: "relative", background: COLORS.cream, borderRadius: 20,
               width: 720, maxWidth: "100%", maxHeight: "88vh", overflowY: "auto",
             }}>
@@ -2589,6 +2733,12 @@ export default function App() {
                     >
                       {t("shop.buyNow")}
                     </button>
+                    {settings.productPage.notify && p.tag === "Sold Out" && (
+                      <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! Please let me know when "${p.name}" is back in stock.`)}`} target="_blank" rel="noopener noreferrer"
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#25D366", color: "#fff", borderRadius: 999, padding: "12px 0", fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
+                        <MessageCircle size={16} /> Notify me when it's back
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2596,12 +2746,32 @@ export default function App() {
               <div style={{ padding: "0 24px 26px" }}>
                 <ReviewsSection productId={p.id} productName={p.name} reviews={reviewsByProduct[p.id] || []} />
               </div>
+              {settings.productPage.related && (() => {
+                const rel = products.filter((x) => x.id !== p.id && x.category === p.category && x.photos && x.photos[0]).slice(0, 4);
+                if (!rel.length) return null;
+                return (
+                  <div style={{ padding: "0 24px 28px" }}>
+                    <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 19, color: COLORS.maroonDark, marginBottom: 12 }}>You may also like</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 12 }}>
+                      {rel.map((x) => (
+                        <button key={x.id} type="button" onClick={() => { openQuickView(x.id); const el = document.querySelector(".ttc-qv-page, .ttc-modal-inner"); if (el) el.scrollTop = 0; window.scrollTo(0, 0); }} style={{ background: "#fff", border: `1px solid ${COLORS.bgSoft}`, borderRadius: 12, padding: 8, textAlign: "left", cursor: "pointer", fontFamily: "inherit" }}>
+                          <img src={x.photos[0]} alt={x.name} loading="lazy" style={{ width: "100%", aspectRatio: "1", objectFit: "cover", borderRadius: 8, display: "block" }} />
+                          <div style={{ fontSize: 12.5, fontWeight: 700, marginTop: 6, color: COLORS.charcoal }}>{x.name}</div>
+                          <div style={{ fontSize: 12.5, color: COLORS.maroon, fontWeight: 800 }}>Rs{x.price}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         );
       })()}
 
       {/* Checkout modal */}
+      {myOrdersOpen && settings.myOrders.on && <Suspense fallback={null}><MyOrders onClose={() => setMyOrdersOpen(false)} onTrack={(no) => { setMyOrdersOpen(false); setTrackOpen(no || true); }} /></Suspense>}
+      {faqOpen && settings.faq.on && <Suspense fallback={null}><FaqPage cfg={settings.faq} whatsapp={WHATSAPP_NUMBER} onClose={closeFaq} /></Suspense>}
       {guideOpen && settings.guide.on && <Suspense fallback={null}><GuidePage cfg={settings.guide} whatsapp={WHATSAPP_NUMBER} onClose={closeGuide} /></Suspense>}
       {trackOpen && <Suspense fallback={null}><TrackOrder initial={typeof trackOpen === "string" ? trackOpen : ""} whatsapp={WHATSAPP_NUMBER} onClose={() => { setTrackOpen(false); try { const u = new URL(window.location.href); if (u.searchParams.has("track")) { u.searchParams.delete("track"); window.history.replaceState({}, "", u.pathname + u.search); } } catch (e) {} }} /></Suspense>}
       {checkoutOpen && (
@@ -2759,6 +2929,13 @@ export default function App() {
                 border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg, resize: "none",
               }}
             />
+            {settings.checkout.giftNote && (
+              <input
+                type="text" maxLength={140} value={giftNote} onChange={(e) => setGiftNote(e.target.value)}
+                placeholder="🎁 Gift note (optional): we write it on a card"
+                style={{ width: "100%", padding: "10px 12px", marginTop: -6, marginBottom: 14, borderRadius: 10, border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg }}
+              />
+            )}
 
             {directBuyItem && (
               <div style={{ marginBottom: 16 }}>

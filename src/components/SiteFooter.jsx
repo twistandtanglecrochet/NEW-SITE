@@ -22,7 +22,7 @@ const toMin = (hhmm) => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(hhmm || ""
 const fmt12 = (hhmm) => { const m = toMin(hhmm); if (m === null) return ""; const h = Math.floor(m / 60); return `${((h + 11) % 12) + 1}${m % 60 ? ":" + String(m % 60).padStart(2, "0") : ""} ${h < 12 ? "am" : "pm"}`; };
 const safe = (u) => (/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(String(u || "").trim()) ? String(u).trim() : "");
 
-export default function SiteFooter({ cfg, shopName, logo, categories, whatsapp, designedBy, footerLinks, onTrack, trackOn, onTop, guide }) {
+export default function SiteFooter({ cfg, shopName, logo, categories, whatsapp, designedBy, footerLinks, onTrack, trackOn, onTop, guide, myOrders, faq }) {
   const [now, setNow] = useState(() => pkTime());
   useEffect(() => { const id = setInterval(() => setNow(pkTime()), 30000); return () => clearInterval(id); }, []);
   const o = toMin(cfg.hours && cfg.hours.open); const c = toMin(cfg.hours && cfg.hours.close);
@@ -60,6 +60,8 @@ export default function SiteFooter({ cfg, shopName, logo, categories, whatsapp, 
           <div><div style={head}>Help</div><div style={{ display: "grid", gap: 9 }}>
             {trackOn && <button type="button" onClick={() => onTrack("")} style={linkStyle}>Track your order</button>}
             {guide && <button type="button" onClick={guide.open} style={linkStyle}>{guide.label}</button>}
+            {faq && <button type="button" onClick={faq.open} style={linkStyle}>{faq.label}</button>}
+            {myOrders && <button type="button" onClick={myOrders} style={linkStyle}>My orders</button>}
             <a href={wa} target="_blank" rel="noopener noreferrer" style={linkStyle}>Chat on WhatsApp</a>
             <button type="button" onClick={onTop} style={linkStyle}>Back to top</button>
           </div></div>
@@ -73,9 +75,12 @@ export default function SiteFooter({ cfg, shopName, logo, categories, whatsapp, 
             </form>
           )}
           <div><div style={head}>Follow</div><div style={{ display: "grid", gap: 9 }}>
-            {soc.instagram && <a href={safe(soc.instagram)} target="_blank" rel="noopener noreferrer" style={linkStyle}>Instagram</a>}
-            {soc.facebook && <a href={safe(soc.facebook)} target="_blank" rel="noopener noreferrer" style={linkStyle}>Facebook</a>}
-            {soc.tiktok && <a href={safe(soc.tiktok)} target="_blank" rel="noopener noreferrer" style={linkStyle}>TikTok</a>}
+            {[["instagram", "Instagram", "#C13584", <Instagram size={13} />], ["facebook", "Facebook", "#1877F2", <Facebook size={13} />], ["tiktok", "TikTok", "#000", <TikTok size={12} />]].map(([k, label, bg, icon]) => soc[k] ? (
+              <a key={k} href={safe(soc[k])} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, display: "flex", alignItems: "center", gap: 8 }}>
+                {cfg.officialIcons && <span style={{ width: 22, height: 22, borderRadius: "50%", background: bg, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: k === "tiktok" ? "0 0 0 1px rgba(255,255,255,.35)" : "none" }}>{icon}</span>}
+                {label}
+              </a>
+            ) : null)}
           </div></div>
         </div>
         {(cfg.showTime || second) && (

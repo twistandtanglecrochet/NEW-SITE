@@ -1,6 +1,42 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="preconnect" href="https://res.cloudinary.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://firestore.googleapis.com" />
+    <!-- Fonts load without blocking the first paint (same fonts as before). -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;700&family=Caveat:wght@600&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;700&family=Caveat:wght@600&display=swap" /></noscript>
+    <script>
+      /* Speed switches (Admin → Speed) are read from the saved copy of the settings, so these only act from the 2nd visit on. */
+      (function () {
+        try {
+          var s = JSON.parse(localStorage.getItem("ttc_settings_v1") || "null"), sp = (s && s.speed) || {};
+          if (sp.apiShop && window.fetch) {
+            window.__ttcEarly = fetch("/api/shop").then(function (r) { return r.ok ? r.json() : Promise.reject(new Error("api")); });
+            window.__ttcEarly.catch(function () { window.__ttcEarly = null; });
+          }
+          if (sp.lcp) {
+            var h = JSON.parse(localStorage.getItem("ttc_hero_v1") || "null");
+            if (h && h.src) {
+              var l = document.createElement("link");
+              l.rel = "preload"; l.as = "image"; l.href = h.src; l.setAttribute("fetchpriority", "high");
+              if (h.set) { l.setAttribute("imagesrcset", h.set); l.setAttribute("imagesizes", h.sizes || "100vw"); }
+              document.head.appendChild(l);
+            }
+          }
+          if (sp.boot) document.documentElement.className += " ttc-boot";
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      #ttc-boot { display: none; }
+      .ttc-boot #ttc-boot { display: flex; position: fixed; inset: 0; z-index: 5; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: #FBF6F0; font: 600 18px Georgia, serif; color: #6B1E2A; }
+      #ttc-boot i { display: block; width: 140px; height: 4px; border-radius: 4px; background: #EADFD3; overflow: hidden; }
+      #ttc-boot i::after { content: ""; display: block; width: 40%; height: 100%; background: #6B1E2A; animation: ttcboot 1s ease-in-out infinite; }
+      @keyframes ttcboot { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }
+    </style>
     <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-J3C8GHWQ1X"></script>
 <script>
@@ -65,22 +101,10 @@ gtag('config', 'G-J3C8GHWQ1X');
     </script>
     <!-- End Meta Pixel Code -->
 
-    <!-- Google Analytics (GA4) -->
-    <!-- To turn this on: create a GA4 property at https://analytics.google.com,
-         copy its Measurement ID (looks like G-ABC1234XYZ), then replace
-         BOTH occurrences of G-XXXXXXXXXX below with that ID. -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
-    </script>
-    <!-- End Google Analytics -->
   </head>
   <body>
     <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1546860426718106&amp;ev=PageView&amp;noscript=1" /></noscript>
-    <div id="root"></div>
+    <div id="root"><div id="ttc-boot"><span>Twist &amp; Tangle Crochet</span><i></i></div></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
