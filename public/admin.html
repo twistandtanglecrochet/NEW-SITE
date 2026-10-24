@@ -327,6 +327,110 @@
   .qr-link-row .btn { margin-top: 0; white-space: nowrap; }
   .qr-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
   .qr-actions .btn { margin-top: 0; }
+  /* ---- site settings ---- */
+  .sw { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--charcoal); margin: 10px 0 4px; cursor: pointer; }
+  .sw input { width: 20px; height: 20px; accent-color: var(--maroon); flex-shrink: 0; margin: 0; }
+  .srow { display: grid; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .srow .move-btn { height: 36px; min-width: 36px; }
+  .trow { display: grid; grid-template-columns: 150px 1fr 1fr; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .trow .tkey { font-size: 11.5px; color: #7A6E64; word-break: break-all; }
+  .trow.thead { font-size: 12px; font-weight: 700; color: #7A6E64; margin-top: 10px; }
+  .tlist { max-height: 460px; overflow: auto; padding-right: 4px; }
+  @media (max-width: 760px) { .trow { grid-template-columns: 1fr; } .trow.thead { display: none; } }
+
+  /* ---- "New look" for this admin panel (button at the top switches it) ---- */
+  body.skin-new { background: var(--cream); }
+  body.skin-new .topbar { background: var(--maroon-dark); color: var(--cream); border-bottom: none; }
+  body.skin-new .topbar .brand { color: var(--cream); }
+  body.skin-new .icon-btn { color: var(--cream) !important; }
+  body.skin-new .icon-btn:hover { background: rgba(255,255,255,0.14) !important; }
+  body.skin-new .topbar .signout { background: var(--cream); color: var(--maroon-dark); border-radius: 999px; font-weight: 600; }
+  body.skin-new .card { background: #fff; border-radius: 22px; padding: 24px; box-shadow: 0 6px 22px rgba(63,18,32,0.08); }
+  body.skin-new .card h2 { font-size: 18px; }
+  body.skin-new .btn { border-radius: 999px; }
+  body.skin-new input[type="text"], body.skin-new input[type="number"], body.skin-new textarea, body.skin-new select { border-radius: 12px; background: var(--cream); }
+  body.skin-new .product-row { background: var(--cream); border-radius: 16px; }
+  body.skin-new:not(.nav-collapsed) .nav-item { border-radius: 999px; margin-left: 12px; padding-left: 18px; }
+  body.skin-new .nav-item.active { background: var(--maroon); color: var(--cream); }
+  body.skin-new .nav-item.active svg { color: var(--cream); }
+
+  /* --- grouped menu, search, back button, settings pages --- */
+  a.brand { text-decoration: none; color: inherit; }
+  a.signout { text-decoration: none; display: inline-flex; align-items: center; border: none; border-radius: 8px; padding: 0 14px; height: 36px; font-size: 13px; font-weight: 500; white-space: nowrap; }
+  @media (max-width: 760px) { #viewShop { display: none; } }
+  .sidebar { overflow-y: auto; max-height: calc(100vh - 65px); }
+  .nav-body { display: flex; flex-direction: column; }
+  .nav-search { padding: 4px 12px 8px 16px; }
+  .nav-search input { width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: 999px; border: 1px solid #E4D8CE; background: var(--bg-soft); font: inherit; font-size: 14px; }
+  body.nav-collapsed .nav-search, body.nav-collapsed .nav-results { display: none; }
+  @media (max-width: 760px) { body.nav-collapsed .nav-search, body.nav-collapsed .nav-results { display: block; } .sidebar { max-height: none; } }
+  .nav-results { padding: 0 12px 8px 16px; }
+  .nav-result { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; border: none; background: none; padding: 9px 10px; border-radius: 10px; cursor: pointer; font: inherit; font-size: 14px; color: var(--charcoal); }
+  .nav-result:hover, .nav-result:focus-visible { background: var(--bg-soft); }
+  .nr-type { font-size: 10.5px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: #7A6E64; min-width: 52px; }
+  .nr-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sidebar.searching .nav-body { display: none; }
+  .nav-group { font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+  .nav-item { height: 44px; padding-left: 16px; }
+  .nav-item .nav-label { margin-left: 12px; }
+  .nav-ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0; color: #fff; }
+  .nav-ic svg, .nav-item.active .nav-ic svg { color: #fff; }
+  .nav-ic.t-red { background: #E5484D; } .nav-ic.t-amber { background: #E58A00; } .nav-ic.t-purple { background: #8B5CF6; }
+  .nav-ic.t-green { background: #22A06B; } .nav-ic.t-blue { background: #3B82F6; } .nav-ic.t-teal { background: #0EA5A4; }
+  .nav-ic.t-pink { background: #EC4899; } .nav-ic.t-gray { background: #6B7280; }
+  body.nav-collapsed .nav-item { padding: 0 0 0 9px; }
+  @media (max-width: 760px) { body.nav-collapsed .nav-item { padding: 0 0 0 16px; } }
+  body.skin-new:not(.nav-collapsed) .nav-item { padding-left: 14px; }
+  .lrow { border: 1px solid #E8DDD3; border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; background: var(--bg-soft); }
+  .lrow-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .lrow-actions { display: inline-flex; gap: 6px; }
+  .lrow .move-btn { height: 34px; min-width: 34px; }
+  .lrow label:not(.sw) { margin-top: 8px; }
+  .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .dash-tile { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; text-align: left; border: none; border-radius: 16px; padding: 14px 16px; cursor: pointer; font: inherit; font-size: 13px; color: #fff; }
+  .dash-tile .dash-n { font-size: 30px; font-weight: 700; line-height: 1.1; }
+  .dash-tile.t-red { background: #E5484D; } .dash-tile.t-amber { background: #E58A00; } .dash-tile.t-purple { background: #8B5CF6; }
+  .dash-tile.t-green { background: #22A06B; } .dash-tile.t-blue { background: #3B82F6; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { border: 1px solid #E4D8CE; background: var(--bg-soft); color: var(--charcoal); border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .pill:hover { background: #F3D8DE; }
+  .settings-pane .card + .card { margin-top: 16px; }
+  #productFilter, #priceFilter { width: 100%; box-sizing: border-box; margin-bottom: 4px; padding: 10px 14px; border-radius: 10px; border: 1px solid #E4D8CE; font: inherit; }
+  .ptable { border: 1px solid #E8DDD3; border-radius: 14px; overflow: hidden; margin: 10px 0 14px; }
+  .prow { display: grid; grid-template-columns: 1fr 120px 160px; gap: 10px; align-items: center; padding: 10px 14px; border-top: 1px solid #EFE6DD; }
+  .prow.head { border-top: none; background: var(--bg-soft); font-size: 12px; font-weight: 700; color: #5A5048; }
+  .prow.changed { background: #FFF6CC; }
+  .prow img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; }
+  .prow .pn { display: flex; gap: 10px; align-items: center; min-width: 0; }
+  .prow .pn b { display: block; font-size: 14px; } .prow .pn span { font-size: 12px; color: #7A6E64; }
+  .prow input, .prow select { width: 100%; box-sizing: border-box; }
+  .savebar { position: sticky; bottom: 8px; display: flex; gap: 12px; align-items: center; background: #fff; border-radius: 14px; padding: 10px 14px; box-shadow: 0 4px 18px rgba(63,18,32,.15); }
+  @media (max-width: 760px) { .prow { grid-template-columns: 1fr 96px; } .prow select { grid-column: 1 / -1; } .prow.head span:last-child { display: none; } }
+  .order-extra { margin-top: 10px; display: grid; gap: 8px; }
+  .oe-row { display: flex; align-items: center; gap: 10px; } .oe-row label { margin: 0; font-size: 12px; font-weight: 700; color: #5A5048; } .oe-row select { flex: 1; max-width: 220px; }
+  .track-box { border: 1px dashed #D8CCC3; border-radius: 12px; padding: 10px 12px; background: var(--bg-soft); }
+  .track-box summary { cursor: pointer; font-size: 13px; }
+  .stage-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .btn.wa { background: #25D366; color: #fff; text-decoration: none; display: inline-flex; align-items: center; }
+  .btn.small { padding: 6px 12px; font-size: 12.5px; margin: 0; text-decoration: none; display: inline-flex; align-items: center; }
+  .sales-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 14px; }
+  .sale-tile { display: flex; flex-direction: column; gap: 4px; text-align: left; background: #fff; border: 1px solid #E8DDD3; border-radius: 14px; padding: 14px 16px; font: inherit; cursor: default; }
+  .sale-tile span { font-size: 12.5px; font-weight: 700; color: #5A5048; } .sale-tile b { font-size: 24px; color: var(--maroon-dark); } .sale-tile small { color: #7A6E64; font-size: 12px; }
+  .sale-tile.warn { background: #FBF0D4; border-color: #E8CF8C; cursor: pointer; }
+  .bar-row { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 10px; align-items: center; padding: 6px 0; font-size: 13.5px; }
+  .bar { background: var(--bg-soft); border-radius: 999px; height: 10px; overflow: hidden; } .bar i { display: block; height: 100%; background: var(--maroon); border-radius: 999px; }
+  .link-row { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid #E8DDD3; border-radius: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .link-ic { width: 36px; height: 36px; border-radius: 10px; background: var(--bg-soft); display: grid; place-items: center; font-size: 18px; }
+  .link-main { flex: 1; min-width: 160px; display: flex; flex-direction: column; } .link-main code { font-size: 11.5px; color: #7A6E64; word-break: break-all; }
+  .link-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .onpage { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 12px; color: #7A6E64; }
+  .onpage .pill { padding: 6px 12px; font-size: 12.5px; }
+  .nav-sub { display: flex; flex-direction: column; margin: 2px 12px 6px 38px; padding-left: 12px; border-left: 2px solid #E8CF8C; }
+  .nav-sub button { border: none; background: none; text-align: left; font: inherit; font-size: 12.5px; color: #5A5048; padding: 5px 4px; cursor: pointer; }
+  .nav-sub button:hover { color: var(--maroon); }
+  body.nav-collapsed .nav-sub { display: none; }
+  @media (max-width: 760px) { body.nav-collapsed .nav-sub { display: flex; } }
+  .card { scroll-margin-top: 80px; }
 </style>
 </head>
 <body>
@@ -349,7 +453,12 @@
     <button type="button" class="icon-btn" id="menuBtn" aria-label="Show or hide menu" aria-expanded="true">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
-    <div class="brand">TTC Admin</div>
+    <button type="button" class="icon-btn" id="backBtn" aria-label="Go back" title="Go back">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <a class="brand" id="brandLink" href="/" title="Back to the shop">TTC Admin</a>
+    <a class="signout" id="viewShop" href="/?preview=1" target="_blank" rel="noopener" title="Open the shop in a new tab">View shop ↗</a>
+    <button type="button" class="signout" id="skinBtn" title="Switch between the Classic and New look of this admin panel">New look</button>
     <button type="button" class="signout" id="signOutBtn">Sign out</button>
   </header>
   <div class="order-alert hidden" id="orderAlert" role="alert">
@@ -361,16 +470,44 @@
 
   <div class="shell">
     <nav class="sidebar" id="sidebar" aria-label="Admin sections">
-      <button type="button" class="nav-item" data-view="import" title="Import products"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span class="nav-label">Import products</span></button>
-      <button type="button" class="nav-item" data-view="add" title="Add new product"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span class="nav-label">Add new product</span></button>
-      <button type="button" class="nav-item" data-view="products" title="Manage products"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span class="nav-label">Manage products</span></button>
-      <button type="button" class="nav-item" data-view="reviews" title="Reviews"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="m12 8 1 2 2 .3-1.5 1.4.4 2.1L12 12.8l-1.9 1 .4-2.1L9 10.3l2-.3z"/></svg><span class="nav-label">Reviews</span><span class="nav-badge hidden" id="navBadgeReviews"></span></button>
-      <button type="button" class="nav-item" data-view="manageReviews" title="Manage reviews"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg><span class="nav-label">Manage reviews</span></button>
-      <button type="button" class="nav-item" data-view="orders" title="Orders"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span class="nav-label">Orders</span><span class="nav-badge hidden" id="navBadgeOrders"></span></button>
+      <div class="nav-search"><input type="search" id="navSearch" placeholder="Search pages, products, orders…" aria-label="Search the admin" autocomplete="off" /></div>
+      <div class="nav-results hidden" id="navResults"></div>
+      <div class="nav-body">
+      <button type="button" class="nav-item" data-view="dashboard" data-kw="home overview start" title="Dashboard"><span class="nav-ic t-blue"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="nav-label">Dashboard</span></button>
+      <button type="button" class="nav-item" data-view="sales" data-kw="money revenue done total" title="Sales"><span class="nav-ic t-green"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16 7.5c0-1.7-1.8-3-4-3s-4 1.3-4 3 1.8 2.7 4 3 4 1.3 4 3-1.8 3-4 3-4-1.3-4-3"/></svg></span><span class="nav-label">Sales</span></button>
+      <button type="button" class="nav-item" data-view="links" data-kw="copy share qr whatsapp url" title="Links"><span class="nav-ic t-teal"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span><span class="nav-label">Links</span></button>
+      <div class="nav-group">Orders</div>
+      <button type="button" class="nav-item" data-view="orders" data-kw="customer order sales" title="Orders"><span class="nav-ic t-red"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></span><span class="nav-label">Orders</span><span class="nav-badge hidden" id="navBadgeOrders"></span></button>
+      <button type="button" class="nav-item" data-view="neworder" data-kw="manual whatsapp phone custom price" title="Place an order"><span class="nav-ic t-red"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span><span class="nav-label">Place an order</span></button>
+      <button type="button" class="nav-item" data-view="promos" data-kw="discount coupon" title="Promo codes"><span class="nav-ic t-amber"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg></span><span class="nav-label">Promo codes</span></button>
+      <div class="nav-group">Products</div>
+      <button type="button" class="nav-item" data-view="add" data-kw="create" title="Add new product"><span class="nav-ic t-green"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span><span class="nav-label">Add new product</span></button>
+      <button type="button" class="nav-item" data-view="products" data-kw="manage list carousel photos download" title="All products"><span class="nav-ic t-teal"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span><span class="nav-label">All products</span></button>
+      <button type="button" class="nav-item" data-view="prices" data-kw="bulk price tag sold out stock" title="Prices &amp; tags"><span class="nav-ic t-amber"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span><span class="nav-label">Prices &amp; tags</span></button>
+      <button type="button" class="nav-item" data-view="import" data-kw="csv upload bulk" title="Import products"><span class="nav-ic t-gray"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span><span class="nav-label">Import products</span></button>
+      <button type="button" class="nav-item" data-view="reviews" data-kw="approve" title="Reviews"><span class="nav-ic t-purple"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="m12 8 1 2 2 .3-1.5 1.4.4 2.1L12 12.8l-1.9 1 .4-2.1L9 10.3l2-.3z"/></svg></span><span class="nav-label">Reviews</span><span class="nav-badge hidden" id="navBadgeReviews"></span></button>
+      <button type="button" class="nav-item" data-view="manageReviews" data-kw="star homepage" title="Manage reviews"><span class="nav-ic t-pink"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg></span><span class="nav-label">Manage reviews</span></button>
+      <div class="nav-group">Marketing</div>
+      <button type="button" class="nav-item" data-view="announce" data-kw="offer sale notice top bar" title="Announcement bars"><span class="nav-ic t-red"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6"/></svg></span><span class="nav-label">Announcement bars</span></button>
+      <button type="button" class="nav-item" data-view="carousel" data-kw="slider slideshow photos banner" title="Homepage carousel"><span class="nav-ic t-blue"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="m3 17 5-4 4 3 3-2 6 4"/></svg></span><span class="nav-label">Homepage carousel</span></button>
+      <button type="button" class="nav-item" data-view="ads" data-kw="advert popup banner" title="Ads"><span class="nav-ic t-amber"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 10h8M8 14h5"/></svg></span><span class="nav-label">Ads</span></button>
+      <div class="nav-group">Website</div>
+      <button type="button" class="nav-item" data-view="brand" data-kw="brand logo name address colours colors fonts website text photos" title="Look &amp; brand"><span class="nav-ic t-pink"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="15.5" cy="10" r="1"/></svg></span><span class="nav-label">Look &amp; brand</span></button>
+      <button type="button" class="nav-item" data-view="hero" data-kw="heading reveal word rotator transition" title="Heading & effects"><span class="nav-ic t-purple"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h10M5 18h6"/></svg></span><span class="nav-label">Heading & effects</span></button>
+      <button type="button" class="nav-item" data-view="homesections" data-kw="reviews shuffle tiles stats bento visit order" title="Home sections"><span class="nav-ic t-teal"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="6" rx="1.5"/><rect x="3" y="12" width="8" height="9" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/></svg></span><span class="nav-label">Home sections</span></button>
+      <button type="button" class="nav-item" data-view="cards" data-kw="layout price filter wishlist recently explore" title="Product cards & filters"><span class="nav-ic t-green"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 14h14"/></svg></span><span class="nav-label">Product cards & filters</span></button>
+      <button type="button" class="nav-item" data-view="look" data-kw="spacing corners animation scroll" title="Look & motion"><span class="nav-ic t-pink"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="15.5" cy="10" r="1"/></svg></span><span class="nav-label">Look & motion</span></button>
+      <button type="button" class="nav-item" data-view="productpage" data-kw="product page details tabs sizes colours includes" title="Product page"><span class="nav-ic t-amber"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span class="nav-label">Product page</span></button>
+      <button type="button" class="nav-item" data-view="guide" data-kw="order guide how to order steps help" title="Order guide"><span class="nav-ic t-blue"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg></span><span class="nav-label">Order guide</span></button>
+      <button type="button" class="nav-item" data-view="footer" data-kw="links designed by credit" title="Footer"><span class="nav-ic t-gray"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15h18"/></svg></span><span class="nav-label">Footer</span></button>
+      <button type="button" class="nav-item" data-view="i18n" data-kw="urdu english language" title="Translations"><span class="nav-ic t-blue"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18"/></svg></span><span class="nav-label">Translations</span></button>
+      <div class="nav-group">Shop</div>
+      <button type="button" class="nav-item" data-view="shopinfo" data-kw="maintenance free delivery timings" title="Shop info & delivery"><span class="nav-ic t-amber"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9l1-5h14l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg></span><span class="nav-label">Shop info & delivery</span></button>
+      <button type="button" class="nav-item" data-view="speed" data-kw="offline install pwa photos" title="Speed & app"><span class="nav-ic t-red"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></svg></span><span class="nav-label">Speed & app</span></button>
+      <button type="button" class="nav-item" data-view="orderflow" data-kw="checkout tracking whatsapp form" title="Order &amp; checkout"><span class="nav-ic t-amber"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 11h10.2l2-8H6.2"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg></span><span class="nav-label">Order &amp; checkout</span></button>
       <div class="nav-group">More</div>
-      <button type="button" class="nav-item" data-view="promos" title="Promo codes"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg><span class="nav-label">Promo codes</span></button>
-      <button type="button" class="nav-item" data-view="tools" title="Tools"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4a5 5 0 0 0-4.6 6.9L4 17.3V20h2.7l6.4-6.4A5 5 0 0 0 20 9l-3 1-2-2 1-3z"/></svg><span class="nav-label">Tools</span></button>
-    </nav>
+      <button type="button" class="nav-item" data-view="tools" data-kw="admins backup" title="Tools"><span class="nav-ic t-gray"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4a5 5 0 0 0-4.6 6.9L4 17.3V20h2.7l6.4-6.4A5 5 0 0 0 20 9l-3 1-2-2 1-3z"/></svg></span><span class="nav-label">Tools</span></button>
+      </div></nav>
     <div class="scrim" id="scrim"></div>
 
     <main class="wrap">
@@ -414,6 +551,24 @@
         <label>Description</label>
         <textarea id="f_desc" required></textarea>
 
+        <label>Short line under the name <span class="hint" style="display:inline">(optional, e.g. “Handmade · 100% cotton”)</span></label>
+        <input type="text" id="f_short" maxlength="90" />
+
+        <label>Details <span class="hint" style="display:inline">(shown in the product's “Details” tab)</span></label>
+        <div id="detailRows"></div>
+        <div id="detailPresets" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0"></div>
+        <button type="button" class="btn secondary" id="detailAdd">+ Add a line</button>
+
+        <label>Sizes available <span class="hint" style="display:inline">(comma separated, e.g. S, M, L)</span></label>
+        <input type="text" id="f_sizesAv" placeholder="S, M, L" />
+
+        <label>Colours available <span class="hint" style="display:inline">(only if you have no colour photos below; comma separated)</span></label>
+        <input type="text" id="f_coloursText" placeholder="Maroon, Cream, Gold" />
+
+        <label>Price includes</label>
+        <div id="inclChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px"></div>
+        <input type="text" id="f_inclOther" placeholder="Other (comma separated)" />
+
         <label>Swatch colors (used as the little color dots)</label>
         <div class="swatchrow">
           <input type="color" id="f_swatch1" value="#6E1E36" />
@@ -443,11 +598,30 @@
     </div>
     </section>
 
+    <section data-view-panel="prices" class="hidden">
+    <div class="card">
+      <h2>Prices &amp; tags</h2>
+      <p class="hint">Change the price and tag (New, Bestseller, Limited Stock, Sold Out) of many products at once, then press Save. Rows you changed turn yellow.</p>
+      <input type="search" id="priceFilter" placeholder="Filter products" aria-label="Filter products" />
+      <div class="ptable" id="priceTable"></div>
+      <div class="savebar"><button type="button" class="btn" id="priceSave" disabled>Save changes</button><span class="hint" id="priceMsg" style="margin:0">Tag “Sold Out” shows the Sold Out badge on the shop.</span></div>
+    </div>
+    </section>
+
+    <section data-view-panel="brand" class="hidden"><div class="settings-pane" data-pane="brand"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="sales" class="hidden"><div id="salesRoot"></div></section>
+    <section data-view-panel="links" class="hidden"><div id="linksRoot"></div></section>
+    <section data-view-panel="neworder" class="hidden"><div id="manualRoot"></div></section>
+    <section data-view-panel="orderflow" class="hidden"><div class="settings-pane" data-pane="orderflow"><div class="card"><p class="hint">Loading…</p></div></div></section>
+
     <section data-view-panel="products" class="hidden">
     <div class="card">
       <h2>Current products (<span id="countLabel">0</span>)</h2>
+      <input type="search" id="productFilter" placeholder="Search products by name or category…" aria-label="Search products" />
+      <p class="hint" style="margin-top:6px">“Carousel +” puts the product's main photo in the homepage carousel; press again to take it out.</p>
       <div class="msg error hidden" id="listError"></div>
       <div class="product-list" id="productList"></div>
+      <div class="msg" id="dlMsg"></div>
     </div>
 
     <div class="card">
@@ -509,6 +683,7 @@
         <button type="button" class="chip active" data-order-filter="new">New <span id="ordersNewCount">0</span></button>
         <button type="button" class="chip" data-order-filter="starred">Starred <span id="ordersStarredCount">0</span></button>
         <button type="button" class="chip" data-order-filter="done">Done <span id="ordersDoneCount">0</span></button>
+        <button type="button" class="chip" data-order-filter="cancelled">Cancelled <span id="ordersCancelledCount">0</span></button>
       </div>
       <div class="msg error hidden" id="orderListError"></div>
       <div class="order-list" id="orderList"></div>
@@ -569,6 +744,20 @@
       </div>
     </div>
     </section>
+    <section data-view-panel="dashboard" class="hidden"><div class="settings-pane" data-pane="dashboard"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="announce" class="hidden"><div class="settings-pane" data-pane="announce"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="carousel" class="hidden"><div class="settings-pane" data-pane="carousel"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="ads" class="hidden"><div class="settings-pane" data-pane="ads"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="hero" class="hidden"><div class="settings-pane" data-pane="hero"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="homesections" class="hidden"><div class="settings-pane" data-pane="homesections"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="cards" class="hidden"><div class="settings-pane" data-pane="cards"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="look" class="hidden"><div class="settings-pane" data-pane="look"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="productpage" class="hidden"><div class="settings-pane" data-pane="productpage"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="guide" class="hidden"><div class="settings-pane" data-pane="guide"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="footer" class="hidden"><div class="settings-pane" data-pane="footer"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="i18n" class="hidden"><div class="settings-pane" data-pane="i18n"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="shopinfo" class="hidden"><div class="settings-pane" data-pane="shopinfo"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="speed" class="hidden"><div class="settings-pane" data-pane="speed"><div class="card"><p class="hint">Loading…</p></div></div></section>
     </main>
   </div>
 </div>
@@ -675,6 +864,7 @@
       return;
     }
     showOnly(appEl);
+    loadSettings();
     startProductListener();
     startReviewListener();
     startOrderListener();
@@ -683,13 +873,22 @@
   });
 
   // ---- sidebar navigation (Keep-style) ----
-  const VIEWS = ["import", "add", "products", "reviews", "manageReviews", "orders", "promos", "tools"];
+  const VIEWS = ["dashboard", "import", "add", "products", "prices", "brand", "sales", "links", "neworder", "orderflow", "reviews", "manageReviews", "orders", "promos", "tools", "announce", "carousel", "ads", "hero", "homesections", "cards", "productpage", "guide", "look", "footer", "i18n", "shopinfo", "speed"];
   const isPhone = () => window.matchMedia("(max-width: 760px)").matches;
 
-  let currentView = "orders";
+  let currentView = "dashboard";
+  let appStarted = false;   // set once the settings code below has loaded
+  const viewStack = [];     // pages visited before this one (for the Back button)
   let alertsReady = false; // set once the alert code below has loaded
-  function showView(name) {
-    if (!VIEWS.includes(name)) name = "orders";
+  function showView(name, opts = {}) {
+    if (!VIEWS.includes(name)) name = "dashboard";
+    if (!opts.initial && !opts.fromBack && !opts.fromPop && name !== currentView) {
+      viewStack.push(currentView);
+      if (viewStack.length > 40) viewStack.shift();
+      try { history.pushState({ view: name }, "", "#" + name); } catch (e) {}
+    } else if (opts.fromPop && viewStack[viewStack.length - 1] === name) {
+      viewStack.pop();
+    }
     currentView = name;
     if (name === "orders" && alertsReady) markOrdersSeen(true);
     document.querySelectorAll("[data-view-panel]").forEach((panel) =>
@@ -700,7 +899,8 @@
       btn.classList.toggle("active", active);
       if (active) btn.setAttribute("aria-current", "page"); else btn.removeAttribute("aria-current");
     });
-    if (location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
+    if (name === "dashboard" && appStarted) renderDashboard();
+    if (opts.fromBack || opts.initial) { try { history.replaceState({ view: name }, "", "#" + name); } catch (e) {} }
     document.body.classList.remove("nav-open");
     window.scrollTo({ top: 0 });
   }
@@ -732,7 +932,7 @@
     el.classList.toggle("hidden", !count);
   }
 
-  showView(location.hash.replace("#", "") || "orders");
+  showView(location.hash.replace("#", "") || "dashboard", { initial: true });
 
   // ---- product list ----
   let unsub = null;
@@ -749,7 +949,7 @@
       (snap) => {
         $("listError").classList.add("hidden");
         $("listError").textContent = "";
-        currentProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        currentProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() })); refreshDash();
         currentProducts.sort((a, b) => {
           const aHas = typeof a.order === "number";
           const bHas = typeof b.order === "number";
@@ -814,7 +1014,11 @@
       list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No products added here yet. This list is separate from the site\'s built-in starter catalog (the 16 starter products) — anything you add here shows up on the site alongside them.</p>';
       return;
     }
+    const fq = (($("productFilter") || { value: "" }).value || "").trim().toLowerCase();
+    let shown = 0;
     currentProducts.forEach((p, idx) => {
+      if (fq && !((p.name || "") + " " + (p.category || "")).toLowerCase().includes(fq)) return;
+      shown++;
       const row = document.createElement("div");
       row.className = "product-row";
       const img = (p.photos && p.photos[0]) || "";
@@ -832,12 +1036,21 @@
           <div class="meta">Rs${p.price} — ${escapeHtml(p.category)}</div>
         </div>
         <div class="actions">
+          <button class="secondary" data-car="${p.id}" title="Add or remove this product's main photo in the homepage carousel">${inCarousel(p.id) ? "In carousel ✓" : "Carousel +"}</button>
+          <button class="secondary" data-photos="${p.id}" title="Download all photos of this product">Photos ⬇</button>
           <button class="secondary" data-edit="${p.id}">Edit</button>
           <button class="danger" data-delete="${p.id}" style="color:#fff;">Delete</button>
         </div>
       `;
       list.appendChild(row);
     });
+    if (!shown) list.innerHTML = '<p style="color:#7A6E64;font-size:13px;">No product matches your search.</p>';
+    list.querySelectorAll("[data-car]").forEach((btn) =>
+      btn.addEventListener("click", () => toggleCarousel(btn.getAttribute("data-car")))
+    );
+    list.querySelectorAll("[data-photos]").forEach((btn) =>
+      btn.addEventListener("click", () => downloadProductPhotos(btn.getAttribute("data-photos")))
+    );
     list.querySelectorAll("[data-edit]").forEach((btn) =>
       btn.addEventListener("click", () => startEdit(btn.getAttribute("data-edit")))
     );
@@ -897,7 +1110,7 @@
       (snap) => {
         $("reviewListError").classList.add("hidden");
         $("reviewListError").textContent = "";
-        currentReviews = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        currentReviews = snap.docs.map((d) => ({ id: d.id, ...d.data() })); refreshDash();
         renderReviewList();
       },
       (err) => {
@@ -1016,7 +1229,7 @@
       q,
       (snap) => {
         $("orderListError").classList.add("hidden");
-        currentOrders = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        currentOrders = snap.docs.map((d) => ({ id: d.id, ...d.data() })); refreshDash();
         detectNewOrders(currentOrders);
         renderOrders();
       },
@@ -1036,8 +1249,9 @@
     })
   );
 
+  const CHANNELS = [["website", "Website"], ["whatsapp", "WhatsApp"], ["instagram", "Instagram"], ["facebook", "Facebook"], ["phone", "Phone call"], ["shop", "In the shop"], ["other", "Other"]];
   function channelClass(ch) { return ch === "website" ? "website" : ch === "instagram" ? "instagram" : "whatsapp"; }
-  function channelLabel(ch) { return ch === "website" ? "Website" : ch === "instagram" ? "Instagram" : "WhatsApp"; }
+  function channelLabel(ch) { const f = CHANNELS.find((c) => c[0] === ch); return f ? f[1] : "WhatsApp"; }
 
   // ---- new order alerts ----
   // Orders already in the database when the page opens are remembered
@@ -1173,15 +1387,17 @@
   }
 
   function renderOrders() {
-    const fresh = currentOrders.filter((o) => o.status !== "done");
+    const fresh = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled");
     const done = currentOrders.filter((o) => o.status === "done");
+    const cancelled = currentOrders.filter((o) => o.status === "cancelled");
+    $("ordersCancelledCount").textContent = cancelled.length;
     const starred = currentOrders.filter((o) => o.starred);
     $("ordersNewCount").textContent = fresh.length;
     $("ordersDoneCount").textContent = done.length;
     $("ordersStarredCount").textContent = starred.length;
     setBadge("navBadgeOrders", fresh.length);
 
-    let shown = orderFilter === "done" ? done : orderFilter === "starred" ? starred : fresh;
+    let shown = orderFilter === "done" ? done : orderFilter === "starred" ? starred : orderFilter === "cancelled" ? cancelled : fresh;
     // Starred orders float to the top of the New list.
     if (orderFilter === "new") shown = [...shown].sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0));
 
@@ -1192,6 +1408,7 @@
         new: "No new orders. They'll appear here as soon as a customer checks out.",
         starred: "No starred orders. Tap ☆ Star on any order to keep it here.",
         done: "Nothing marked done yet. Tap \"Move to done\" once an order is delivered.",
+        cancelled: "No cancelled orders.",
       }[orderFilter];
       list.innerHTML = '<p class="empty">' + escapeHtml(empty) + "</p>";
       return;
@@ -1228,11 +1445,13 @@
             </li>`).join("")}
         </ul>
         <div class="order-total">
-          ${o.channel === "website" ? `<span>Delivery: to confirm</span>` : ""}
+          ${Number(o.deliveryCharge) > 0 ? `<span>Delivery: Rs${Number(o.deliveryCharge)}</span>` : (o.channel === "website" ? `<span>Delivery: to confirm</span>` : "")}
           ${o.promo ? `<span>Promo ${escapeHtml(o.promo)}: -Rs${Number(o.discount) || 0}</span>` : ""}
           <strong>Total Rs${Number(o.total) || 0}</strong>
         </div>
+        ${orderExtras(o)}
         <div class="order-actions">
+          ${orderCardExtraActions(o)}
           <button type="button" class="star-toggle${o.starred ? " is-featured" : ""}" data-order-star="${o.id}">${o.starred ? "★ Starred" : "☆ Star"}</button>
           ${isDone
             ? `<button type="button" class="undo-btn" data-order-undo="${o.id}">Move back to new</button>`
@@ -1721,7 +1940,31 @@
   });
 
   // ---- form: add / edit ----
+  const DETAIL_PRESETS = ["Size", "Material", "Weight", "Care", "Made in"];
+  const INCL_PRESETS = ["Item", "Gift wrap", "Box", "Pouch", "Card"];
+  let detailItems = [];
+  let inclSel = [];
+  function renderDetails() {
+    const box = $("detailRows"); if (!box) return;
+    box.innerHTML = detailItems.map((d, i) => `<div style="display:grid;grid-template-columns:1fr 1.6fr auto;gap:6px;margin-bottom:6px"><input type="text" data-dl="${i}" data-f="label" value="${esc(d.label)}" placeholder="Size" /><input type="text" data-dl="${i}" data-f="value" value="${esc(d.value)}" placeholder="Medium (about 10 cm)" /><button type="button" class="move-btn" data-dl-rm="${i}" title="Remove">✕</button></div>`).join("");
+    $("detailPresets").innerHTML = DETAIL_PRESETS.filter((n) => !detailItems.some((d) => d.label === n)).map((n) => `<button type="button" class="chip-btn" data-dl-preset="${esc(n)}" style="border:1px dashed #B98A2E;background:#fff;border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer">+ ${esc(n)}</button>`).join("");
+  }
+  function renderIncl() {
+    const box = $("inclChips"); if (!box) return;
+    box.innerHTML = INCL_PRESETS.map((n) => `<label style="display:flex;align-items:center;gap:5px;border:1px solid #E8DCC8;border-radius:999px;padding:4px 12px;font-size:13px;margin:0;cursor:pointer;background:${inclSel.includes(n) ? "#FBF0D4" : "#fff"}"><input type="checkbox" data-incl="${esc(n)}" ${inclSel.includes(n) ? "checked" : ""} style="width:auto;margin:0" /> ${esc(n)}</label>`).join("");
+  }
+  document.addEventListener("input", (e) => { const el = e.target; if (el.dataset && el.dataset.dl !== undefined) { const d = detailItems[Number(el.dataset.dl)]; if (d) d[el.dataset.f] = el.value; } });
+  document.addEventListener("change", (e) => { const el = e.target; if (el.dataset && el.dataset.incl) { const k = el.dataset.incl; inclSel = inclSel.filter((x) => x !== k); if (el.checked) inclSel.push(k); renderIncl(); } });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest && e.target.closest("[data-dl-rm],[data-dl-preset],#detailAdd"); if (!b) return;
+    if (b.id === "detailAdd") detailItems.push({ label: "", value: "" });
+    else if (b.dataset.dlRm !== undefined) detailItems.splice(Number(b.dataset.dlRm), 1);
+    else if (b.dataset.dlPreset) detailItems.push({ label: b.dataset.dlPreset, value: "" });
+    renderDetails();
+  });
+  setTimeout(() => { renderDetails(); renderIncl(); }, 0);
   function resetForm() {
+    detailItems = []; inclSel = []; renderDetails(); renderIncl();
     $("productForm").reset();
     $("editId").value = "";
     $("f_swatch1").value = "#6E1E36";
@@ -1747,6 +1990,14 @@
     $("f_price").value = p.price || "";
     $("f_tag").value = p.tag || "";
     $("f_desc").value = p.desc || "";
+    $("f_short").value = p.shortLine || "";
+    $("f_sizesAv").value = (Array.isArray(p.sizesAvailable) ? p.sizesAvailable : []).join(", ");
+    $("f_coloursText").value = p.coloursText || "";
+    detailItems = (Array.isArray(p.details) ? p.details : []).map((d) => ({ label: d.label || "", value: d.value || "" }));
+    const inc = Array.isArray(p.includes) ? p.includes : [];
+    inclSel = inc.filter((x) => INCL_PRESETS.includes(x));
+    $("f_inclOther").value = inc.filter((x) => !INCL_PRESETS.includes(x)).join(", ");
+    renderDetails(); renderIncl();
     $("f_swatch1").value = (p.swatch && p.swatch[0]) || "#6E1E36";
     $("f_swatch2").value = (p.swatch && p.swatch[1]) || "#B98A2E";
 
@@ -1852,6 +2103,11 @@
         category,
         tag: $("f_tag").value.trim() || null,
         desc: $("f_desc").value.trim(),
+        shortLine: $("f_short").value.trim(),
+        details: detailItems.map((d) => ({ label: String(d.label || "").trim(), value: String(d.value || "").trim() })).filter((d) => d.label && d.value),
+        sizesAvailable: $("f_sizesAv").value.split(",").map((x) => x.trim()).filter(Boolean),
+        coloursText: $("f_coloursText").value.trim(),
+        includes: inclSel.concat($("f_inclOther").value.split(",").map((x) => x.trim()).filter(Boolean)),
         swatch: [$("f_swatch1").value, $("f_swatch2").value],
         photos,
         variants,
@@ -1888,6 +2144,1235 @@
       $("submitBtn").disabled = false;
     }
   });
+
+
+  // =====================================================================
+  // Site settings (all the pages under Marketing / Website / Shop) — saved in
+  // config/siteSettings. Every switch starts OFF; the shop reads this live.
+  // Also here: dashboard, global search, Back button, "Carousel" button in
+  // All products, Classic / New look of this admin.
+  // =====================================================================
+  const SETTINGS_REF = doc(db, "config", "siteSettings");
+  const CARD_LAYOUT_NAMES = [
+    "1 — Classic (current look)", "2 — Minimal", "3 — Floating info", "4 — Horizontal", "5 — Outlined",
+    "6 — Compact", "7 — Polaroid", "8 — Price badge", "9 — Banner", "10 — Elegant",
+  ];
+  const SECTION_LABELS = {
+    hero: "Top banner (heading + slideshow)",
+    ads: "Ad banners",
+    tiles: "Category tiles",
+    bento: "Stats boxes",
+    shop: "The collection (products)",
+    recent: "Recently viewed",
+    reviews: "What customers say",
+    visit: "Visit our store",
+  };
+  // Which groups of switches live on which admin page.
+  const PANES = {
+    announce: { title: "Announcement bars", intro: "Thin bars at the very top of the shop (sale news, delivery notice, …). Each bar has its own on/off.", groups: ["announce"] },
+    carousel: { title: "Homepage carousel", intro: "The photos that slide at the top of the home page. Add a product's main photo from All products (press “Carousel +”), or add pictures here.", groups: ["carousel"] },
+    ads: { title: "Ads", intro: "Picture ads for your own offers: a banner on the home page or a pop-up. Each ad has its own on/off.", groups: ["ads"] },
+    hero: { title: "Heading & effects", intro: "The big heading at the top of the home page.", groups: ["hero"] },
+    homesections: { title: "Home sections", intro: "Parts of the home page: reviews, tiles, stats, visit-store and their order.", groups: ["shuffle", "tiles", "bento", "visit", "sections"] },
+    cards: { title: "Product cards & filters", intro: "How products look and how customers find them.", groups: ["cards", "price", "wish", "recent", "explore"] },
+    productpage: { title: "Product page", intro: "What customers see when they open a product. Fill the details of each product in Add / edit product.", groups: ["ppage"] },
+    guide: { title: "Order guide", intro: "A “Complete order guide” bar under the top banner of the home page. Add, edit and re-order the steps.", groups: ["guidef", "guidesteps"] },
+    look: { title: "Look & motion", intro: "Spacing, corners and the little animations. Colors and fonts are not touched.", groups: ["look", "motion"] },
+    footer: { title: "Footer", intro: "A sorted footer with link columns, track-your-order, local time and social icons, plus links and the credit line.", groups: ["footerpro", "flinks", "designed"] },
+    brand: { title: "Look & brand", intro: "Shop name, logo, address, colours, fonts, website text and shop photos.", groups: ["brandid", "brandcolors", "brandtext", "brandphotos"] },
+    i18n: { title: "Translations", intro: "English / اردو for the whole shop.", groups: ["i18n"] },
+    shopinfo: { title: "Shop info & delivery", intro: "Maintenance page, free-delivery bar and shop timings.", groups: ["maint", "delivery", "timings"] },
+    orderflow: { title: "Order & checkout", intro: "How customers place and follow their orders.", groups: ["checkoutf", "trackingf"] },
+    speed: { title: "Speed & app", intro: "Faster loading and the phone-app options.", groups: ["speed", "pwa"] },
+  };
+  const FEATURES = [
+    ["maintenance.on", "Maintenance page", "shopinfo"], ["announcements.on", "Announcement bars", "announce"],
+    ["carousel.on", "Homepage carousel", "carousel"], ["ads.on", "Ads", "ads"],
+    ["heroReveal.on", "Heading reveal", "hero"], ["rotator.on", "Word rotator", "hero"],
+    ["reviewsShuffle.on", "Reviews shuffle", "homesections"], ["categoryTiles.on", "Category tiles", "homesections"],
+    ["bento.on", "Stats boxes", "homesections"], ["visit.on", "Visit-store", "homesections"], ["sections.on", "Custom section order", "homesections"],
+    ["cardLayout.on", "Card design", "cards"], ["priceFilter.on", "Price filter", "cards"], ["wishlist.on", "Wishlist", "cards"],
+    ["recent.on", "Recently viewed", "cards"], ["exploreMore.on", "Explore more", "cards"],
+    ["productPage.tabs", "Description / Details tabs", "productpage"], ["productPage.sizes", "Sizes available", "productpage"], ["productPage.colours", "Colours available", "productpage"], ["productPage.includes", "Price includes", "productpage"], ["guide.on", "Order guide", "guide"],
+    ["look.on", "Custom spacing & corners", "look"], ["motion.sections.on", "Scroll reveal", "look"], ["motion.cards.on", "Card motion", "look"], ["motion.overlays.on", "Cart & pop-up motion", "look"],
+    ["brand.on", "Look & brand", "brand"], ["footer.on", "Sorted footer", "footer"], ["footerLinks.on", "Footer links", "footer"], ["designedBy.on", "Designed-by credit", "footer"], ["i18n.on", "Urdu / English", "i18n"],
+    ["freeDelivery.on", "Free-delivery bar", "shopinfo"], ["timings.on", "Shop timings", "shopinfo"],
+    ["checkout.betterForm", "Better order form", "orderflow"], ["checkout.whatsappAuto", "WhatsApp after order", "orderflow"], ["tracking.on", "Order tracking", "orderflow"], ["speed.srcset", "Smaller photos", "speed"], ["speed.apiShop", "Fast shop data", "speed"], ["speed.sw", "Offline mode", "speed"],
+    ["pwa.install", "Install button", "speed"], ["pwa.safeArea", "Notch padding", "speed"],
+  ];
+  let S = null;        // the settings being edited
+  let SDEF = null;     // starting values (from /site-settings-defaults.json)
+  let IDEF = null;     // shop texts (from /i18n-defaults.json)
+  let SECTION_IDS = [];
+  let settingsStatus = "";
+
+  function isPlain(v) { return v && typeof v === "object" && !Array.isArray(v); }
+  function mergeDefaults(base, remote) {
+    if (!isPlain(base)) return remote === undefined || remote === null ? base : remote;
+    if (Object.keys(base).length === 0) return isPlain(remote) ? remote : {}; // free-form map (translations)
+    const out = {};
+    Object.keys(base).forEach((k) => {
+      out[k] = isPlain(base[k]) ? mergeDefaults(base[k], isPlain(remote) ? remote[k] : undefined)
+        : (isPlain(remote) && remote[k] !== undefined && remote[k] !== null ? remote[k] : base[k]);
+    });
+    return out;
+  }
+  function getPath(o, path) { return path.split(".").reduce((a, k) => (a == null ? undefined : a[k]), o); }
+  function setPath(o, path, v) {
+    const keys = path.split(".");
+    let cur = o;
+    keys.slice(0, -1).forEach((k) => { if (!isPlain(cur[k])) cur[k] = {}; cur = cur[k]; });
+    cur[keys[keys.length - 1]] = v;
+  }
+
+  async function loadSettings() {
+    settingsStatus = "";
+    try {
+      if (!SDEF) {
+        const d = await (await fetch("/site-settings-defaults.json", { cache: "no-store" })).json();
+        SDEF = d.defaults; SECTION_IDS = d.sectionIds;
+        IDEF = await (await fetch("/i18n-defaults.json", { cache: "no-store" })).json();
+      }
+    } catch (e) {
+      document.querySelectorAll(".settings-pane[data-pane]").forEach((p) => {
+        if (p.dataset.pane !== "dashboard") p.innerHTML = '<div class="card"><p class="msg error">Couldn\'t load this page (' + escapeHtml(e.message) + '). Refresh and try again.</p></div>';
+      });
+      return;
+    }
+    let remote = {};
+    try {
+      const snap = await getDoc(SETTINGS_REF);
+      if (snap.exists()) remote = snap.data();
+    } catch (e) {
+      settingsStatus = "error:Couldn't read the saved settings (" + (e.code || e.message) + "). The pages show the starting values. If this says permission-denied, add the rule shown at the bottom of Shop info & delivery.";
+    }
+    S = mergeDefaults(SDEF, remote);
+    renderSettings();
+    refreshDash();
+    renderList && currentProducts.length && renderList();
+  }
+
+  // ---- small HTML builders ----
+  const esc = escapeHtml;
+  const val = (path) => getPath(S, path);
+  function sw(path, label, hint) {
+    return `<label class="sw"><input type="checkbox" data-path="${path}" data-type="bool" ${val(path) ? "checked" : ""} /><span>${label}</span></label>${hint ? `<p class="hint">${hint}</p>` : ""}`;
+  }
+  function tf(path, label, opts = {}) {
+    const v = val(path);
+    const shown = Array.isArray(v) ? v.join(", ") : (v === undefined || v === null ? "" : v);
+    const type = opts.type === "num" ? "number" : "text";
+    const attrs = `data-path="${path}" data-type="${opts.type || "text"}" value="${esc(shown)}" ${opts.ph ? `placeholder="${esc(opts.ph)}"` : ""} ${opts.rtl ? 'dir="rtl"' : ""} ${opts.min !== undefined ? `min="${opts.min}"` : ""}`;
+    return `<label>${label}</label>${opts.area
+      ? `<textarea data-path="${path}" data-type="text" ${opts.ph ? `placeholder="${esc(opts.ph)}"` : ""} rows="${opts.rows || 3}">${esc(shown)}</textarea>`
+      : `<input type="${type}" ${attrs} />`}${opts.hint ? `<p class="hint">${opts.hint}</p>` : ""}`;
+  }
+  function sel(path, label, options, opts = {}) {
+    const cur = String(val(path));
+    return `<label>${label}</label><select data-path="${path}" data-type="${opts.type || "text"}">${options.map(([v, l]) => `<option value="${esc(v)}" ${cur === String(v) ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>${opts.hint ? `<p class="hint">${opts.hint}</p>` : ""}`;
+  }
+  function lsel(list, i, prop, options, cur) {
+    return `<select data-list="${list}" data-idx="${i}" data-prop="${prop}" data-type="text">${options.map(([v, l]) => `<option value="${esc(v)}" ${String(cur) === String(v) ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
+  }
+  function group(id, title, hint, body) {
+    return `<div class="card" id="grp_${id}"><h2>${title}</h2>${hint ? `<p class="hint">${hint}</p>` : ""}${body}</div>`;
+  }
+  const iconBtn = (act, idx, label, extra = "") => `<button type="button" class="move-btn" data-act="${act}" data-idx="${idx}" title="${label}" ${extra}>${label === "Remove" ? "✕" : label === "Up" ? "▲" : "▼"}</button>`;
+  const moveBtns = (name, i, n) => `${iconBtn("up-" + name, i, "Up", i === 0 ? "disabled" : "")}${iconBtn("down-" + name, i, "Down", i === n - 1 ? "disabled" : "")}${iconBtn("rm-" + name, i, "Remove")}`;
+  const listIn = (list, i, prop, v, type, extra = "") => `<input ${type === "num" ? 'type="number"' : 'type="text"'} data-list="${list}" data-idx="${i}" data-prop="${prop}" data-type="${type || "text"}" value="${esc(v === undefined || v === null ? "" : v)}" ${extra} />`;
+  const listChk = (list, i, prop, checked, label) => `<label class="sw" style="margin:0"><input type="checkbox" data-list="${list}" data-idx="${i}" data-prop="${prop}" data-type="bool" ${checked ? "checked" : ""} /><span>${label}</span></label>`;
+  const heroPhotoOf = (p) => (p && ((p.photos && p.photos[0]) || (p.variants && p.variants[0] && p.variants[0].photo))) || "";
+  const TONE_OPTS = [["maroon", "Maroon"], ["navy", "Navy"], ["gold", "Gold"], ["blush", "Blush (light)"], ["dark", "Dark maroon"]];
+
+  function buildGroups() {
+    const v = val;
+    const G = {};
+
+    // ---- Announcement bars ----
+    const bars = v("announcements.bars") || [];
+    G.announce = group("announce", "Announcement bars", "Add as many bars as you like; each one can be turned on or off on its own. Leave the Urdu line empty to show the same text in both languages.",
+      sw("announcements.on", "Show announcement bars on the shop") +
+      sel("announcements.style", "How several bars are shown", [["rotate", "One at a time (they take turns)"], ["stack", "All stacked on top of each other"], ["marquee", "Scrolling line"]]) +
+      sel("announcements.transition", "Change effect (for “one at a time”)", [["fade", "Fade"], ["slide", "Slide up"]]) +
+      tf("announcements.speed", "Seconds between bars ×1000 (milliseconds; for “scrolling” it sets the speed)", { type: "num", min: 1500 }) +
+      `<div style="margin-top:12px">${bars.map((b, i) => `
+        <div class="lrow">
+          <div class="lrow-head">${listChk("announcements.bars", i, "on", b.on !== false, "Bar " + (i + 1) + " is on")}<span class="lrow-actions">${moveBtns("bar", i, bars.length)}</span></div>
+          <label>Text</label>${listIn("announcements.bars", i, "text", b.text, "text", 'placeholder="Free delivery on orders above Rs 2000"')}
+          <label>Text in Urdu (optional)</label>${listIn("announcements.bars", i, "textUr", b.textUr, "text", 'dir="rtl"')}
+          <div class="row2"><div><label>Link (optional)</label>${listIn("announcements.bars", i, "link", b.link, "text", 'placeholder="https://… or /category/hair-clips"')}</div><div><label>Link words</label>${listIn("announcements.bars", i, "linkLabel", b.linkLabel, "text", 'placeholder="Shop now"')}</div></div>
+          <div class="row2"><div><label>Color</label>${lsel("announcements.bars", i, "tone", TONE_OPTS, b.tone || "maroon")}</div><div><label>&nbsp;</label>${listChk("announcements.bars", i, "dismissible", b.dismissible !== false, "Customer can close it")}</div></div>
+        </div>`).join("")}</div>` +
+      `<button type="button" class="btn secondary" data-act="add-bar" style="margin-top:6px">Add a bar</button>`);
+
+    // ---- Carousel ----
+    const slides = v("carousel.slides") || [];
+    const inCar = new Set(slides.map((s) => String(s.productId || "")));
+    const addable = currentProducts.filter((p) => !inCar.has(String(p.id)) && heroPhotoOf(p));
+    G.carousel = group("carousel", "Homepage carousel", "While this is off (or has no photos) the home page keeps its original four slides.",
+      sw("carousel.on", "Use the photos below on the home page") +
+      sw("carousel.autoplay", "Slide by itself") +
+      sel("carousel.transition", "Slide effect", [["slide", "Slide sideways"], ["fade", "Fade"], ["zoom", "Fade with a slow zoom"]]) +
+      tf("carousel.speed", "Time on each photo (milliseconds)", { type: "num", min: 1200 }) +
+      `<div style="margin-top:12px">${slides.length === 0 ? '<p class="hint">No photos yet. Go to All products and press “Carousel +” on a product, or add one below.</p>' : slides.map((s, i) => {
+        const prod = s.productId ? currentProducts.find((p) => String(p.id) === String(s.productId)) : null;
+        const photo = (prod && heroPhotoOf(prod)) || s.photo || "";
+        return `<div class="srow" style="grid-template-columns: 64px 1fr auto auto auto;">
+          <img src="${esc(photo)}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:8px;background:#fff" />
+          <div style="min-width:0"><div style="font-weight:600;font-size:14px">${esc((prod && prod.name) || s.name || "Picture")}</div><div class="hint" style="margin:0">${prod ? "Product photo (follows the product)" : "Custom picture"}</div></div>
+          ${moveBtns("slide", i, slides.length)}
+        </div>`;
+      }).join("")}</div>` +
+      `<label>Add a product's main photo</label>
+       <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="car_product" style="flex:1;min-width:180px"><option value="">Choose a product…</option>${addable.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("")}</select><button type="button" class="btn secondary" data-act="add-slide-product" style="margin-top:0">Add</button></div>` +
+      `<label>Add your own picture</label>
+       <div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="car_url" placeholder="Picture address (https://…)" style="flex:1;min-width:180px" /><button type="button" class="btn secondary" data-act="add-slide-url" style="margin-top:0">Add</button></div>
+       <div style="margin-top:8px"><input type="file" id="car_file" accept="image/*" data-upload="carousel" /> <span class="hint">or upload a picture</span></div>`);
+
+    // ---- Ads ----
+    const ads = v("ads.items") || [];
+    const AD_SIZES = [["strip", "Thin strip (970 × 90)"], ["banner", "Small banner (970 × 120)"], ["square", "Square box (300 × 250)"], ["wide", "Wide 16:9 (640 × 360)"], ["card", "Card (300 × 400)"]];
+    const AD_PLACES = [["underCarousel", "Under the carousel"], ["underTiles", "Under the categories"], ["betweenProducts", "Below the products"], ["aboveFooter", "Above the footer"], ["popup", "Pop-up (opens once per visit)"]];
+    const adImgs = (a) => (Array.isArray(a.images) && a.images.length ? a.images : (a.image ? [{ src: a.image }] : [])).map((x) => (typeof x === "string" ? { src: x } : x));
+    const adIn = (i, prop, v, type, extra = "") => `<input ${type === "num" || type === "date" ? `type="${type === "num" ? "number" : "date"}"` : 'type="text"'} data-ad="${i}" data-prop="${prop}" data-type="${type || "text"}" value="${esc(v === undefined || v === null ? "" : v)}" ${extra} />`;
+    const adSel = (i, prop, opts, cur) => `<select data-ad="${i}" data-prop="${prop}" data-type="text">${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(cur) === String(v) ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
+    const adChk = (i, prop, checked, label) => `<label class="sw" style="margin:0"><input type="checkbox" data-ad="${i}" data-prop="${prop}" data-type="bool" ${checked ? "checked" : ""} /><span>${label}</span></label>`;
+    G.ads = group("ads", "Ads", "Picture ads for your own offers. Each ad can have 1 to 5 pictures (they take turns like a carousel), a size, places to show, a closing button and dates. Each ad has its own on/off.",
+      sw("ads.on", "Show ads on the shop") +
+      tf("ads.popupDelay", "Pop-up opens after (seconds)", { type: "num", min: 0 }) +
+      `<div style="margin-top:12px">${ads.map((a, i) => {
+        const imgs = adImgs(a);
+        const places = Array.isArray(a.places) ? a.places : [(a.placement === "popup") ? "popup" : ""];
+        return `<div class="lrow">
+          <div class="lrow-head">${adChk(i, "on", a.on !== false, "Ad " + (i + 1) + " is on")}<span class="lrow-actions">${moveBtns("ad", i, ads.length)}</span></div>
+          <div class="row2"><div><label>Ad name (only you see it)</label>${adIn(i, "title", a.title, "text")}</div><div><label>Size</label>${adSel(i, "size", AD_SIZES, a.size || "banner")}</div></div>
+          <label>Pictures (1 to 5)</label>
+          <div class="hint" style="margin:0 0 6px">Computer picture is needed. The phone picture is optional (the computer one is used if empty). Several pictures change by themselves.</div>
+          ${imgs.map((im, j) => `<div class="srow" style="grid-template-columns: 56px 1fr 1fr auto;">
+            <img src="${esc(im.src)}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px;background:#fff" />
+            <div><input type="text" data-ad="${i}" data-img="${j}" data-prop="src" value="${esc(im.src)}" placeholder="Computer picture address" /><input type="file" accept="image/*" data-upload="adimg" data-idx="${i}" data-img="${j}" data-prop="src" style="margin-top:4px" /></div>
+            <div><input type="text" data-ad="${i}" data-img="${j}" data-prop="phone" value="${esc(im.phone || "")}" placeholder="Phone picture (optional)" /><input type="file" accept="image/*" data-upload="adimg" data-idx="${i}" data-img="${j}" data-prop="phone" style="margin-top:4px" /></div>
+            <button type="button" class="move-btn" data-act="rm-adimg" data-idx="${i}" data-img="${j}" title="Remove">✕</button>
+          </div>`).join("")}
+          ${imgs.length < 5 ? `<button type="button" class="btn secondary" data-act="add-adimg" data-idx="${i}" style="margin-top:2px">+ Add a picture (${imgs.length}/5)</button>` : '<div class="hint">5 of 5 pictures added.</div>'}
+          ${imgs.length > 1 ? `<div class="row2"><div><label>Seconds per picture</label>${adIn(i, "seconds", a.seconds === undefined ? 5 : a.seconds, "num", 'min="2" max="30"')}</div><div><label>Change effect</label>${adSel(i, "fx", [["fade", "Fade"], ["slide", "Slide"]], a.fx || "fade")}</div></div>` : ""}
+          <label>Opens (when tapped)</label>${adIn(i, "link", a.link, "text", 'placeholder="https://… or /category/hair-clips"')}
+          <label>Where it shows</label>
+          <div class="pills" style="gap:6px 14px">${AD_PLACES.map(([v, l]) => `<label class="sw" style="margin:2px 0;font-weight:500"><input type="checkbox" data-ad="${i}" data-place="${v}" ${places.includes(v) ? "checked" : ""} /><span>${l}</span></label>`).join("")}</div>
+          <div class="hint">Nothing ticked = the older “Ad banners” spot set in Home sections.</div>
+          <label>Closing</label>
+          ${adChk(i, "closable", !!a.closable, "Customer can close this ad (X button)")}
+          <div class="row2"><div><label>X can be pressed after (seconds, 0–15)</label>${adIn(i, "closeAfter", a.closeAfter === undefined ? 3 : a.closeAfter, "num", 'min="0" max="15"')}</div><div><label>After X, the ad comes back</label>${adSel(i, "comesBack", [["visit", "On the next visit"], ["reload", "On the next page load"], ["never", "Never (on this phone)"]], a.comesBack || "visit")}</div></div>
+          <div class="row2"><div><label>From</label>${adIn(i, "from", a.from, "date")}</div><div><label>Until (then it switches off by itself)</label>${adIn(i, "until", a.until, "date")}</div></div>
+        </div>`;
+      }).join("")}</div>` +
+      `<button type="button" class="btn secondary" data-act="add-ad" style="margin-top:6px">Add an ad</button>`);
+
+    // ---- Heading ----
+    G.hero = group("hero", "Heading effects", "The big heading at the top of the home page. Both effects have their own on/off and their own transition.",
+      sw("heroReveal.on", "Words come in one by one (reveal)") +
+      sel("heroReveal.style", "Reveal effect", [["rise", "Rise gently"], ["fade", "Fade in"], ["blur", "Un-blur"], ["slide", "Slide in from the left"], ["zoom", "Zoom in"]]) +
+      tf("heroReveal.step", "Pause between words (milliseconds)", { type: "num", min: 40 }) +
+      `<div style="height:12px"></div>` +
+      sw("rotator.on", "One word keeps changing (word rotator)", "Example: Handmade → Cute → Cozy. The word you type under “Word to replace” is swapped for the list below.") +
+      tf("rotator.target", "Word to replace (must be a word in the heading)", { ph: "Handmade" }) +
+      tf("rotator.words", "Words, separated by commas", { ph: "Handmade, Cute, Cozy" }) +
+      sel("rotator.fx", "Change effect", [["rise", "Rise (soft)"], ["fade", "Fade"], ["slide", "Slide up"], ["flip", "Flip"], ["blur", "Blur"], ["zoom", "Pop"]]) +
+      tf("rotator.speed", "Change every (milliseconds)", { type: "num", min: 1200 }) +
+      `<p class="hint" style="margin-top:14px">For the Urdu version of the site (optional):</p>` +
+      tf("rotator.targetUr", "Word to replace (Urdu)", { rtl: true }) +
+      tf("rotator.wordsUr", "Words (Urdu), separated by commas", { rtl: true }));
+
+    // ---- Home sections ----
+    G.shuffle = group("shuffle", "Reviews shuffle", "The reviews you starred are shown in a different order on every visit, with a little animation.",
+      sw("reviewsShuffle.on", "Shuffle the home-page reviews") +
+      tf("reviewsShuffle.limit", "How many to show", { type: "num", min: 1 }) +
+      sel("reviewsShuffle.fx", "Animation", [["rise", "Rise"], ["fade", "Fade"], ["flip", "Flip"], ["pop", "Pop"], ["none", "None"]]) +
+      sw("reviewsShuffle.auto", "Reshuffle by itself while the page is open") +
+      tf("reviewsShuffle.every", "Reshuffle every (seconds)", { type: "num", min: 3 }) +
+      sw("reviewsShuffle.button", "Show a “Shuffle reviews” button"));
+    G.tiles = group("tiles", "Category tiles", "Picture tiles on the home page, one per category. Tapping a tile opens that category's page.",
+      sw("categoryTiles.on", "Show category tiles") + tf("categoryTiles.title", "Heading"));
+    const bentoRows = (v("bento.items") || []).map((it, i) => `
+      <div class="srow" style="grid-template-columns: 90px 64px 1fr auto;">
+        <input type="number" data-list="bento.items" data-idx="${i}" data-prop="value" data-type="num" value="${esc(it.value)}" aria-label="Number" />
+        <input type="text" data-list="bento.items" data-idx="${i}" data-prop="suffix" value="${esc(it.suffix)}" placeholder="+ or %" aria-label="After the number" />
+        <input type="text" data-list="bento.items" data-idx="${i}" data-prop="label" value="${esc(it.label)}" placeholder="Orders" aria-label="Label" />
+        ${iconBtn("rm-bento", i, "Remove")}
+      </div>`).join("");
+    G.bento = group("bento", "Stats boxes (bento)", "Small boxes like “500+ Orders”. The numbers count up when a customer scrolls to them.",
+      sw("bento.on", "Show the stats boxes") + `<div style="margin-top:8px">${bentoRows}</div>` +
+      `<button type="button" class="btn secondary" data-act="add-bento" style="margin-top:6px">Add a box</button>`);
+    G.visit = group("visit", "Visit-store section", "Your shop address, timings and a map button. Timings come from “Shop timings” in Shop info & delivery.",
+      sw("visit.on", "Show the visit-store section") +
+      tf("visit.title", "Heading") +
+      tf("visit.address", "Address (one line per row)", { area: true, rows: 3 }) +
+      tf("visit.mapUrl", "Map link (optional)", { ph: "https://maps.app.goo.gl/…", hint: "Leave empty and the map button searches for the address above on Google Maps." }) +
+      tf("visit.buttonLabel", "Button text"));
+    const order = (v("sections.order") || []).filter((id) => SECTION_IDS.includes(id));
+    SECTION_IDS.forEach((id) => { if (!order.includes(id)) order.push(id); });
+    const secRows = order.map((id, i) => `
+      <div class="srow" style="grid-template-columns: 1fr auto auto auto;">
+        <label class="sw" style="margin:0"><input type="checkbox" data-path="sections.visible.${id}" data-type="bool" ${v("sections.visible." + id) !== false ? "checked" : ""} /><span>${esc(SECTION_LABELS[id] || id)}</span></label>
+        ${iconBtn("up-section", i, "Up", i === 0 ? "disabled" : "")}${iconBtn("down-section", i, "Down", i === order.length - 1 ? "disabled" : "")}
+        <span></span>
+      </div>`).join("");
+    G.sections = group("sections", "Home sections: order and visibility", "Choose which parts of the home page show and in what order. Parts that have their own switch (tiles, stats, visit, recently viewed, ads) also need that switch on.",
+      sw("sections.on", "Use the order below (off = the original order)") + `<div style="margin-top:8px">${secRows}</div>`);
+
+    // ---- Products ----
+    const layoutOpts = CARD_LAYOUT_NAMES.map((n, i) => [i + 1, n]);
+    G.cards = group("cards", "Product card design", "Pick one of 10 card designs for every product on the site.",
+      sw("cardLayout.on", "Use the design below (off = the current design)") + sel("cardLayout.layout", "Design", layoutOpts, { type: "num" }));
+    G.price = group("price", "Price filter", "Customers can set a lowest and highest price to narrow the product list.", sw("priceFilter.on", "Show the price filter"));
+    G.wish = group("wish", "Wishlist (hearts)", "A heart button on products. Customers' saved items are kept on their own phone, no login needed.", sw("wishlist.on", "Show heart buttons and the saved list"));
+    G.recent = group("recent", "Recently viewed", "A strip with the products the customer opened lately, kept on their phone.",
+      sw("recent.on", "Show the “recently viewed” strip") + tf("recent.max", "How many to remember", { type: "num", min: 1 }));
+    G.explore = group("explore", "“Explore more” button", "Show only a few products first; one tap shows the rest (replaces the page numbers).",
+      sw("exploreMore.on", "Use “Explore more”") + tf("exploreMore.initial", "Products shown at first", { type: "num", min: 1 }));
+
+    // ---- Look & motion ----
+    G.look = group("look", "Spacing and corners", "Fine-tune spacing and roundness on the home page and product cards. Colors and fonts are not touched. The numbers below are today's look.",
+      sw("look.on", "Use these values") +
+      `<div class="row2">${tf("look.gap", "Space between products (px)", { type: "num", min: 0 })}${tf("look.sectionSpace", "Space between home sections (px)", { type: "num", min: 0 })}</div>` +
+      `<div class="row2">${tf("look.cardRadius", "Card corners (px)", { type: "num", min: 0 })}${tf("look.panelRadius", "Big panel corners (px)", { type: "num", min: 0 })}</div>` +
+      tf("look.photoRadius", "Photo corners (px)", { type: "num", min: 0 }) +
+      `<button type="button" class="btn secondary" data-act="reset-look" style="margin-top:10px">Put back today's numbers</button>`);
+    G.motion = group("motion", "Motion", "Small animations around the shop. Each one has its own switch and is skipped for customers who turned animations off on their phone.",
+      sw("motion.sections.on", "Home sections fade in as the customer scrolls") +
+      sel("motion.sections.style", "Section effect", [["fade-up", "Rise and fade"], ["fade", "Fade"], ["zoom", "Zoom"], ["slide", "Slide from the left"]]) +
+      `<div style="height:10px"></div>` +
+      sw("motion.cards.on", "Product cards move (hover and entrance)") +
+      sel("motion.cards.hover", "When the pointer is over a card", [["lift", "Lift up"], ["zoom", "Zoom the photo"], ["none", "Nothing"]]) +
+      sel("motion.cards.enter", "When cards first appear", [["stagger", "One after another"], ["none", "All at once"]]) +
+      `<div style="height:10px"></div>` +
+      sw("motion.overlays.on", "Cart, product pop-up and checkout open smoothly (slide / fade)") +
+      `<p class="hint">The heading, word rotator, reviews and carousel have their own effects on their own pages.</p>`);
+
+    // ---- Footer ----
+    const links = v("footerLinks.links") || [];
+    const linkRows = links.map((l, i, a) => `
+      <div class="srow" style="grid-template-columns: 1fr 1.6fr auto auto auto;">
+        <input type="text" data-list="footerLinks.links" data-idx="${i}" data-prop="label" value="${esc(l.label)}" placeholder="Privacy policy" aria-label="Link text" />
+        <input type="text" data-list="footerLinks.links" data-idx="${i}" data-prop="url" value="${esc(l.url)}" placeholder="https://…" aria-label="Link address" />
+        ${moveBtns("link", i, a.length)}
+      </div>`).join("");
+    G.flinks = group("flinks", "Footer links", "Links shown at the bottom of every page (policies, social pages, …). Use full web addresses starting with https://.",
+      sw("footerLinks.on", "Show the footer links") + `<div style="margin-top:8px">${linkRows}</div>` +
+      `<button type="button" class="btn secondary" data-act="add-link" style="margin-top:6px">Add a link</button>`);
+    G.designed = group("designed", "“Designed by” link", "A small credit line at the very bottom of the footer.",
+      sw("designedBy.on", "Show the credit") + tf("designedBy.name", "Name") + tf("designedBy.url", "Link (optional)", { ph: "https://…" }));
+
+    // ---- Shop info ----
+    G.maint = group("maint", "Maintenance mode", "While this is on, customers see a “back soon” page instead of the shop. This admin panel keeps working. To look at the real shop yourself meanwhile, add <b>?preview=1</b> to the shop address.",
+      sw("maintenance.on", "Show the “back soon” page") +
+      tf("maintenance.title", "Heading") +
+      tf("maintenance.message", "Message", { area: true }));
+    G.delivery = group("delivery", "Free-delivery bar", "A bar in the cart: “Add Rs X more for free delivery”. Set the order amount from which delivery is free.",
+      sw("freeDelivery.on", "Show the free-delivery bar") + tf("freeDelivery.threshold", "Free delivery from (Rs)", { type: "num", min: 0 }));
+    G.timings = group("timings", "Shop timings", "Shown in the footer and in the visit-store section.",
+      sw("timings.on", "Show the timings") + tf("timings.text", "Timings (one line per row)", { area: true, rows: 3, ph: "Mon – Sat: 11:00 am – 8:00 pm\nSunday: closed" }));
+
+    // ---- Translations ----
+    const keys = Object.keys(IDEF.en);
+    const rows = keys.map((k) => {
+      const enV = (v("i18n.en") || {})[k] || ""; const urV = (v("i18n.ur") || {})[k] || "";
+      return `<div class="trow" data-search="${esc((k + " " + IDEF.en[k] + " " + IDEF.ur[k]).toLowerCase())}">
+        <div class="tkey">${esc(k)}</div>
+        <input type="text" data-i18n="en" data-key="${esc(k)}" value="${esc(enV)}" placeholder="${esc(IDEF.en[k])}" aria-label="English: ${esc(k)}" />
+        <input type="text" dir="rtl" data-i18n="ur" data-key="${esc(k)}" value="${esc(urV)}" placeholder="${esc(IDEF.ur[k])}" aria-label="Urdu: ${esc(k)}" />
+      </div>`;
+    }).join("");
+    G.i18n = group("i18n", "Translations (English / اردو)", "Adds an English / اردو button at the top of the shop. Every line of shop text can be changed below. Leave a box empty to keep the default (shown in grey).",
+      sw("i18n.on", "Show the language button") +
+      sel("i18n.defaultLang", "Language when a customer first arrives", [["en", "English"], ["ur", "اردو (Urdu)"]]) +
+      `<label>Find a line</label><input type="text" id="i18nSearch" placeholder="Type to search…" />` +
+      `<div class="trow thead"><div>Line</div><div>English</div><div>اردو</div></div><div class="tlist">${rows}</div>`);
+
+    G.ppage = group("ppage", "Product page", "Each switch is off until you turn it on. Products without details look exactly as before.",
+      sw("productPage.tabs", "Description / Details tabs (and the short line under the name)", "Details rows come from the product. The Colour row follows the colour the customer picks.") +
+      sw("productPage.sizes", "Show “Sizes available”") +
+      sw("productPage.colours", "Show “Colours available”", "Uses the colour photos of the product, or the colours you typed.") +
+      sw("productPage.includes", "Show the “Price includes” box"));
+    G.guidef = group("guidef", "Complete order guide", "Turn the guide on, choose where it shows and edit the texts.",
+      sw("guide.on", "Use the order guide on the shop") +
+      sw("guide.home", "Show the guide bar under the top banner of the home page") +
+      sw("guide.footer", "Show a link to the guide in the footer") +
+      tf("guide.buttonText", "Bar text") + tf("guide.goText", "Button word") + tf("guide.title", "Guide heading") + tf("guide.intro", "Intro line", { area: true, rows: 2 }) +
+      `<label>Good to know (one tip per line)</label><textarea data-path="guide.tips" data-type="lines" rows="4">${esc((v("guide.tips") || []).join("\n"))}</textarea>`);
+    const gsteps = v("guide.steps") || [];
+    G.guidesteps = group("guidesteps", "Guide steps", "Add as many steps as you like. They are numbered in this order.",
+      gsteps.map((st, i) => `<div class="lrow"><div class="lrow-head"><b>Step ${i + 1}</b><span class="lrow-actions">${moveBtns("gstep", i, gsteps.length)}</span></div>
+        <label>Title</label>${listIn("guide.steps", i, "title", st.title, "text")}
+        <label>What to do</label><textarea data-list="guide.steps" data-idx="${i}" data-prop="text" rows="2">${esc(st.text || "")}</textarea></div>`).join("") +
+      `<button type="button" class="btn secondary" data-act="add-gstep" style="margin-top:6px">+ Add a step</button>`);
+    G.checkoutf = group("checkoutf", "Order form & WhatsApp", "Make the order form stricter and send the customer to WhatsApp after the thank-you screen.",
+      sw("checkout.betterForm", "Better order form (first + last name, full address, city, postal code, email, “save for next time”)", "An order is only placed when the details are correct, so you get fewer wrong orders.") +
+      sw("checkout.whatsappAuto", "After “Order placed”, open WhatsApp by itself with the order already written") +
+      tf("checkout.whatsappDelay", "Seconds before WhatsApp opens", { type: "num", min: 1 }));
+    G.trackingf = group("trackingf", "Order tracking", "Customers type their order number on the shop (“Track your order”) and see the steps you set in Orders → Order tracking.",
+      sw("tracking.on", "Show “Track your order” on the shop") +
+      `<p class="hint" style="margin-top:12px">Needs a Firestore rule once. In Firebase Console → Firestore → Rules add:</p><pre style="background:var(--bg);padding:12px;border-radius:8px;font-size:12px;overflow:auto">match /tracking/{no} {
+  allow read: if true;
+  allow write: if &lt;the same admin check as config/promoCodes&gt;;
+}</pre>`);
+    // ---- Look & brand ----
+    const bt = (v.brand && v.brand.texts) || {};
+    const btf = (key, label) => `<label>${label}</label><input type="text" data-btext="${key}" value="${esc(bt[key] || "")}" placeholder="${esc(IDEF.en[key] || "")}" />`;
+    G.brandid = group("brandid", "Shop name, logo & address", "While the switch below is off, the shop stays exactly as it is. Empty boxes keep today's value.",
+      sw("brand.on", "Use my brand settings on the shop") +
+      tf("brand.shopName", "Shop name") +
+      `<label>Logo</label>${v("brand.logo") ? `<img src="${esc(v("brand.logo"))}" alt="" style="max-height:60px;display:block;margin:6px 0;background:#eee;border-radius:8px;padding:6px" />` : ""}<input type="text" data-path="brand.logo" data-type="text" value="${esc(v("brand.logo") || "")}" placeholder="Logo address (https://…)" /><div style="margin-top:6px"><input type="file" accept="image/*" data-upload="logo" /> <span class="hint">or upload a logo (a see-through PNG works best)</span></div>` +
+      tf("brand.address1", "Address, first line") + tf("brand.address2", "Address, second line (optional)") + tf("brand.area", "Area and city"));
+    const colorRow = (path, label, def) => `<div><label>${label}</label><div class="swatchrow"><input type="color" data-path="${path}" data-type="text" value="${esc(val(path) || def)}" /><input type="text" data-path="${path}" data-type="text" value="${esc(val(path) || "")}" placeholder="${def} (today)" style="max-width:130px" /></div></div>`;
+    G.brandcolors = group("brandcolors", "Colours & fonts", "Pick your own colours. Empty = today's colour. Choose dark main colours so white text stays easy to read.",
+      `<div class="row2">${colorRow("brand.colors.main", "Main colour (buttons, headings)", "#6E1E36")}${colorRow("brand.colors.second", "Second colour (cart, links)", "#153A73")}</div><div class="row2">${colorRow("brand.colors.accent", "Accent colour (highlights)", "#B98A2E")}${colorRow("brand.colors.bg", "Page background colour", "#F3E9E2")}</div>` +
+      sel("brand.fonts", "Fonts", [["default", "Today's fonts (Fraunces + Karla)"], ["classic", "Classic (Playfair Display + Poppins)"], ["modern", "Modern (DM Serif Display + Inter)"], ["soft", "Soft (Lora + Nunito)"]]) +
+      `<button type="button" class="btn secondary" data-act="reset-brand-colors" style="margin-top:10px">Put back today's colours</button>`);
+    G.brandtext = group("brandtext", "Website text", "Change the main headings on the shop. Empty = the default (shown in grey).",
+      btf("shop.title", "Home page: products heading") + btf("reviews.title", "Home page: reviews heading") + btf("visit.title", "Home page: shop location heading") +
+      btf("footer.handmade", "Footer: big line (old footer)") + btf("footer.loop", "Footer: second line (old footer)") + btf("footer.contact", "Footer: contact label (old footer)") + btf("footer.designedBy", "Footer: “Designed by” label"));
+    const bp = v("brand.photos.list") || [];
+    G.brandphotos = group("brandphotos", "Shop photos", "Photos of your shop shown in “Visit our store” on the home page. Best: a daytime photo from the front with your board easy to read. Up to 6 photos.",
+      sw("brand.photos.on", "Show shop photos on the website") +
+      bp.map((u, i) => `<div class="srow" style="grid-template-columns: 56px 1fr auto;"><img src="${esc(u)}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px;background:#fff" /><input type="text" data-bphoto="${i}" value="${esc(u)}" placeholder="Photo address" /><button type="button" class="move-btn" data-act="rm-bphoto" data-idx="${i}" title="Remove">✕</button></div>`).join("") +
+      (bp.length < 6 ? `<div style="margin-top:6px"><input type="file" accept="image/*" data-upload="bphoto" /> <span class="hint">upload a shop photo (${bp.length}/6)</span></div><button type="button" class="btn secondary" data-act="add-bphoto" style="margin-top:6px">Add by picture address</button>` : '<div class="hint">6 of 6 photos added.</div>'));
+    // ---- Sorted footer ----
+    const fc = v("footer.columns") || [];
+    G.footerpro = group("footerpro", "Sorted footer", "Replaces the footer with a dark footer: big line and button, link columns, “track your order”, local time, social icons and credits.",
+      sw("footer.on", "Use the sorted footer") + tf("footer.headline", "Big line", { area: true, rows: 2 }) + tf("footer.button", "Round button text (empty = hide)") +
+      sw("footer.shopColumn", "Show a “Shop” column with your categories") + sw("footer.track", "Show the “Track your order” box (needs Order tracking on)") +
+      `<div style="margin-top:8px">${fc.map((c, i) => `<div class="lrow"><div class="lrow-head"><b>Column ${i + 1}</b><span class="lrow-actions"><button type="button" class="move-btn" data-act="rm-fcol" data-idx="${i}" title="Remove">✕</button></span></div>
+        <label>Title</label><input type="text" data-fcol="${i}" data-f="title" value="${esc(c.title || "")}" />
+        <label>Links — one per line: Name | https://address</label><textarea rows="3" data-fcol="${i}" data-f="links">${esc((c.links || []).map((l) => l.label + " | " + l.url).join("\n"))}</textarea></div>`).join("")}</div>` +
+      `<button type="button" class="btn secondary" data-act="add-fcol" style="margin-top:6px">Add a link column</button>` +
+      sw("footer.showTime", "Show local time and open / closed") +
+      `<div class="row2"><div><label>Opens at</label><input type="time" data-path="footer.hours.open" data-type="text" value="${esc(v("footer.hours.open") || "")}" /></div><div><label>Closes at</label><input type="time" data-path="footer.hours.close" data-type="text" value="${esc(v("footer.hours.close") || "")}" /></div></div>` +
+      tf("footer.secondNumber", "Second phone number (optional)", { ph: "0312 3499922" }) +
+      sw("footer.socials.whatsapp", "WhatsApp icon") + tf("footer.socials.instagram", "Instagram page address") + tf("footer.socials.facebook", "Facebook page address") + tf("footer.socials.tiktok", "TikTok page address") +
+      tf("footer.copyright", "Copyright line (empty = hide)", { hint: "{year} becomes this year and {shop} becomes the shop name." }) + tf("footer.lastLine", "Last line (empty = hide)"));
+    // ---- Speed / app ----
+    G.speed = group("speed", "Speed", "Safe to try: each one can be switched off again at any time.",
+      sw("speed.srcset", "Smaller photos on phones (Cloudinary sizes)", "Photos load at the size the screen needs: less data, faster pages.") +
+      sw("speed.apiShop", "Fast shop data", "Products load from a quick saved copy first, and the last good copy is shown if Firebase isn't reachable.") +
+      sw("speed.sw", "Offline mode (service worker)", "After the first visit the site opens faster and works on a weak connection. Customers need one extra refresh after you turn this on or off."));
+    G.pwa = group("pwa", "App on the phone", "Lets customers keep the shop on their home screen like an app (it uses your logo and the name Twist & Tangle Crochet).",
+      sw("pwa.install", "Show an “Install app” button", "Works best together with “Offline mode” above.") +
+      sw("pwa.safeArea", "Keep content clear of the iPhone notch and bottom bar"));
+    return G;
+  }
+
+  function renderSettings() {
+    if (!S) return;
+    const scrollY = window.scrollY;
+    const G = buildGroups();
+    const status = settingsStatus ? `<p class="msg ${settingsStatus.startsWith("error:") ? "error" : "success"}">${esc(settingsStatus.replace(/^(error|ok):/, ""))}</p>` : "";
+    Object.keys(PANES).forEach((paneId) => {
+      const pane = document.querySelector(`.settings-pane[data-pane="${paneId}"]`);
+      if (!pane) return;
+      const P = PANES[paneId];
+      const top = `<div class="card">
+        <h2>${P.title}</h2>
+        <p class="hint">${P.intro} Everything starts <b>OFF</b>; turn a switch on, press <b>Save</b>, and the shop updates (customers may need to refresh once).</p>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="btn" data-act="save-settings">Save</button>
+          <button type="button" class="btn secondary" data-act="reload-settings">Discard changes</button>
+          <a class="btn secondary" href="/?preview=1" target="_blank" rel="noopener" style="text-decoration:none; display:inline-block;">Open shop ↗</a>
+        </div>
+        <div class="settingsMsg">${status}</div>
+      </div>`;
+      const foot = paneId === "shopinfo" ? `<div class="card"><details><summary style="cursor:pointer; font-size:13px; font-weight:600;">Saving or loading doesn't work? (Firebase rule)</summary>
+        <p class="hint" style="margin-top:10px">These settings live in one Firestore document, <code>config/siteSettings</code>. Customers must be able to read it, and only admins can write it. In Firebase Console → Firestore Database → Rules, add next to your other <code>config</code> rules (copy the write condition you already use for <code>config/promoCodes</code>):</p>
+        <pre style="background:var(--bg); padding:12px; border-radius:8px; font-size:12px; overflow:auto;">match /config/siteSettings {
+  allow read: if true;
+  allow write: if &lt;the same admin check as config/promoCodes&gt;;
+}</pre></details></div>` : "";
+      pane.innerHTML = top + P.groups.map((g) => G[g]).join("") + foot;
+    });
+    window.scrollTo({ top: scrollY });
+  }
+
+  // ---- editing ----
+  function cleanNumber(raw) { return raw === "" ? "" : Number(raw); }
+  function onSettingInput(e) {
+    const el = e.target;
+    if (!S || !el || !el.closest || !el.closest(".settings-pane")) return;
+    if (el.id === "i18nSearch") {
+      const q = el.value.trim().toLowerCase();
+      document.querySelectorAll(".trow[data-search]").forEach((r) => r.classList.toggle("hidden", !!q && !r.getAttribute("data-search").includes(q)));
+      return;
+    }
+    if (el.dataset.skin) { if (el.checked) applySkin(el.dataset.skin); return; }
+    if (el.dataset.upload !== undefined) { if (e.type === "change" && el.files && el.files[0]) uploadFor(el); return; }
+    if (el.dataset.i18n) {
+      const lang = el.dataset.i18n; const key = el.dataset.key;
+      if (!isPlain(S.i18n[lang])) S.i18n[lang] = {};
+      if (el.value.trim()) S.i18n[lang][key] = el.value; else delete S.i18n[lang][key];
+      return;
+    }
+    if (el.dataset.btext !== undefined) { if (!isPlain(S.brand.texts)) S.brand.texts = {}; if (el.value.trim()) S.brand.texts[el.dataset.btext] = el.value; else delete S.brand.texts[el.dataset.btext]; return; }
+    if (el.dataset.bphoto !== undefined) { S.brand.photos.list[Number(el.dataset.bphoto)] = el.value; if (e.type === "change") renderSettings(); return; }
+    if (el.dataset.fcol !== undefined) {
+      const c = S.footer.columns[Number(el.dataset.fcol)]; if (!c) return;
+      if (el.dataset.f === "title") c.title = el.value;
+      else c.links = el.value.split("\n").map((ln) => { const k = ln.indexOf("|"); return k < 0 ? null : { label: ln.slice(0, k).trim(), url: ln.slice(k + 1).trim() }; }).filter((l) => l && l.label && l.url);
+      return;
+    }
+    if (el.dataset.ad !== undefined) {
+      const ad = S.ads.items[Number(el.dataset.ad)]; if (!ad) return;
+      if (!Array.isArray(ad.images)) ad.images = (ad.image ? [{ src: ad.image }] : []);
+      if (el.dataset.place) {
+        if (!Array.isArray(ad.places)) ad.places = [];
+        const k = el.dataset.place; ad.places = ad.places.filter((x) => x !== k); if (el.checked) ad.places.push(k);
+      } else if (el.dataset.img !== undefined) {
+        const im = ad.images[Number(el.dataset.img)]; if (!im) return;
+        im[el.dataset.prop] = el.value;
+        if (e.type === "change") renderSettings();
+      } else {
+        const t = el.dataset.type;
+        ad[el.dataset.prop] = t === "bool" ? el.checked : t === "num" ? cleanNumber(el.value) : el.value;
+        if (el.dataset.prop === "closable" || el.dataset.prop === "size") renderSettings();
+      }
+      return;
+    }
+    if (el.dataset.list) {
+      const list = getPath(S, el.dataset.list); const i = Number(el.dataset.idx);
+      if (!list || !list[i]) return;
+      const t = el.dataset.type;
+      list[i][el.dataset.prop] = t === "bool" ? el.checked : t === "num" ? cleanNumber(el.value) : el.value;
+      if (el.dataset.list === "ads.items" && el.dataset.prop === "image" && e.type === "change") renderSettings();
+      return;
+    }
+    const path = el.dataset.path; if (!path) return;
+    const type = el.dataset.type;
+    let value;
+    if (type === "bool") value = el.checked;
+    else if (type === "num") value = cleanNumber(el.value);
+    else value = el.value;
+    if (el.dataset.type === "lines") value = String(el.value).split("\n").map((x) => x.trim()).filter(Boolean);
+    if (path === "rotator.words" || path === "rotator.wordsUr") value = String(el.value).split(",").map((x) => x.trim()).filter(Boolean);
+    setPath(S, path, value);
+    if (path.startsWith("brand.colors.") && e.type === "change") renderSettings();
+  }
+  const pageRoot = document.querySelector("main.wrap");
+  pageRoot.addEventListener("input", onSettingInput);
+  pageRoot.addEventListener("change", onSettingInput);
+
+  async function uploadFor(el) {
+    const kind = el.dataset.upload;
+    const file = el.files[0];
+    setSettingsMsg("ok:Uploading the picture…");
+    try {
+      const url = await uploadToCloudinary(file);
+      if (kind === "logo") { S.brand.logo = url; }
+      else if (kind === "bphoto") { S.brand.photos.list.push(url); }
+      else if (kind === "adimg") { const ad = S.ads.items[Number(el.dataset.idx)]; if (!Array.isArray(ad.images)) ad.images = []; const im = ad.images[Number(el.dataset.img)] || (ad.images[Number(el.dataset.img)] = {}); im[el.dataset.prop] = url; }
+      else { S.carousel.slides.push({ productId: "", photo: url, name: "Picture" }); }
+      settingsStatus = "ok:Picture uploaded. Press Save to publish it.";
+      renderSettings();
+    } catch (err) {
+      setSettingsMsg("error:Couldn't upload the picture (" + err.message + "). You can paste a picture address instead.");
+    }
+  }
+
+  function swap(list, i, j) { if (list[i] && list[j]) { const t = list[i]; list[i] = list[j]; list[j] = t; } }
+  pageRoot.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-act]");
+    if (!btn || !btn.closest(".settings-pane")) return;
+    const act = btn.dataset.act; const i = Number(btn.dataset.idx);
+    if (act === "goto") { showView(btn.dataset.view); return; }
+    if (act === "go-shop") { goShop(); return; }
+    if (!S) return;
+    const L = { bento: S.bento.items, link: S.footerLinks.links, bar: S.announcements.bars, ad: S.ads.items, slide: S.carousel.slides, gstep: S.guide.steps };
+    const m = /^(up|down|rm)-(bento|link|bar|ad|slide|gstep)$/.exec(act);
+    if (m) {
+      const list = L[m[2]];
+      if (m[1] === "rm") list.splice(i, 1); else swap(list, i, m[1] === "up" ? i - 1 : i + 1);
+      renderSettings(); refreshDash(); return;
+    }
+    if (act === "add-bento") { S.bento.items.push({ value: 0, suffix: "", label: "" }); renderSettings(); }
+    else if (act === "add-gstep") { S.guide.steps.push({ title: "", text: "" }); renderSettings(); }
+    else if (act === "add-link") { S.footerLinks.links.push({ label: "", url: "" }); renderSettings(); }
+    else if (act === "add-bar") { S.announcements.bars.push({ on: true, text: "", textUr: "", link: "", linkLabel: "", tone: "maroon", dismissible: true }); renderSettings(); }
+    else if (act === "reset-brand-colors") { S.brand.colors = { main: "", second: "", accent: "", bg: "" }; S.brand.fonts = "default"; renderSettings(); }
+    else if (act === "add-bphoto") { if (S.brand.photos.list.length < 6) S.brand.photos.list.push(""); renderSettings(); }
+    else if (act === "rm-bphoto") { S.brand.photos.list.splice(i, 1); renderSettings(); }
+    else if (act === "add-fcol") { S.footer.columns.push({ title: "", links: [] }); renderSettings(); }
+    else if (act === "rm-fcol") { S.footer.columns.splice(i, 1); renderSettings(); }
+    else if (act === "add-ad") { S.ads.items.push({ on: true, title: "", images: [{ src: "" }], link: "", size: "banner", places: ["underCarousel"], seconds: 5, fx: "fade", closable: false, closeAfter: 3, comesBack: "visit", from: "", until: "" }); renderSettings(); }
+    else if (act === "add-adimg") { const ad = S.ads.items[i]; if (!Array.isArray(ad.images)) ad.images = ad.image ? [{ src: ad.image }] : []; if (ad.images.length < 5) ad.images.push({ src: "" }); renderSettings(); }
+    else if (act === "rm-adimg") { const ad = S.ads.items[i]; ad.images.splice(Number(btn.dataset.img), 1); renderSettings(); }
+    else if (act === "add-slide-product") {
+      const id = $("car_product").value; const p = currentProducts.find((x) => String(x.id) === String(id));
+      if (!p) { setSettingsMsg("error:Choose a product first."); return; }
+      S.carousel.slides.push({ productId: p.id, photo: heroPhotoOf(p), name: p.name });
+      renderSettings(); refreshDash();
+    }
+    else if (act === "add-slide-url") {
+      const u = $("car_url").value.trim();
+      if (!/^https?:\/\//i.test(u)) { setSettingsMsg("error:The picture address must start with https://"); return; }
+      S.carousel.slides.push({ productId: "", photo: u, name: "Picture" });
+      renderSettings();
+    }
+    else if (act === "up-section" || act === "down-section") {
+      const order = S.sections.order.filter((id) => SECTION_IDS.includes(id));
+      SECTION_IDS.forEach((id) => { if (!order.includes(id)) order.push(id); });
+      swap(order, i, act === "up-section" ? i - 1 : i + 1);
+      S.sections.order = order; renderSettings();
+    }
+    else if (act === "reset-look") { S.look = { ...S.look, ...SDEF.look, on: S.look.on }; renderSettings(); }
+    else if (act === "reload-settings") { loadSettings(); }
+    else if (act === "save-settings") { saveSettings(); }
+  });
+
+  const SAFE_LINK = /^(https?:\/\/|mailto:|tel:|\/)/i;
+  async function saveSettings() {
+    const out = JSON.parse(JSON.stringify(S));
+    out.bento.items = (out.bento.items || []).filter((it) => String(it.label || "").trim() || Number(it.value));
+    out.bento.items.forEach((it) => { it.value = Number(it.value) || 0; it.suffix = String(it.suffix || ""); it.label = String(it.label || "").trim(); });
+    out.footerLinks.links = (out.footerLinks.links || []).filter((l) => String(l.label || "").trim() && String(l.url || "").trim())
+      .map((l) => ({ label: String(l.label).trim(), url: String(l.url).trim() }));
+    const bad = out.footerLinks.links.find((l) => !SAFE_LINK.test(l.url));
+    if (bad) { setSettingsMsg("error:The link “" + bad.label + "” must start with https:// (or mailto: / tel:)."); return; }
+    if (out.designedBy.url && !SAFE_LINK.test(out.designedBy.url)) { setSettingsMsg("error:The “Designed by” link must start with https://"); return; }
+    out.announcements.bars = (out.announcements.bars || []).filter((b) => String(b.text || "").trim() || String(b.textUr || "").trim());
+    const badBar = out.announcements.bars.find((b) => String(b.link || "").trim() && !SAFE_LINK.test(String(b.link).trim()));
+    if (badBar) { setSettingsMsg("error:The link of the bar “" + badBar.text + "” must start with https:// or /"); return; }
+    out.announcements.bars.forEach((b) => { b.link = String(b.link || "").trim(); b.text = String(b.text || "").trim(); b.textUr = String(b.textUr || "").trim(); b.linkLabel = String(b.linkLabel || "").trim(); b.on = b.on !== false; b.dismissible = b.dismissible !== false; });
+    out.ads.items = (out.ads.items || []).map((a) => {
+      const imgs = (Array.isArray(a.images) && a.images.length ? a.images : (a.image ? [{ src: a.image }] : [])).map((x) => ({ src: String(x.src || "").trim(), phone: String(x.phone || "").trim() })).filter((x) => x.src).slice(0, 5);
+      const o = { on: a.on !== false, title: String(a.title || "").trim(), images: imgs, link: String(a.link || "").trim(), size: ["strip", "banner", "square", "wide", "card"].includes(a.size) ? a.size : "banner",
+        places: (Array.isArray(a.places) ? a.places : []).filter((x) => ["underCarousel", "underTiles", "betweenProducts", "aboveFooter", "popup"].includes(x)),
+        seconds: Math.min(30, Math.max(2, Number(a.seconds) || 5)), fx: a.fx === "slide" ? "slide" : "fade", closable: !!a.closable,
+        closeAfter: Math.min(15, Math.max(0, Number(a.closeAfter) || 0)), comesBack: ["visit", "reload", "never"].includes(a.comesBack) ? a.comesBack : "visit", from: a.from || "", until: a.until || "" };
+      return o;
+    }).filter((a) => a.images.length);
+    const badAd = out.ads.items.find((a) => a.images.some((x) => !/^https?:\/\//i.test(x.src) || (x.phone && !/^https?:\/\//i.test(x.phone))) || (a.link && !SAFE_LINK.test(a.link)));
+    if (badAd) { setSettingsMsg("error:Every ad picture address must start with https:// and the link with https:// or /"); return; }
+    out.guide.steps = (out.guide.steps || []).map((x) => ({ title: String(x.title || "").trim(), text: String(x.text || "").trim() })).filter((x) => x.title || x.text);
+    out.guide.tips = (out.guide.tips || []).map((x) => String(x).trim()).filter(Boolean);
+    out.brand.colors = out.brand.colors || {};
+    ["main", "second", "accent", "bg"].forEach((k) => { const c = String(out.brand.colors[k] || "").trim(); out.brand.colors[k] = /^#[0-9a-f]{6}$/i.test(c) ? c : ""; });
+    out.brand.logo = String(out.brand.logo || "").trim(); if (out.brand.logo && !/^https?:\/\//i.test(out.brand.logo)) { setSettingsMsg("error:The logo address must start with https://"); return; }
+    out.brand.photos.list = (out.brand.photos.list || []).map((u) => String(u || "").trim()).filter((u) => /^https?:\/\//i.test(u)).slice(0, 6);
+    ["shopName", "address1", "address2", "area"].forEach((k) => { out.brand[k] = String(out.brand[k] || "").trim(); });
+    out.footer.columns = (out.footer.columns || []).map((c) => ({ title: String(c.title || "").trim(), links: (c.links || []).filter((l) => SAFE_LINK.test(l.url)) })).filter((c) => c.title && c.links.length);
+    ["instagram", "facebook", "tiktok"].forEach((k) => { const u = String(out.footer.socials[k] || "").trim(); if (u && !SAFE_LINK.test(u)) out.footer.socials[k] = ""; else out.footer.socials[k] = u; });
+    ["gap", "cardRadius", "panelRadius", "photoRadius", "sectionSpace"].forEach((k) => { if (out.look[k] === "") out.look[k] = SDEF.look[k]; });
+    if (out.exploreMore.initial === "" || Number(out.exploreMore.initial) < 1) out.exploreMore.initial = SDEF.exploreMore.initial;
+    if (out.recent.max === "" || Number(out.recent.max) < 1) out.recent.max = SDEF.recent.max;
+    if (out.reviewsShuffle.limit === "" || Number(out.reviewsShuffle.limit) < 1) out.reviewsShuffle.limit = SDEF.reviewsShuffle.limit;
+    if (out.reviewsShuffle.every === "" || Number(out.reviewsShuffle.every) < 3) out.reviewsShuffle.every = SDEF.reviewsShuffle.every;
+    if (out.freeDelivery.threshold === "") out.freeDelivery.threshold = 0;
+    if (out.rotator.speed === "" || Number(out.rotator.speed) < 1200) out.rotator.speed = SDEF.rotator.speed;
+    if (out.heroReveal.step === "" || Number(out.heroReveal.step) < 40) out.heroReveal.step = SDEF.heroReveal.step;
+    if (out.carousel.speed === "" || Number(out.carousel.speed) < 1200) out.carousel.speed = SDEF.carousel.speed;
+    if (out.announcements.speed === "" || Number(out.announcements.speed) < 1500) out.announcements.speed = SDEF.announcements.speed;
+    if (out.ads.popupDelay === "") out.ads.popupDelay = SDEF.ads.popupDelay;
+    const buttons = document.querySelectorAll("[data-act='save-settings']");
+    buttons.forEach((b) => { b.disabled = true; b.textContent = "Saving…"; });
+    try {
+      await setDoc(SETTINGS_REF, out);
+      S = mergeDefaults(SDEF, out);
+      settingsStatus = "ok:Saved. The shop now uses these settings (customers may need to refresh once).";
+    } catch (err) {
+      settingsStatus = "error:Couldn't save (" + (err.code || err.message) + "). " + (err.code === "permission-denied" ? "Add the Firestore rule shown at the bottom of Shop info & delivery." : "");
+    }
+    renderSettings(); refreshDash();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function setSettingsMsg(m) {
+    document.querySelectorAll(".settingsMsg").forEach((box) => {
+      box.innerHTML = `<p class="msg ${m.startsWith("error:") ? "error" : "success"}">${esc(m.replace(/^(error|ok):/, ""))}</p>`;
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // ---- "Carousel +" button in All products ----
+  function inCarousel(id) { return !!(S && (S.carousel.slides || []).some((s) => String(s.productId) === String(id))); }
+  async function toggleCarousel(id) {
+    const msg = $("dlMsg");
+    const p = currentProducts.find((x) => x.id === id);
+    if (!p) return;
+    if (!S) { msg.className = "msg error"; msg.textContent = "Settings are still loading. Try again in a moment."; return; }
+    const slides = S.carousel.slides || (S.carousel.slides = []);
+    const at = slides.findIndex((s) => String(s.productId) === String(id));
+    let text;
+    if (at >= 0) { slides.splice(at, 1); text = "Removed “" + p.name + "” from the homepage carousel."; }
+    else {
+      const photo = heroPhotoOf(p);
+      if (!photo) { msg.className = "msg error"; msg.textContent = "“" + p.name + "” has no photo to use."; return; }
+      slides.push({ productId: p.id, photo, name: p.name });
+      text = "Added the main photo of “" + p.name + "” to the homepage carousel.";
+    }
+    try {
+      await setDoc(SETTINGS_REF, { carousel: { slides } }, { merge: true });
+      msg.className = "msg success";
+      msg.textContent = text + (S.carousel.on ? "" : " The carousel switch is still OFF — turn it on under Marketing → Homepage carousel.");
+    } catch (err) {
+      msg.className = "msg error"; msg.textContent = "Couldn't update the carousel (" + (err.code || err.message) + ").";
+    }
+    renderList(); renderSettings(); refreshDash();
+  }
+
+  // ---- dashboard ----
+  function refreshDash() { if (typeof appStarted !== "undefined" && appStarted && currentView === "dashboard") renderDashboard(); }
+  function renderDashboard() {
+    const pane = document.querySelector('.settings-pane[data-pane="dashboard"]');
+    if (!pane) return;
+    const open = currentOrders.filter((o) => o.status !== "done").length;
+    const fresh = currentOrders.filter((o) => o.status === "new").length;
+    const pending = currentReviews.filter((r) => !r.approved).length;
+    const on = S ? FEATURES.filter((f) => getPath(S, f[0])) : [];
+    const tile = (n, label, view, tone) => `<button type="button" class="dash-tile ${tone}" data-act="goto" data-view="${view}"><span class="dash-n">${n}</span><span>${label}</span></button>`;
+    const skin = document.body.classList.contains("skin-new") ? "new" : "classic";
+    pane.innerHTML = `
+      <div class="card"><h2>Dashboard</h2>
+        <div class="dash-grid">
+          ${tile(fresh, "new orders", "orders", "t-red")}
+          ${tile(open, "orders not done", "orders", "t-amber")}
+          ${tile(pending, "reviews to approve", "reviews", "t-purple")}
+          ${tile(currentProducts.length, "products", "products", "t-green")}
+          ${tile(S ? (S.carousel.slides || []).length : "–", "carousel photos", "carousel", "t-blue")}
+        </div>
+      </div>
+      <div class="card"><h2>Switched on in the shop</h2>
+        ${S ? (on.length ? `<div class="pills">${on.map((f) => `<button type="button" class="pill" data-act="goto" data-view="${f[2]}">${esc(f[1])}</button>`).join("")}</div>` : '<p class="hint">Nothing is switched on yet, so the shop looks exactly like before. Use the menu to turn features on.</p>') : '<p class="hint">Loading…</p>'}
+      </div>
+      <div class="card"><h2>Quick links</h2>
+        <div class="pills">
+          <button type="button" class="pill" data-act="go-shop">← Back to the shop</button>
+          <button type="button" class="pill" data-act="goto" data-view="add">Add a product</button>
+          <button type="button" class="pill" data-act="goto" data-view="announce">Announcement bars</button>
+          <button type="button" class="pill" data-act="goto" data-view="carousel">Homepage carousel</button>
+          <button type="button" class="pill" data-act="goto" data-view="ads">Ads</button>
+        </div>
+      </div>
+      <div class="card"><h2>Admin look</h2>
+        <p class="hint">Only you see this. The shop is not affected.</p>
+        <label class="sw"><input type="radio" name="skin" data-skin="classic" ${skin === "classic" ? "checked" : ""} /><span>Classic</span></label>
+        <label class="sw"><input type="radio" name="skin" data-skin="new" ${skin === "new" ? "checked" : ""} /><span>New</span></label>
+      </div>`;
+  }
+
+  // ---- Back button, brand link ----
+  function goShop() { location.href = "/"; }
+  $("backBtn").addEventListener("click", () => {
+    if (viewStack.length) showView(viewStack.pop(), { fromBack: true });
+    else goShop();
+  });
+  window.addEventListener("popstate", (e) => {
+    const v = (e.state && e.state.view) || location.hash.replace("#", "") || "dashboard";
+    showView(v, { fromPop: true });
+  });
+
+  // ---- search (menu): sections, products, orders, reviews ----
+  const navSearch = $("navSearch");
+  const navResults = $("navResults");
+  function navItemsInfo() {
+    return [...document.querySelectorAll(".sidebar .nav-item[data-view]")].map((b) => ({
+      view: b.getAttribute("data-view"), label: b.querySelector(".nav-label").textContent, kw: (b.getAttribute("data-kw") || "").toLowerCase(),
+    }));
+  }
+  function runSearch() {
+    const q = navSearch.value.trim().toLowerCase();
+    document.getElementById("sidebar").classList.toggle("searching", !!q);
+    navResults.classList.toggle("hidden", !q);
+    if (!q) { navResults.innerHTML = ""; return; }
+    const out = [];
+    navItemsInfo().filter((n) => n.label.toLowerCase().includes(q) || n.kw.includes(q)).forEach((n) => out.push(["Page", n.label, `data-view="${n.view}"`]));
+    FEATURES.filter((f) => f[1].toLowerCase().includes(q)).forEach((f) => out.push(["Switch", f[1], `data-view="${f[2]}"`]));
+    currentProducts.filter((p) => (p.name + " " + p.category).toLowerCase().includes(q)).slice(0, 6).forEach((p) => out.push(["Product", p.name, `data-view="products" data-find="${esc(p.name)}"`]));
+    currentOrders.filter((o) => ((o.orderNo || "") + " " + ((o.customer && o.customer.name) || "") + " " + ((o.customer && o.customer.phone) || "")).toLowerCase().includes(q)).slice(0, 5)
+      .forEach((o) => out.push(["Order", (o.orderNo || "Order") + " · " + ((o.customer && o.customer.name) || ""), 'data-view="orders"']));
+    currentReviews.filter((r) => ((r.name || "") + " " + (r.comment || "")).toLowerCase().includes(q)).slice(0, 3).forEach((r) => out.push(["Review", (r.name || "") + ": " + String(r.comment || "").slice(0, 40), 'data-view="manageReviews"']));
+    navResults.innerHTML = out.length ? out.map((r) => `<button type="button" class="nav-result" ${r[2]}><span class="nr-type">${r[0]}</span><span class="nr-label">${esc(r[1])}</span></button>`).join("") : '<p class="hint" style="padding:8px 16px">Nothing found.</p>';
+  }
+  function closeSearch() { navSearch.value = ""; runSearch(); }
+  navSearch.addEventListener("input", runSearch);
+  navSearch.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { closeSearch(); navSearch.blur(); }
+    if (e.key === "Enter") { const first = navResults.querySelector(".nav-result"); if (first) first.click(); }
+  });
+  navResults.addEventListener("click", (e) => {
+    const b = e.target.closest(".nav-result"); if (!b) return;
+    const find = b.getAttribute("data-find");
+    closeSearch();
+    showView(b.getAttribute("data-view"));
+    if (find !== null) { $("productFilter").value = find; renderList(); }
+  });
+  const pf = $("productFilter");
+  if (pf) pf.addEventListener("input", () => renderList());
+
+  // ---- admin panel look: Classic / New ----
+  function applySkin(skin) {
+    document.body.classList.toggle("skin-new", skin === "new");
+    try { localStorage.setItem("ttcAdminSkin", skin === "new" ? "new" : "classic"); } catch (e) {}
+    const b = $("skinBtn");
+    if (b) b.textContent = skin === "new" ? "Classic look" : "New look";
+  }
+  (function initSkin() {
+    let skin = "classic";
+    try { if (localStorage.getItem("ttcAdminSkin") === "new") skin = "new"; } catch (e) {}
+    applySkin(skin);
+    $("skinBtn").addEventListener("click", () => {
+      applySkin(document.body.classList.contains("skin-new") ? "classic" : "new");
+      refreshDash();
+    });
+  })();
+
+  // ---- product photos: download ----
+  function slugify(str) { return String(str || "product").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "product"; }
+  function saveBlob(blob, name) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  function extFor(blob, url) {
+    const t = (blob.type || "").toLowerCase();
+    if (t.includes("png")) return "png"; if (t.includes("webp")) return "webp"; if (t.includes("gif")) return "gif"; if (t.includes("jpeg") || t.includes("jpg")) return "jpg";
+    const m = /\.(jpe?g|png|webp|gif)(\?|$)/i.exec(url); return m ? m[1].toLowerCase().replace("jpeg", "jpg") : "jpg";
+  }
+  async function downloadProductPhotos(id) {
+    const msg = $("dlMsg");
+    const p = currentProducts.find((x) => x.id === id);
+    if (!p) return;
+    const seen = new Set(); const items = [];
+    (p.photos || []).forEach((u, n) => { if (/^https?:/.test(u) && !seen.has(u)) { seen.add(u); items.push({ url: u, label: "photo-" + (n + 1) }); } });
+    (p.variants || []).forEach((v) => { if (v && /^https?:/.test(v.photo || "") && !seen.has(v.photo)) { seen.add(v.photo); items.push({ url: v.photo, label: slugify(v.name || "variant") }); } });
+    if (!items.length) { msg.className = "msg error"; msg.textContent = "“" + p.name + "” has no online photos to download."; return; }
+    const base = slugify(p.name);
+    msg.className = "msg"; msg.textContent = "Preparing " + items.length + " photo" + (items.length > 1 ? "s" : "") + " of “" + p.name + "”…";
+    try {
+      const files = await Promise.all(items.map(async (it) => {
+        const r = await fetch(it.url);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const blob = await r.blob();
+        return { name: base + "-" + it.label + "." + extFor(blob, it.url), blob };
+      }));
+      if (files.length === 1) saveBlob(files[0].blob, files[0].name);
+      else {
+        const JSZip = (await import("https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm")).default;
+        const zip = new JSZip();
+        files.forEach((f) => zip.file(f.name, f.blob));
+        saveBlob(await zip.generateAsync({ type: "blob" }), base + "-photos.zip");
+      }
+      msg.className = "msg success"; msg.textContent = "Downloaded " + files.length + " photo" + (files.length > 1 ? "s" : "") + " of “" + p.name + "”.";
+    } catch (err) {
+      // The browser wouldn't let us collect them in one go — download one by one instead.
+      items.forEach((it, n) => setTimeout(() => {
+        const a = document.createElement("a");
+        a.href = it.url.replace("/upload/", "/upload/fl_attachment/"); a.download = ""; a.target = "_blank"; a.rel = "noopener";
+        document.body.appendChild(a); a.click(); a.remove();
+      }, n * 700));
+      msg.className = "msg"; msg.textContent = "Downloading the photos one by one (" + err.message + "). Allow multiple downloads if your browser asks.";
+    }
+  }
+
+  // =====================================================================
+  // Orders: where it came from, tracking, placing an order by hand,
+  // sales numbers, links, and the "On this page" shortcuts.
+  // =====================================================================
+  const STAGES = [["placed", "Order placed"], ["confirmed", "Confirmed"], ["preparing", "Being prepared"], ["onway", "On the way"], ["delivered", "Delivered"], ["cancelled", "Cancelled"]];
+  const COURIERS = ["Not sent yet", "TCS", "Leopards", "M&P", "Trax", "Call Courier", "PostEx", "BlueEx", "Pakistan Post", "Rider (own delivery)", "Other"];
+  const SHOP_WA = "923027609899";
+  const stageLabel = (k) => (STAGES.find((s) => s[0] === k) || STAGES[0])[1];
+  function makeOrderNoAdmin() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let out = "";
+    const pick = new Uint32Array(5); try { crypto.getRandomValues(pick); } catch (e) { for (let i = 0; i < 5; i++) pick[i] = Math.floor(Math.random() * 1e9); }
+    for (let i = 0; i < 5; i++) out += chars[pick[i] % chars.length];
+    return "TTC-" + out;
+  }
+  const trackLink = (no) => location.origin + "/?track=" + encodeURIComponent(no);
+  function trackMessage(o) {
+    const t = o.tracking || {}; const c = o.customer || {};
+    const st = stageLabel(t.stage || "placed");
+    return `Hi ${(c.name || "").split(" ")[0] || "there"}! Update on your order ${o.orderNo || ""}: ${st}.` +
+      (t.courier && t.courier !== "Not sent yet" ? `\nCourier: ${t.courier}` : "") + (t.number ? `\nTracking number: ${t.number}` : "") +
+      (t.note ? `\n${t.note}` : "") + (o.orderNo ? `\n\nTrack your order: ${trackLink(o.orderNo)}` : "") + "\n— Twist & Tangle Crochet";
+  }
+  // Extra parts of each order card (called from renderOrders).
+  function orderExtras(o) {
+    const t = o.tracking || {}; const stage = t.stage || "placed";
+    const wa = waNumber((o.customer || {}).phone);
+    return `<div class="order-extra">
+      <div class="oe-row"><label>Came from</label><select data-order-channel="${o.id}">${CHANNELS.map(([v, l]) => `<option value="${v}" ${(o.channel || "whatsapp") === v ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+      <details class="track-box"><summary>Order tracking · <b>${esc(stageLabel(stage))}</b></summary>
+        <div class="stage-chips" data-stage-box="${o.id}">${STAGES.map(([k, l]) => `<button type="button" class="chip ${k === stage ? "active" : ""}" data-stage="${k}">${l}</button>`).join("")}</div>
+        <div class="row2"><div><label>Courier</label><select data-trk="courier">${COURIERS.map((c) => `<option ${((t.courier || COURIERS[0]) === c) ? "selected" : ""}>${c}</option>`).join("")}</select></div>
+        <div><label>Courier tracking number</label><input type="text" data-trk="number" value="${esc(t.number || "")}" placeholder="e.g. 7712345678" /></div></div>
+        <label>Note for the customer (optional)</label><input type="text" data-trk="note" value="${esc(t.note || "")}" placeholder="e.g. Your order will arrive on Thursday" />
+        <div class="order-actions">
+          <button type="button" class="btn" data-track-save="${o.id}">Update tracking</button>
+          ${wa ? `<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${encodeURIComponent(trackMessage(o))}">Send “${esc(stageLabel(stage))}” on WhatsApp</a>` : ""}
+          ${o.orderNo ? `<button type="button" class="btn secondary" data-track-copy="${o.id}">Copy tracking link</button>` : ""}
+        </div>
+        <div class="hint" style="margin:6px 0 0">The customer sees these steps when they type the order number in “Track your order” on the shop (turn it on in Shop → Order &amp; checkout).</div>
+      </details>
+    </div>`;
+  }
+  function orderCardExtraActions(o) {
+    return `<button type="button" class="chip" data-order-print="${o.id}">Print slip</button>`;
+  }
+  pageRoot.addEventListener("change", async (e) => {
+    const sel = e.target.closest("[data-order-channel]");
+    if (sel) { updateOrder(sel.getAttribute("data-order-channel"), { channel: sel.value }); }
+  });
+  pageRoot.addEventListener("click", async (e) => {
+    const stageBtn = e.target.closest("[data-stage]");
+    if (stageBtn) { stageBtn.parentElement.querySelectorAll(".chip").forEach((c) => c.classList.toggle("active", c === stageBtn)); return; }
+    const save = e.target.closest("[data-track-save]");
+    const copy = e.target.closest("[data-track-copy]");
+    const print = e.target.closest("[data-order-print]");
+    if (copy) {
+      const o = currentOrders.find((x) => x.id === copy.getAttribute("data-track-copy")); if (!o) return;
+      try { await navigator.clipboard.writeText(trackLink(o.orderNo)); copy.textContent = "Copied ✓"; } catch (err) { prompt("Copy this link:", trackLink(o.orderNo)); }
+      return;
+    }
+    if (print) { printSlip(currentOrders.find((x) => x.id === print.getAttribute("data-order-print"))); return; }
+    if (save) {
+      const o = currentOrders.find((x) => x.id === save.getAttribute("data-track-save")); if (!o) return;
+      const box = save.closest(".track-box");
+      const stage = (box.querySelector(".stage-chips .chip.active") || {}).dataset ? box.querySelector(".stage-chips .chip.active").dataset.stage : "placed";
+      const courier = box.querySelector('[data-trk="courier"]').value; const number = box.querySelector('[data-trk="number"]').value.trim(); const note = box.querySelector('[data-trk="note"]').value.trim();
+      save.disabled = true; save.textContent = "Saving…";
+      try {
+        const orderNo = o.orderNo || makeOrderNoAdmin();
+        const upd = { tracking: { stage, courier, number, note }, orderNo };
+        if (stage === "cancelled") upd.status = "cancelled"; else if (o.status === "cancelled") upd.status = "new";
+        await updateDoc(doc(db, "orders", o.id), upd);
+        await setDoc(doc(db, "tracking", orderNo), { stage, courier, number, note, updatedAt: serverTimestamp() });
+        save.textContent = "Saved ✓";
+      } catch (err) { save.textContent = "Update tracking"; save.disabled = false; alert("Couldn't save tracking: " + (err.code || err.message) + (err.code === "permission-denied" ? "\n\nAdd the Firestore rule for “tracking” (see Shop → Order & checkout)." : "")); }
+    }
+  });
+  function printSlip(o) {
+    if (!o) return;
+    const c = o.customer || {}; const items = Array.isArray(o.items) ? o.items : [];
+    const brand = (S && S.brand) || {};
+    const shop = (brand.on && brand.shopName) || "Twist & Tangle Crochet";
+    const logo = (brand.on && brand.logo) || "";
+    const n = (x) => Number(x) || 0;
+    const sub = items.reduce((t, i) => t + n(i.price) * (n(i.qty) || 1), 0);
+    const del = n(o.deliveryCharge), disc = n(o.discount), total = n(o.total) || Math.max(0, sub + del - disc);
+    const when = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate() : new Date();
+    const dateStr = when.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    const addr = [c.address, c.apartment, c.city, c.postal].filter(Boolean).join(", ");
+    const waNum = String(c.phone || "").replace(/\D/g, "").replace(/^0/, "92");
+    const msg = "Assalam o Alaikum " + (c.name || "") + "! Your order " + (o.orderNo || "") + " from " + shop + " (Rs" + total + ") is being prepared. Thank you!";
+    const rows = items.map((i) => `<tr><td class="ph">${i.photo ? `<img src="${esc(i.photo)}" alt="">` : `<span class="noph">🧶</span>`}</td><td><b>${esc(i.name)}</b>${i.variant ? `<div class="sm">${esc(i.variant)}</div>` : ""}</td><td class="r">${n(i.qty) || 1}</td><td class="r pr">Rs${n(i.price)}</td><td class="r"><b>Rs${n(i.price) * (n(i.qty) || 1)}</b></td></tr>`).join("");
+    const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(o.orderNo || "Order")}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#EFE6DA;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#2B2420}
+.bar{position:sticky;top:0;z-index:5;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;padding:10px;background:#3F1220;color:#fff}
+.bar button,.bar a{border:none;border-radius:999px;padding:8px 16px;font-weight:700;font-size:13px;cursor:pointer;background:#F7F1E8;color:#3F1220;text-decoration:none}
+.bar button.p{background:#B98A2E;color:#fff}.bar a.w{background:#25D366;color:#fff}
+.bar label{font-size:12.5px;display:flex;align-items:center;gap:5px;cursor:pointer}
+.bar .sz button{padding:6px 12px}.bar .sz button.on{background:#B98A2E;color:#fff}
+.slip{width:420px;max-width:calc(100% - 24px);margin:18px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(63,18,32,.2)}
+.slip.a5{width:560px}.slip.a4{width:760px}
+.head{background:linear-gradient(135deg,#6E1E36,#3F1220);color:#fff;padding:18px 20px;display:flex;gap:12px;align-items:center}
+.head img{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#fff}
+.head h1{font-size:19px;margin:0;font-family:Georgia,serif;font-weight:600}.head .sm{color:#E8CF8C;font-size:12px}
+.ono{margin-left:auto;text-align:right}.ono b{display:block;font-size:17px;letter-spacing:.5px;color:#F3D98A}
+.body{padding:16px 20px}
+.cust{background:#FBF0D4;border:1px solid #E8CF8C;border-radius:12px;padding:10px 14px;font-size:13.5px;line-height:1.55;margin-bottom:14px}
+.cust .lbl{font-size:10.5px;font-weight:800;letter-spacing:1px;color:#8A6A10;text-transform:uppercase}
+table{width:100%;border-collapse:collapse;font-size:13px}th{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:#7A6E64;text-align:left;border-bottom:2px solid #6E1E36;padding:6px 4px}
+td{padding:8px 4px;border-bottom:1px dashed #E8DCC8;vertical-align:middle}.r{text-align:right}th.r{text-align:right}
+.ph{width:46px}.ph img{width:42px;height:42px;object-fit:cover;border-radius:8px;display:block}.noph{display:flex;width:42px;height:42px;border-radius:8px;background:#F3E9DB;align-items:center;justify-content:center}
+.sm{font-size:11.5px;color:#7A6E64}
+.nophotos .ph{display:none}.noprices .pr{display:none}
+.tot{margin:12px 0 0 auto;width:min(260px,100%);font-size:13.5px}.tot div{display:flex;justify-content:space-between;padding:3px 0}
+.tot .g{border-top:2px solid #6E1E36;margin-top:6px;padding-top:8px;font-size:18px;font-weight:800;color:#6E1E36}
+.pay{margin-top:10px;display:inline-block;background:#F3E9DB;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700}
+.note{margin-top:10px;font-size:12.5px;color:#5A4E46;border-left:3px solid #B98A2E;padding-left:10px}
+.foot{text-align:center;padding:12px 16px 16px;border-top:2px dashed #E8DCC8;font-size:12px;color:#7A6E64}
+.foot b{display:block;font-family:Georgia,serif;font-size:15px;color:#6E1E36;margin-bottom:2px}
+.check{display:flex;align-items:center;gap:8px;margin:0;font-size:12.5px;cursor:pointer}
+.tick{cursor:pointer}.tick.done td{opacity:.45;text-decoration:line-through}
+@media print{body{background:#fff}.bar,.hint{display:none!important}.slip{box-shadow:none;margin:0 auto;border-radius:0;width:100%!important;max-width:100%}.head{-webkit-print-color-adjust:exact;print-color-adjust:exact}.cust{-webkit-print-color-adjust:exact;print-color-adjust:exact}.tick.done td{opacity:1;text-decoration:none}}
+</style></head><body>
+<div class="bar">
+ <button class="p" onclick="window.print()">🖨 Print</button>
+ <span class="sz"><button data-sz="" class="on">Small</button><button data-sz="a5">A5</button><button data-sz="a4">A4</button></span>
+ <label><input type="checkbox" id="cp" checked> Pictures</label>
+ <label><input type="checkbox" id="cr" checked> Prices</label>
+ ${waNum ? `<a class="w" target="_blank" rel="noopener" href="https://wa.me/${waNum}?text=${encodeURIComponent(msg)}">WhatsApp customer</a>` : ""}
+ <button id="cc">Copy address</button>
+</div>
+<div class="slip" id="slip">
+ <div class="head">${logo ? `<img src="${esc(logo)}" alt="">` : ""}<div><h1>${esc(shop)}</h1><div class="sm">Handmade with love</div></div><div class="ono"><span class="sm">ORDER</span><b>${esc(o.orderNo || "")}</b><span class="sm">${esc(dateStr)}</span></div></div>
+ <div class="body">
+  <div class="cust"><div class="lbl">Deliver to</div><b>${esc(c.name || "")}</b><br>${esc(c.phone || "")}<br>${esc(addr)}</div>
+  <table><thead><tr><th class="ph"></th><th>Item</th><th class="r">Qty</th><th class="r pr">Price</th><th class="r">Total</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="tot"><div class="pr"><span>Items</span><span>Rs${sub}</span></div>${del ? `<div><span>Delivery</span><span>Rs${del}</span></div>` : ""}${disc ? `<div><span>Discount</span><span>− Rs${disc}</span></div>` : ""}<div class="g"><span>Total</span><span>Rs${total}</span></div></div>
+  ${o.paymentMethod ? `<span class="pay">💳 ${esc(o.paymentMethod)}</span>` : ""}
+  ${o.notes ? `<div class="note">${esc(o.notes)}</div>` : ""}
+ </div>
+ <div class="foot"><b>Thank you for shopping with us 💛</b>Keep your order number to track your parcel.</div>
+</div>
+<script>
+var slip=document.getElementById("slip");
+document.querySelectorAll("[data-sz]").forEach(function(b){b.onclick=function(){document.querySelectorAll("[data-sz]").forEach(function(x){x.classList.remove("on")});b.classList.add("on");slip.className="slip "+b.dataset.sz+(slip.classList.contains("nophotos")?" nophotos":"")+(slip.classList.contains("noprices")?" noprices":"")}});
+document.getElementById("cp").onchange=function(){slip.classList.toggle("nophotos",!this.checked)};
+document.getElementById("cr").onchange=function(){slip.classList.toggle("noprices",!this.checked)};
+document.getElementById("cc").onclick=function(){var t=${JSON.stringify([c.name, c.phone, addr].filter(Boolean).join("\n"))};var b=this;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent="Copied ✓"}).catch(function(){b.textContent="Copy not allowed"})};
+document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick");r.title="Tap to tick off while packing";r.onclick=function(){r.classList.toggle("done")}});
+<\/script></body></html>`;
+    const w = window.open("", "_blank"); if (!w) { alert("Please allow pop-ups to print."); return; }
+    w.document.write(html); w.document.close(); w.focus();
+  }
+
+  // ---- place an order by hand (WhatsApp / phone / shop customers) ----
+  let manualItems = [{ name: "", price: "", qty: 1, photo: "", variant: "" }];
+  let manualDone = "";
+  function renderManual() {
+    const pane = $("manualRoot"); if (!pane) return;
+    const sub = manualItems.reduce((n, i) => n + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+    const val = (id) => { const el = $(id); return el ? el.value : ""; };
+    const keep = { name: val("mo_name"), phone: val("mo_phone"), address: val("mo_address"), city: val("mo_city"), channel: val("mo_channel") || "whatsapp", pay: val("mo_pay"), notes: val("mo_notes"), delivery: val("mo_delivery"), discount: val("mo_discount") };
+    pane.innerHTML = `
+      <div class="card"><h2>Customer</h2>
+        <p class="hint">For customers who order on WhatsApp, Instagram or by phone. The order is saved here with its own price and pictures, and appears in Orders.</p>
+        <div class="row2"><div><label>Name *</label><input type="text" id="mo_name" value="${esc(keep.name)}" /></div><div><label>Mobile number *</label><input type="tel" id="mo_phone" value="${esc(keep.phone)}" placeholder="0300 1234567" /></div></div>
+        <label>Address</label><input type="text" id="mo_address" value="${esc(keep.address)}" />
+        <div class="row2"><div><label>City</label><input type="text" id="mo_city" value="${esc(keep.city)}" /></div><div><label>Order came from</label><select id="mo_channel">${CHANNELS.map(([v, l]) => `<option value="${v}" ${keep.channel === v ? "selected" : ""}>${l}</option>`).join("")}</select></div></div>
+      </div>
+      <div class="card"><h2>Items</h2>
+        ${manualItems.map((it, i) => `<div class="lrow">
+          <div class="lrow-head"><b>Item ${i + 1}</b><span class="lrow-actions">${manualItems.length > 1 ? `<button type="button" class="move-btn" data-mo-rm="${i}" title="Remove">✕</button>` : ""}</span></div>
+          <label>Pick a product (optional — fills the name, price and picture)</label>
+          <select data-mo-pick="${i}"><option value="">— custom item —</option>${currentProducts.map((p) => `<option value="${esc(p.id)}">${esc(p.name)} (Rs${esc(p.price)})</option>`).join("")}</select>
+          <div class="row2"><div><label>Name *</label><input type="text" data-mo="${i}" data-f="name" value="${esc(it.name)}" /></div><div><label>Variant / note</label><input type="text" data-mo="${i}" data-f="variant" value="${esc(it.variant)}" /></div></div>
+          <div class="row2"><div><label>Price (Rs) *</label><input type="number" min="0" data-mo="${i}" data-f="price" value="${esc(it.price)}" /></div><div><label>Quantity</label><input type="number" min="1" data-mo="${i}" data-f="qty" value="${esc(it.qty)}" /></div></div>
+          <label>Picture</label>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${it.photo ? `<img src="${esc(it.photo)}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px" />` : ""}<input type="text" data-mo="${i}" data-f="photo" value="${esc(it.photo)}" placeholder="Picture address (https://…)" style="flex:1;min-width:160px" /><input type="file" accept="image/*" data-mo-up="${i}" /></div>
+        </div>`).join("")}
+        <button type="button" class="btn secondary" id="mo_add">+ Add another item</button>
+      </div>
+      <div class="card"><h2>Payment &amp; total</h2>
+        <div class="row2"><div><label>Delivery charge (Rs)</label><input type="number" min="0" id="mo_delivery" value="${esc(keep.delivery)}" /></div><div><label>Discount (Rs)</label><input type="number" min="0" id="mo_discount" value="${esc(keep.discount)}" /></div></div>
+        <label>Payment</label><select id="mo_pay">${["Cash on Delivery", "JazzCash", "Easypaisa", "Bank transfer", "Paid already"].map((m) => `<option ${keep.pay === m ? "selected" : ""}>${m}</option>`).join("")}</select>
+        <label>Notes</label><input type="text" id="mo_notes" value="${esc(keep.notes)}" />
+        <p style="font-size:18px;margin:14px 0 4px"><b>Total: Rs<span id="mo_total">${sub}</span></b></p>
+        <button type="button" class="btn" id="mo_place">Place order</button>
+        <div id="mo_msg" class="msg ${manualDone ? "success" : ""}">${manualDone}</div>
+      </div>`;
+    updateManualTotal();
+  }
+  function updateManualTotal() {
+    const sub = manualItems.reduce((n, i) => n + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+    const d = Number(($("mo_delivery") || {}).value) || 0; const disc = Number(($("mo_discount") || {}).value) || 0;
+    if ($("mo_total")) $("mo_total").textContent = Math.max(0, sub + d - disc);
+  }
+  pageRoot.addEventListener("input", (e) => {
+    const el = e.target; if (!el.closest || !el.closest("#manualRoot")) return;
+    if (el.dataset.mo !== undefined) { const it = manualItems[Number(el.dataset.mo)]; if (it) it[el.dataset.f] = el.value; }
+    updateManualTotal();
+  });
+  pageRoot.addEventListener("change", async (e) => {
+    const el = e.target; if (!el.closest || !el.closest("#manualRoot")) return;
+    if (el.dataset.moPick !== undefined) {
+      const p = currentProducts.find((x) => x.id === el.value); const it = manualItems[Number(el.dataset.moPick)];
+      if (p && it) { it.name = p.name; it.price = p.price; it.photo = heroPhotoOf(p); renderManual(); }
+    } else if (el.dataset.moUp !== undefined && el.files && el.files[0]) {
+      const it = manualItems[Number(el.dataset.moUp)];
+      try { it.photo = await uploadToCloudinary(el.files[0]); renderManual(); } catch (err) { $("mo_msg").className = "msg error"; $("mo_msg").textContent = "Couldn't upload the picture (" + err.message + "). Paste a picture address instead."; }
+    }
+  });
+  pageRoot.addEventListener("click", async (e) => {
+    if (!e.target.closest("#manualRoot")) return;
+    if (e.target.id === "mo_add") { manualItems.push({ name: "", price: "", qty: 1, photo: "", variant: "" }); renderManual(); return; }
+    const rm = e.target.closest("[data-mo-rm]"); if (rm) { manualItems.splice(Number(rm.dataset.moRm), 1); renderManual(); return; }
+    if (e.target.id !== "mo_place") return;
+    const msg = $("mo_msg"); msg.className = "msg error"; manualDone = "";
+    const name = $("mo_name").value.trim(); const phone = $("mo_phone").value.trim(); const digits = waNumber(phone);
+    const items = manualItems.map((i) => ({ productId: "", name: String(i.name).trim(), variant: String(i.variant || "").trim() || null, qty: Math.max(1, Number(i.qty) || 1), price: Number(i.price) || 0, photo: /^https?:\/\//.test(i.photo || "") ? i.photo : null })).filter((i) => i.name);
+    if (!name) { msg.textContent = "Please enter the customer's name."; return; }
+    if (digits.length < 11) { msg.textContent = "Please enter a correct mobile number, e.g. 0300 1234567."; return; }
+    if (!items.length) { msg.textContent = "Add at least one item with a name."; return; }
+    if (items.some((i) => !(i.price > 0))) { msg.textContent = "Every item needs a price above 0."; return; }
+    const delivery = Number($("mo_delivery").value) || 0; const discount = Number($("mo_discount").value) || 0;
+    const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
+    const orderNo = makeOrderNoAdmin();
+    $("mo_place").disabled = true;
+    try {
+      await addDoc(collection(db, "orders"), {
+        orderNo, items, subtotal, discount, deliveryCharge: delivery, total: Math.max(0, subtotal + delivery - discount), promo: null,
+        customer: { name, phone, address: [$("mo_address").value.trim(), $("mo_city").value.trim()].filter(Boolean).join(", "), notes: $("mo_notes").value.trim() },
+        paymentMethod: $("mo_pay").value, channel: $("mo_channel").value, status: "new", starred: false, manual: true, createdAt: serverTimestamp(),
+      });
+      manualItems = [{ name: "", price: "", qty: 1, photo: "", variant: "" }];
+      manualDone = "Order " + orderNo + " placed. You can find it in Orders.";
+      ["mo_name", "mo_phone", "mo_address", "mo_city", "mo_notes", "mo_delivery", "mo_discount"].forEach((id) => { $(id).value = ""; });
+      renderManual();
+    } catch (err) { msg.textContent = "Couldn't place the order (" + (err.code || err.message) + ")."; $("mo_place").disabled = false; }
+  });
+
+  // ---- sales (done orders only) ----
+  let salesRange = "month";
+  function salesRangeStart() {
+    const now = new Date();
+    if (salesRange === "today") return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    if (salesRange === "7d") return Date.now() - 7 * 864e5;
+    if (salesRange === "30d") return Date.now() - 30 * 864e5;
+    if (salesRange === "month") return new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    return 0;
+  }
+  const tsMs = (t) => (t && t.toMillis ? t.toMillis() : 0);
+  function renderSales() {
+    const pane = $("salesRoot"); if (!pane) return;
+    const from = salesRangeStart();
+    const done = currentOrders.filter((o) => o.status === "done" && (tsMs(o.doneAt) || tsMs(o.createdAt)) >= from);
+    const other = currentOrders.filter((o) => o.status !== "done" && tsMs(o.createdAt) >= from);
+    const total = done.reduce((n, o) => n + (Number(o.total) || 0), 0);
+    const itemsSold = done.reduce((n, o) => n + (Array.isArray(o.items) ? o.items.reduce((m, i) => m + (Number(i.qty) || 1), 0) : 0), 0);
+    const avg = done.length ? Math.round(total / done.length) : 0;
+    const byCh = {}; done.forEach((o) => { const k = o.channel || "whatsapp"; byCh[k] = (byCh[k] || 0) + (Number(o.total) || 0); });
+    const top = {}; done.forEach((o) => (o.items || []).forEach((i) => { const r = top[i.name] || (top[i.name] = { q: 0, rs: 0 }); r.q += Number(i.qty) || 1; r.rs += (Number(i.price) || 0) * (Number(i.qty) || 1); }));
+    const topRows = Object.entries(top).sort((a, b) => b[1].rs - a[1].rs).slice(0, 8);
+    const fmt = (n) => "Rs. " + Number(n).toLocaleString("en-PK");
+    const chips = [["today", "Today"], ["7d", "Last 7 days"], ["month", "This month"], ["30d", "Last 30 days"], ["all", "All time"]];
+    const label = (chips.find((c) => c[0] === salesRange) || [])[1].toLowerCase();
+    const maxCh = Math.max(1, ...Object.values(byCh));
+    pane.innerHTML = `<div class="card"><h2>Sales</h2>
+      <p class="hint">Only orders you moved to <b>Done</b> are counted here. New and open orders, cancelled orders and your own test orders are never added. <b>Test order?</b> Cancel it instead of moving it to Done.</p>
+      <div class="chips">${chips.map(([k, l]) => `<button type="button" class="chip ${k === salesRange ? "active" : ""}" data-sales="${k}">${l}</button>`).join("")}</div>
+      <div class="sales-grid">
+        <div class="sale-tile"><span>Total sales</span><b>${fmt(total)}</b><small>${label}</small></div>
+        <div class="sale-tile"><span>Done orders</span><b>${done.length}</b><small>${itemsSold} items sold</small></div>
+        <div class="sale-tile"><span>Average order</span><b>${fmt(avg)}</b><small>per done order</small></div>
+        <button type="button" class="sale-tile warn" data-act="goto" data-view="orders"><span>Not counted</span><b>${other.length}</b><small>new, open or cancelled →</small></button>
+      </div>
+      ${done.length === 0 ? `<p class="empty">No done orders ${label}. When you deliver an order, open Orders and press <b>Move to done</b>.</p>` : ""}
+    </div>
+    ${done.length ? `<div class="card"><h2>By channel</h2>${Object.entries(byCh).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div class="bar-row"><span>${esc(channelLabel(k))}</span><div class="bar"><i style="width:${Math.round(v / maxCh * 100)}%"></i></div><b>${fmt(v)}</b></div>`).join("")}</div>
+    <div class="card"><h2>Best sellers</h2>${topRows.map(([n, r]) => `<div class="bar-row"><span>${esc(n)}</span><span class="hint" style="margin:0">× ${r.q}</span><b>${fmt(r.rs)}</b></div>`).join("")}</div>` : ""}`;
+  }
+  pageRoot.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-sales]"); if (b) { salesRange = b.dataset.sales; renderSales(); }
+  });
+
+  // ---- important links ----
+  function renderLinks() {
+    const pane = $("linksRoot"); if (!pane) return;
+    const o = location.origin;
+    const cats = [...new Set(currentProducts.map((p) => p.category).filter(Boolean))];
+    const sections = [
+      ["Shop pages for customers", "Paste these in WhatsApp, Instagram bio or Facebook posts.", [
+        ["🏠", "Shop home page", o + "/"], ["📦", "Track your order", o + "/?track=1"], ["🛒", "All products", o + "/#shop"],
+      ]],
+      ["Categories", "One link per category.", cats.map((c) => ["🧶", c, o + "/category/" + encodeURIComponent(c.trim().toLowerCase().replace(/\s+/g, "-"))])],
+      ["WhatsApp, social", "Ways customers can reach you.", [
+        ["💬", "WhatsApp chat", "https://wa.me/" + SHOP_WA], ["📸", "Instagram message", "https://ig.me/m/twisttanglecrochet"], ["📘", "Facebook", "https://www.facebook.com/twisttanglecrochet"],
+      ]],
+      ["For you (work tools)", "Only for you and your admins.", [["🛠️", "This admin panel", o + "/admin.html"]]],
+    ];
+    pane.innerHTML = `<div class="card"><h2>Links</h2><p class="hint">All your links in one place: copy, open, send on WhatsApp or make a QR code.</p></div>` + sections.map(([t, d, rows]) => `<div class="card"><h2>${t}</h2><p class="hint">${d}</p>${rows.map(([ic, name, url], i) => `<div class="link-row"><span class="link-ic">${ic}</span><div class="link-main"><b>${esc(name)}</b><code>${esc(url.replace(/^https?:\/\//, ""))}</code></div><div class="link-btns"><button type="button" class="btn small" data-lk="copy" data-url="${esc(url)}">Copy</button><a class="btn small secondary" target="_blank" rel="noopener" href="${esc(url)}">Open</a><a class="btn small wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(name + ": " + url)}">WhatsApp</a><button type="button" class="btn small secondary" data-lk="qr" data-url="${esc(url)}">QR</button></div></div>`).join("")}</div>`).join("") + `<div class="card hidden" id="qrCard"><h2>QR code</h2><img id="lk_qr" alt="QR code" style="max-width:240px" /><p class="hint" id="lk_qr_url"></p></div>`;
+  }
+  pageRoot.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-lk]"); if (!b) return;
+    const url = b.dataset.url;
+    if (b.dataset.lk === "copy") { try { await navigator.clipboard.writeText(url); b.textContent = "Copied ✓"; setTimeout(() => (b.textContent = "Copy"), 1500); } catch (err) { prompt("Copy this link:", url); } }
+    else { $("qrCard").classList.remove("hidden"); $("lk_qr").src = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=" + encodeURIComponent(url); $("lk_qr_url").textContent = url; $("qrCard").scrollIntoView({ behavior: "smooth", block: "center" }); }
+  });
+
+  // ---- "On this page" shortcuts + sub-links under the menu item ----
+  function buildOnThisPage() {
+    document.querySelectorAll(".onpage, .nav-sub").forEach((n) => n.remove());
+    if (typeof _obs !== "undefined") _obs.takeRecords();
+    const panel = document.querySelector(`[data-view-panel="${currentView}"]`); if (!panel) return;
+    const heads = [...panel.querySelectorAll(".card > h2")].filter((h) => h.textContent.trim());
+    if (heads.length < 2) return;
+    heads.forEach((h, i) => { h.parentElement.id = h.parentElement.id || "sec_" + currentView + "_" + i; });
+    const pills = document.createElement("div"); pills.className = "onpage";
+    pills.innerHTML = '<span>On this page:</span>' + heads.map((h) => `<button type="button" class="pill" data-jump="${h.parentElement.id}">${esc(h.textContent.trim())}</button>`).join("");
+    panel.insertBefore(pills, panel.firstChild);
+    const active = document.querySelector(`.nav-item[data-view="${currentView}"]`);
+    if (active) {
+      const sub = document.createElement("div"); sub.className = "nav-sub";
+      sub.innerHTML = heads.map((h) => `<button type="button" data-jump="${h.parentElement.id}">${esc(h.textContent.trim())}</button>`).join("");
+      active.insertAdjacentElement("afterend", sub);
+    }
+    if (typeof _obs !== "undefined") _obs.takeRecords();
+  }
+  document.addEventListener("click", (e) => {
+    const j = e.target.closest("[data-jump]"); if (!j) return;
+    const el = document.getElementById(j.dataset.jump); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.body.classList.remove("nav-open");
+  });
+  let _otp = null;
+  const scheduleOnThisPage = () => { clearTimeout(_otp); _otp = setTimeout(buildOnThisPage, 60); };
+  const _obs = new MutationObserver(scheduleOnThisPage);
+  _obs.observe(document.querySelector("main.wrap"), { childList: true, subtree: true });
+  const _showView = showView;
+  showView = function (name, opts) {
+    _showView(name, opts);
+    if (name === "neworder") renderManual();
+    if (name === "sales") renderSales();
+    if (name === "links") renderLinks();
+    scheduleOnThisPage();
+  };
+  // keep the number views fresh when orders/products change
+  const _refresh = refreshDash;
+  refreshDash = function () { _refresh(); if (currentView === "sales") renderSales(); };
+
+  // ---- Prices & tags (bulk table) ----
+  const priceEdits = {};  // id -> { price, tag } typed but not saved yet
+  const TAG_OPTS = ["", "New", "Bestseller", "Limited Stock", "Sold Out"];
+  function renderPriceTable() {
+    const box = $("priceTable"); if (!box) return;
+    const q = $("priceFilter").value.trim().toLowerCase();
+    const rows = currentProducts.filter((p) => !q || ((p.name || "") + " " + (p.category || "")).toLowerCase().includes(q));
+    box.innerHTML = '<div class="prow head"><span>Product</span><span>Price (Rs.)</span><span>Tag</span></div>' + (rows.length ? rows.map((p) => {
+      const e = priceEdits[p.id] || {};
+      const price = e.price !== undefined ? e.price : (p.price ?? "");
+      const tag = e.tag !== undefined ? e.tag : (p.tag || "");
+      const opts = TAG_OPTS.includes(tag) ? TAG_OPTS : TAG_OPTS.concat([tag]);
+      return `<div class="prow ${priceDirty(p) ? "changed" : ""}" data-id="${esc(p.id)}">
+        <div class="pn"><img src="${esc(heroPhotoOf(p))}" alt="" /><div style="min-width:0"><b>${esc(p.name)}</b><span>${esc(p.category)}</span></div></div>
+        <input type="number" min="0" data-pf="price" value="${esc(price)}" aria-label="Price of ${esc(p.name)}" />
+        <select data-pf="tag" aria-label="Tag of ${esc(p.name)}">${opts.map((o) => `<option value="${esc(o)}" ${o === tag ? "selected" : ""}>${o || "None"}</option>`).join("")}</select>
+      </div>`;
+    }).join("") : '<p class="hint" style="padding:12px 14px">No product matches.</p>');
+    $("priceSave").disabled = !Object.keys(priceEdits).some((id) => { const p = currentProducts.find((x) => x.id === id); return p && priceDirty(p); });
+  }
+  function priceDirty(p) {
+    const e = priceEdits[p.id]; if (!e) return false;
+    return (e.price !== undefined && Number(e.price) !== Number(p.price)) || (e.tag !== undefined && e.tag !== (p.tag || ""));
+  }
+  $("priceTable").addEventListener("input", (ev) => {
+    const el = ev.target; const row = el.closest(".prow[data-id]"); if (!row) return;
+    const id = row.dataset.id; (priceEdits[id] = priceEdits[id] || {})[el.dataset.pf] = el.value;
+    const p = currentProducts.find((x) => x.id === id);
+    row.classList.toggle("changed", priceDirty(p));
+    $("priceSave").disabled = !Object.keys(priceEdits).some((k) => { const q = currentProducts.find((x) => x.id === k); return q && priceDirty(q); });
+  });
+  $("priceFilter").addEventListener("input", renderPriceTable);
+  $("priceSave").addEventListener("click", async () => {
+    const msg = $("priceMsg"); const changed = currentProducts.filter(priceDirty);
+    for (const p of changed) { const v = priceEdits[p.id].price; if (v !== undefined && (v === "" || Number(v) < 0)) { msg.textContent = "“" + p.name + "” needs a valid price."; return; } }
+    $("priceSave").disabled = true; msg.textContent = "Saving…";
+    try {
+      await Promise.all(changed.map((p) => {
+        const e = priceEdits[p.id]; const data = {};
+        if (e.price !== undefined) data.price = Number(e.price);
+        if (e.tag !== undefined) data.tag = e.tag;
+        return updateDoc(doc(db, "products", p.id), data);
+      }));
+      changed.forEach((p) => delete priceEdits[p.id]);
+      msg.textContent = "Saved " + changed.length + " product" + (changed.length === 1 ? "" : "s") + ".";
+    } catch (err) { msg.textContent = "Couldn't save (" + (err.code || err.message) + ")."; }
+    renderPriceTable();
+  });
+  const _renderList = renderList;
+  renderList = function () { _renderList(); renderPriceTable(); };
+
+  appStarted = true;
+  if (currentView === "dashboard") renderDashboard();
+
 
   populateCategorySelect();
   renderPhotoThumbs();

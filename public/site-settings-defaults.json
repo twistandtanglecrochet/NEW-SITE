@@ -1,0 +1,285 @@
+{
+  "defaults": {
+    "maintenance": {
+      "on": false,
+      "title": "Jaldi wapas aayenge",
+      "message": "Hum site par thora kaam kar rahe hain. Order ya sawal ke liye WhatsApp par message karein."
+    },
+    "heroReveal": {
+      "on": false,
+      "style": "rise",
+      "step": 140
+    },
+    "rotator": {
+      "on": false,
+      "target": "Handmade",
+      "words": [
+        "Handmade",
+        "Cute",
+        "Cozy"
+      ],
+      "targetUr": "",
+      "wordsUr": [],
+      "speed": 2200,
+      "fx": "rise"
+    },
+    "bento": {
+      "on": false,
+      "items": [
+        {
+          "value": 500,
+          "suffix": "+",
+          "label": "Orders"
+        },
+        {
+          "value": 100,
+          "suffix": "%",
+          "label": "Handmade"
+        }
+      ]
+    },
+    "reviewsShuffle": {
+      "on": false,
+      "limit": 6,
+      "fx": "rise",
+      "auto": false,
+      "every": 8,
+      "button": false
+    },
+    "categoryTiles": {
+      "on": false,
+      "title": "Shop by category"
+    },
+    "visit": {
+      "on": false,
+      "title": "Visit our store",
+      "address": "",
+      "mapUrl": "",
+      "buttonLabel": "Open in Maps"
+    },
+    "sections": {
+      "on": false,
+      "order": [
+        "hero",
+        "ads",
+        "tiles",
+        "bento",
+        "shop",
+        "recent",
+        "reviews",
+        "visit"
+      ],
+      "visible": {
+        "hero": true,
+        "ads": true,
+        "tiles": true,
+        "bento": true,
+        "shop": true,
+        "recent": true,
+        "reviews": true,
+        "visit": true
+      }
+    },
+    "announcements": {
+      "on": false,
+      "style": "rotate",
+      "transition": "fade",
+      "speed": 4000,
+      "bars": []
+    },
+    "carousel": {
+      "on": false,
+      "autoplay": true,
+      "speed": 2500,
+      "transition": "slide",
+      "slides": []
+    },
+    "ads": {
+      "on": false,
+      "popupDelay": 3,
+      "items": []
+    },
+    "checkout": {
+      "betterForm": false,
+      "whatsappAuto": false,
+      "whatsappDelay": 2
+    },
+    "tracking": {
+      "on": false
+    },
+    "productPage": {
+      "tabs": false,
+      "sizes": false,
+      "colours": false,
+      "includes": false
+    },
+    "guide": {
+      "on": false,
+      "home": true,
+      "footer": true,
+      "buttonText": "Complete order guide",
+      "goText": "Go",
+      "title": "Complete order guide",
+      "intro": "Everything about ordering from Twist & Tangle Crochet, step by step.",
+      "steps": [
+        {
+          "title": "Choose your product",
+          "text": "Browse the collection. Tap a product to see its photos, colours and details."
+        },
+        {
+          "title": "Pick colour and quantity",
+          "text": "Choose the colour you like (if there are several) and how many you want."
+        },
+        {
+          "title": "Add to cart or Buy now",
+          "text": "Add several things to your cart, or press Buy now to order one item quickly."
+        },
+        {
+          "title": "Enter your delivery details",
+          "text": "Write your full name, mobile number and complete address with house number, street, area and city."
+        },
+        {
+          "title": "Place your order",
+          "text": "Press Place order. You get an order number. Keep it safe: you need it to track your order."
+        },
+        {
+          "title": "We confirm your order",
+          "text": "We call or WhatsApp you to confirm your order, delivery charges and payment."
+        },
+        {
+          "title": "Track your order",
+          "text": "Use “Track your order” and type your order number to see where your parcel is."
+        }
+      ],
+      "tips": [
+        "Payment: Cash on Delivery, JazzCash or Easypaisa.",
+        "Every piece is handmade, so tiny differences are normal and make it special.",
+        "Questions? Message us on WhatsApp, we are happy to help."
+      ]
+    },
+    "footer": {
+      "on": false,
+      "headline": "Need help choosing? Message us and we'll guide you.",
+      "button": "Chat on WhatsApp",
+      "shopColumn": true,
+      "columns": [],
+      "track": true,
+      "showTime": true,
+      "hours": {
+        "open": "",
+        "close": ""
+      },
+      "secondNumber": "",
+      "socials": {
+        "whatsapp": true,
+        "instagram": "https://www.instagram.com/twisttanglecrochet/",
+        "facebook": "https://www.facebook.com/twisttanlecrochet",
+        "tiktok": ""
+      },
+      "copyright": "Copyright © {year} {shop}",
+      "lastLine": "Thanks for visiting"
+    },
+    "brand": {
+      "on": false,
+      "shopName": "",
+      "logo": "",
+      "address1": "",
+      "address2": "",
+      "area": "",
+      "colors": {
+        "main": "",
+        "second": "",
+        "accent": "",
+        "bg": ""
+      },
+      "fonts": "default",
+      "texts": {},
+      "photos": {
+        "on": false,
+        "list": []
+      }
+    },
+    "motion": {
+      "sections": {
+        "on": false,
+        "style": "fade-up"
+      },
+      "cards": {
+        "on": false,
+        "hover": "lift",
+        "enter": "stagger"
+      },
+      "overlays": {
+        "on": false
+      }
+    },
+    "cardLayout": {
+      "on": false,
+      "layout": 1
+    },
+    "priceFilter": {
+      "on": false
+    },
+    "wishlist": {
+      "on": false
+    },
+    "recent": {
+      "on": false,
+      "max": 10
+    },
+    "exploreMore": {
+      "on": false,
+      "initial": 8
+    },
+    "freeDelivery": {
+      "on": false,
+      "threshold": 0
+    },
+    "footerLinks": {
+      "on": false,
+      "links": []
+    },
+    "timings": {
+      "on": false,
+      "text": ""
+    },
+    "designedBy": {
+      "on": false,
+      "name": "",
+      "url": ""
+    },
+    "look": {
+      "on": false,
+      "gap": 22,
+      "cardRadius": 18,
+      "panelRadius": 24,
+      "photoRadius": 14,
+      "sectionSpace": 20
+    },
+    "i18n": {
+      "on": false,
+      "defaultLang": "en",
+      "en": {},
+      "ur": {}
+    },
+    "speed": {
+      "srcset": false,
+      "apiShop": false,
+      "sw": false
+    },
+    "pwa": {
+      "install": false,
+      "safeArea": false
+    }
+  },
+  "sectionIds": [
+    "hero",
+    "ads",
+    "tiles",
+    "bento",
+    "shop",
+    "recent",
+    "reviews",
+    "visit"
+  ]
+}

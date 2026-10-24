@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
-import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star, ArrowUp, CheckCircle2 } from "lucide-react";
+import React, { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
+import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star, ArrowUp, CheckCircle2, Clock, Shuffle } from "lucide-react";
 import { collection, doc, onSnapshot, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { COLORS } from "./data/colors.js";
@@ -13,6 +13,57 @@ import {
   JERSEY_KEYCHAIN_1_SRC,
   EARRING_EAR1_SRC,
 } from "./data/products.js";
+import { VariantPicker, ProductPhotoGallery, ProductSwatch, StarRating, RatingSummary } from "./components/shared.jsx";
+import ProductCard from "./components/ProductCard.jsx";
+import { AnnouncementBars, AdBanners, AdPopup, safeLink, liveAds } from "./components/Marketing.jsx";
+import Reveal from "./components/Reveal.jsx";
+import HeroHeading from "./components/HeroHeading.jsx";
+import { FreeDeliveryBar, PriceFilter, LangToggle, InstallButton, useInstallPrompt } from "./components/UiBits.jsx";
+import { SpeedContext, Img } from "./lib/cloudinary.jsx";
+import { useSiteSettings, useI18n, useIdList } from "./hooks/useSiteSettings.js";
+import { SECTION_IDS, SETTINGS_CACHE_KEY, normalizedOrder, readCachedSettings } from "./data/siteSettings.js";
+import { applyManifest, applySafeArea, applyServiceWorker } from "./lib/pwa.js";
+
+// "Look & brand" (Admin → Website): colours and logo are changed in place while the switch is on.
+const ORIG_COLORS = { ...COLORS };
+let CURRENT_LOGO = LOGO_SRC;
+const isHex = (v) => /^#[0-9a-f]{6}$/i.test(String(v || "").trim());
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (c) => Math.max(0, Math.min(255, Math.round(amt < 0 ? c * (1 + amt) : c + (255 - c) * amt)));
+  return "#" + [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => f(c).toString(16).padStart(2, "0")).join("");
+}
+function applyBrandColors(brand) {
+  Object.assign(COLORS, ORIG_COLORS);
+  CURRENT_LOGO = LOGO_SRC;
+  if (!brand || !brand.on) return;
+  const c = brand.colors || {};
+  if (isHex(c.main)) { COLORS.maroon = c.main; COLORS.maroonDark = shade(c.main, -0.4); }
+  if (isHex(c.second)) { COLORS.navy = c.second; COLORS.navyDeep = shade(c.second, -0.3); }
+  if (isHex(c.accent)) COLORS.gold = c.accent;
+  if (isHex(c.bg)) { COLORS.bg = c.bg; COLORS.bgSoft = shade(c.bg, -0.05); }
+  if (/^https?:\/\//i.test(String(brand.logo || ""))) CURRENT_LOGO = brand.logo.trim();
+}
+const FONT_PAIRS = {
+  classic: ["Playfair Display", "Poppins", "family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700"],
+  modern: ["DM Serif Display", "Inter", "family=DM+Serif+Display&family=Inter:wght@400;500;600;700"],
+  soft: ["Lora", "Nunito", "family=Lora:wght@500;600;700&family=Nunito:wght@400;600;700"],
+};
+
+// Parts of the shop that are only needed when the matching switch is on in
+// the admin panel — loaded on demand so the main page stays light.
+const BentoStats = lazy(() => import("./components/BentoStats.jsx"));
+const CategoryTiles = lazy(() => import("./components/CategoryTiles.jsx"));
+const VisitStore = lazy(() => import("./components/VisitStore.jsx"));
+const RecentStrip = lazy(() => import("./components/RecentStrip.jsx"));
+const WishlistPanel = lazy(() => import("./components/WishlistPanel.jsx"));
+const MaintenancePage = lazy(() => import("./components/MaintenancePage.jsx"));
+const GuidePage = lazy(() => import("./components/OrderGuide.jsx").then((m) => ({ default: m.GuidePage })));
+const GuideBar = lazy(() => import("./components/OrderGuide.jsx").then((m) => ({ default: m.GuideBar })));
+const ProductTabs = lazy(() => import("./components/ProductInfo.jsx").then((m) => ({ default: m.ProductTabs })));
+const ProductMeta = lazy(() => import("./components/ProductInfo.jsx").then((m) => ({ default: m.ProductMeta })));
+const SiteFooter = lazy(() => import("./components/SiteFooter.jsx"));
+const TrackOrder = lazy(() => import("./components/TrackOrder.jsx"));
 
 const WHATSAPP_NUMBER = "923027609899";
 
@@ -148,7 +199,7 @@ function Logo({ size = 72, scale = 2 }) {
       <div style={{ height: size, width: size, display: "flex", alignItems: "center", justifyContent: "center", overflow: "visible", flexShrink: 0 }}>
         <img
           className="ttc-logo-img"
-          src={LOGO_SRC}
+          src={CURRENT_LOGO}
           alt="Twist & Tangle Crochet logo"
           style={{ height: size * scale, width: "auto", objectFit: "contain" }}
         />
@@ -165,186 +216,6 @@ function Logo({ size = 72, scale = 2 }) {
   );
 }
 
-// Controlled by the parent (App) via `index`/`onSelect` — NOT internal state
-// — so that whichever color/style a customer taps is something the parent
-// actually knows about and can put in the cart / WhatsApp order text,
-// instead of the choice only ever changing the picture on screen.
-function VariantPicker({ variants, name, index, onSelect, onImageClick }) {
-  return (
-    <div>
-      <div
-        onClick={onImageClick}
-        style={{
-          width: "100%", aspectRatio: "4/5", borderRadius: 14, overflow: "hidden", background: "#fff",
-          cursor: onImageClick ? "pointer" : "default",
-        }}
-      >
-        <img
-          src={variants[index].photo}
-          alt={`${name} — ${variants[index].name}`}
-          loading="lazy"
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 8 }}>
-        {variants.map((v, i) => (
-          <button
-            key={v.name}
-            onClick={(e) => { e.stopPropagation(); onSelect(i); }}
-            aria-label={v.name}
-            style={{
-              aspectRatio: "1", borderRadius: 8, overflow: "hidden", padding: 0,
-              border: i === index ? `2px solid ${COLORS.navy}` : "2px solid transparent",
-              background: "none",
-            }}
-          >
-            <img src={v.photo} alt={v.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ProductPhotoGallery({ photos, name, autoPlay = false }) {
-  const [index, setIndex] = useState(0);
-  const go = (delta) => setIndex((i) => (i + delta + photos.length) % photos.length);
-
-  // Auto-advance every 4 seconds — only used where a product has just been
-  // opened (the quick view), not on the small grid thumbnails, so browsing
-  // the shop isn't distracting. Any manual click also resets this timer
-  // (via the `index` dependency) so it doesn't fight with the customer.
-  useEffect(() => {
-    if (!autoPlay || photos.length <= 1) return;
-    const timer = setInterval(() => {
-      setIndex((i) => (i + 1) % photos.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [autoPlay, photos.length, index]);
-
-  return (
-    <div style={{ position: "relative" }}>
-      <div style={{
-        width: "100%", aspectRatio: "4/5", borderRadius: 14, overflow: "hidden",
-        background: "#fff",
-      }}>
-        <img
-          src={photos[index]}
-          alt={`${name} — handmade crochet, Twist & Tangle Crochet`}
-          loading="lazy"
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </div>
-      {photos.length > 1 && (
-        <>
-          <button
-            onClick={() => go(-1)}
-            aria-label="Previous photo"
-            style={{
-              position: "absolute", left: 6, top: "50%", transform: "translateY(-50%)",
-              background: "rgba(251,246,240,0.85)", border: "none", borderRadius: "50%",
-              width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center",
-              color: COLORS.navy,
-            }}
-          >
-            <ChevronLeft size={14} />
-          </button>
-          <button
-            onClick={() => go(1)}
-            aria-label="Next photo"
-            style={{
-              position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
-              background: "rgba(251,246,240,0.85)", border: "none", borderRadius: "50%",
-              width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center",
-              color: COLORS.navy,
-            }}
-          >
-            <ChevronRight size={14} />
-          </button>
-          <div style={{ position: "absolute", bottom: 8, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 5 }}>
-            {photos.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setIndex(i)}
-                aria-label={`Photo ${i + 1}`}
-                style={{
-                  width: i === index ? 14 : 5, height: 5, borderRadius: 999, border: "none",
-                  background: i === index ? COLORS.cream : "rgba(251,246,240,0.5)",
-                  transition: "width 0.2s",
-                }}
-              />
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function ProductSwatch({ colors, real }) {
-  return (
-    <div
-      style={{
-        width: "100%", aspectRatio: "4/5", borderRadius: 14,
-        background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 55%, ${colors[1]} 55%, ${colors[1]} 100%)`,
-        position: "relative", overflow: "hidden",
-      }}
-    >
-      <svg width="100%" height="100%" style={{ position: "absolute", inset: 0, opacity: 0.35 }}>
-        <defs>
-          <pattern id={`stitch-${colors[0]}-${colors[1]}`} width="14" height="14" patternUnits="userSpaceOnUse">
-            <circle cx="7" cy="7" r="1.4" fill={COLORS.cream} />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill={`url(#stitch-${colors[0]}-${colors[1]})`} />
-      </svg>
-      {!real && (
-        <div
-          style={{
-            position: "absolute", bottom: 10, left: 10, right: 10,
-            fontFamily: "'Karla', sans-serif", fontSize: 11, color: COLORS.cream,
-            background: "rgba(43,36,32,0.55)", borderRadius: 8, padding: "4px 8px",
-            textAlign: "center",
-          }}
-        >
-          add your photo here
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Filled/empty star row for one review's rating (1-5, whole stars only).
-function StarRating({ rating, size = 13 }) {
-  return (
-    <div style={{ display: "flex", gap: 1 }}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        <Star
-          key={n}
-          size={size}
-          fill={n <= rating ? COLORS.gold : "none"}
-          color={COLORS.gold}
-          strokeWidth={1.5}
-        />
-      ))}
-    </div>
-  );
-}
-
-// Compact "★ 4.8 (12)" summary used on product cards and the quick view.
-// Returns null (renders nothing) when a product has no approved reviews yet —
-// a "0 reviews" badge on every product would look worse than no badge at all.
-function RatingSummary({ reviews, size = 13, style }) {
-  if (!reviews || reviews.length === 0) return null;
-  const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 5, margin: "5px 0", ...style }}>
-      <Star size={size} fill={COLORS.gold} color={COLORS.gold} strokeWidth={1.5} />
-      <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.charcoal }}>{avg.toFixed(1)}</span>
-      <span style={{ fontSize: 12, color: "#7A6E64" }}>({reviews.length})</span>
-    </div>
-  );
-}
 
 // The reviews block shown inside the quick view / product detail: the
 // existing approved reviews for this one product, plus a form to leave a
@@ -481,30 +352,40 @@ const HERO_SLIDES = [
   { photo: EARRING_EAR1_SRC, colors: [COLORS.gold, COLORS.navy], real: true },
 ];
 
-function Slideshow({ slides }) {
+const slideCss = `
+.ttc-sl { position: relative; width: 100%; aspect-ratio: 4/5; border-radius: var(--ttc-photo-radius, 14px); overflow: hidden; background: #fff; }
+.ttc-sl-item { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity .8s ease, transform .8s cubic-bezier(.22,.61,.36,1); }
+.ttc-sl-item.on { opacity: 1; pointer-events: auto; transform: none; }
+.ttc-sl.fx-slide .ttc-sl-item { transform: translateX(100%); opacity: 1; }
+.ttc-sl.fx-slide .ttc-sl-item.out { transform: translateX(-100%); }
+.ttc-sl.fx-zoom .ttc-sl-item { transform: scale(1.12); transition: opacity 1s ease, transform 3.2s ease-out; }
+.ttc-sl.fx-zoom .ttc-sl-item.on { transform: scale(1); }
+@media (prefers-reduced-motion: reduce) { .ttc-sl-item { transition: none !important; } }
+`;
+
+// `fx` is null for the original slideshow; "slide" | "fade" | "zoom" for the
+// admin-managed carousel (Admin → Marketing → Homepage carousel).
+function Slideshow({ slides, fx, speed, autoplay = true, onOpen }) {
   const [index, setIndex] = useState(0);
+  const [prev, setPrev] = useState(-1);
+  const ms = fx ? Math.max(1200, Number(speed) || 2500) : 2500;
+  const reduce = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
-    const t = setInterval(() => setIndex((i) => (i + 1) % slides.length), 2500);
+    if (fx && (!autoplay || reduce)) return undefined;
+    const t = setInterval(() => setIndex((i) => { setPrev(i); return (i + 1) % slides.length; }), ms);
     return () => clearInterval(t);
-  }, [slides.length]);
+  }, [slides.length, ms, fx, autoplay, reduce]);
 
-  const go = (delta) => setIndex((i) => (i + delta + slides.length) % slides.length);
-
-  return (
-    <div style={{ position: "relative" }}>
-      {slides[index].photo ? (
-        <div style={{ width: "100%", aspectRatio: "4/5", borderRadius: 14, overflow: "hidden", background: "#fff" }}>
-          <img src={slides[index].photo} alt="Twist & Tangle Crochet — handmade crochet product" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        </div>
-      ) : (
-        <ProductSwatch colors={slides[index].colors} real={slides[index].real} />
-      )}
+  const go = (delta) => setIndex((i) => { setPrev(i); return (i + delta + slides.length) % slides.length; });
+  const cur = index % slides.length;
+  const dotsAndArrows = (
+    <>
       <button
         onClick={() => go(-1)}
         aria-label="Previous slide"
         style={{
-          position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)",
+          position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", zIndex: 3,
           background: "rgba(251,246,240,0.85)", border: "none", borderRadius: "50%",
           width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center",
           color: COLORS.navy,
@@ -516,7 +397,7 @@ function Slideshow({ slides }) {
         onClick={() => go(1)}
         aria-label="Next slide"
         style={{
-          position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+          position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", zIndex: 3,
           background: "rgba(251,246,240,0.85)", border: "none", borderRadius: "50%",
           width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center",
           color: COLORS.navy,
@@ -524,22 +405,96 @@ function Slideshow({ slides }) {
       >
         <ChevronRight size={16} />
       </button>
-      <div style={{ position: "absolute", bottom: 10, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 6 }}>
+      <div style={{ position: "absolute", bottom: 10, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 6, zIndex: 3 }}>
         {slides.map((_, i) => (
           <button
             key={i}
-            onClick={() => setIndex(i)}
+            onClick={() => { setPrev(cur); setIndex(i); }}
             aria-label={`Go to slide ${i + 1}`}
             style={{
-              width: i === index ? 16 : 6, height: 6, borderRadius: 999, border: "none",
-              background: i === index ? COLORS.cream : "rgba(251,246,240,0.5)",
+              width: i === cur ? 16 : 6, height: 6, borderRadius: 999, border: "none",
+              background: i === cur ? COLORS.cream : "rgba(251,246,240,0.5)",
               transition: "width 0.2s",
             }}
           />
         ))}
       </div>
+    </>
+  );
+
+  if (fx) {
+    return (
+      <div style={{ position: "relative" }}>
+        <style>{slideCss}</style>
+        <div className={"ttc-sl fx-" + fx}>
+          {slides.map((sl, i) => (
+            <div
+              key={i}
+              className={"ttc-sl-item" + (i === cur ? " on" : i === prev % slides.length ? " out" : "")}
+              onClick={sl.productId && onOpen ? () => onOpen(sl.productId) : undefined}
+              style={{ cursor: sl.productId && onOpen ? "pointer" : "default" }}
+            >
+              {sl.photo ? (
+                <Img src={sl.photo} alt={sl.name || "Twist & Tangle Crochet — handmade crochet product"} sizes="(max-width: 700px) 92vw, 460px" widths={[480, 720, 960]} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <ProductSwatch colors={sl.colors} real={sl.real} />
+              )}
+            </div>
+          ))}
+        </div>
+        {slides.length > 1 && dotsAndArrows}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ position: "relative" }}>
+      {slides[index].photo ? (
+        <div style={{ width: "100%", aspectRatio: "4/5", borderRadius: 14, overflow: "hidden", background: "#fff" }}>
+          <Img src={slides[index].photo} alt="Twist & Tangle Crochet — handmade crochet product" sizes="(max-width: 700px) 92vw, 460px" widths={[480, 720, 960]} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+      ) : (
+        <ProductSwatch colors={slides[index].colors} real={slides[index].real} />
+      )}
+      {dotsAndArrows}
     </div>
   );
+}
+
+// Links typed into the admin panel (footer links, "designed by") — only normal
+// web, mail, phone and on-site links are allowed.
+function safeHref(url) {
+  const u = String(url || "").trim();
+  return /^(https?:\/\/|mailto:|tel:|\/)/i.test(u) ? u : "";
+}
+
+// ---- Fast shop data (Admin → Site settings → Speed → "Fast shop data") ----
+// The last good product list is kept in the browser so the shop can show it
+// at once, and keep showing it if Firebase can't be reached.
+const SHOP_CACHE_KEY = "ttc_shop_cache_v1";
+function readShopCache() {
+  try {
+    if (!readCachedSettings().speed.apiShop) return null;
+    const v = JSON.parse(localStorage.getItem(SHOP_CACHE_KEY) || "null");
+    return v && Array.isArray(v.products) && v.products.length ? v.products : null;
+  } catch (e) { return null; }
+}
+function writeShopCache(list) {
+  try { localStorage.setItem(SHOP_CACHE_KEY, JSON.stringify({ products: list, at: Date.now() })); } catch (e) {}
+}
+function mergeWithSeed(fromFirestore) {
+  const importedSeedIds = new Set(fromFirestore.map((p) => p.seedId).filter(Boolean));
+  return [...fromFirestore, ...SEED_PRODUCTS.filter((p) => !importedSeedIds.has(p.id))];
+}
+// A stable "random" order for one visit: same on every re-render, different on the next visit.
+function orderBySeed(list, seed) {
+  const score = (id) => {
+    let h = 2166136261 ^ Math.floor(seed * 4294967296);
+    const str = String(id);
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return (h >>> 0) / 4294967296;
+  };
+  return [...list].map((r) => [r, score(r.id)]).sort((a, b) => a[1] - b[1]).map((x) => x[0]);
 }
 
 // Every place that used to open WhatsApp/Instagram/Facebook via a
@@ -551,6 +506,48 @@ function Slideshow({ slides }) {
 // WhatsApp/Instagram app.
 
 export default function App() {
+  // Switches and texts from Admin → Site settings (everything off by default).
+  const [settings, applySettingsSeed] = useSiteSettings();
+  applyBrandColors(settings.brand);
+  const { lang, setLang, t: t0, enabled: i18nOn } = useI18n(settings);
+  const brandOn = !!settings.brand.on;
+  const brandAddr = [settings.brand.address1, settings.brand.address2, settings.brand.area].map((x) => String(x || "").trim()).filter(Boolean);
+  const t = brandOn ? (k) => {
+    const o = settings.brand.texts && settings.brand.texts[k];
+    if (o && String(o).trim()) return String(o);
+    if (k === "footer.location" && brandAddr.length) return brandAddr.join(", ");
+    return t0(k);
+  } : t0;
+  const brandShop = (brandOn && String(settings.brand.shopName || "").trim()) || SITE_NAME;
+  useEffect(() => {
+    const id = "ttc-brand-fonts";
+    let el = document.getElementById(id);
+    const pair = brandOn ? FONT_PAIRS[settings.brand.fonts] : null;
+    if (!pair) { if (el) el.remove(); return; }
+    if (!el) { el = document.createElement("div"); el.id = id; document.head.appendChild(el); }
+    el.innerHTML = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${pair[2]}&display=swap"><style>.ttc-bg-scroll, .ttc-bg-scroll button, .ttc-bg-scroll input, .ttc-bg-scroll select, .ttc-bg-scroll textarea { font-family: '${pair[1]}', system-ui, sans-serif; } .ttc-bg-scroll [style*="Fraunces"] { font-family: '${pair[0]}', serif !important; }</style>`;
+  }, [brandOn, settings.brand.fonts]);
+  const [wishIds, wishApi] = useIdList("ttc_wishlist", 200);
+  const [recentIds, recentApi] = useIdList("ttc_recent", Math.max(1, Number(settings.recent.max) || 10));
+  const wish = { on: settings.wishlist.on, has: wishApi.has, toggle: wishApi.toggle };
+  const [wishOpen, setWishOpen] = useState(false);
+  const [iosHelp, setIosHelp] = useState(false);
+  const installPrompt = useInstallPrompt(!!settings.pwa.install);
+  const [priceMin, setPriceMin] = useState("");
+  const [priceMax, setPriceMax] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const [shuffleSeed] = useState(() => Math.random());
+  const [reviewTick, setReviewTick] = useState(0);
+  const speedCtx = useMemo(() => ({ srcset: !!settings.speed.srcset }), [settings.speed.srcset]);
+  const apiShopRef = useRef(false);
+  apiShopRef.current = !!settings.speed.apiShop;
+  const liveProductsRef = useRef(false);
+
+  useEffect(() => { applyManifest(!!settings.pwa.install); }, [settings.pwa.install]);
+  useEffect(() => { applySafeArea(!!settings.pwa.safeArea); }, [settings.pwa.safeArea]);
+  useEffect(() => { applyServiceWorker(!!settings.speed.sw); }, [settings.speed.sw]);
+  useEffect(() => { document.documentElement.lang = lang === "ur" ? "ur" : "en"; }, [lang]);
+
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem("ttc_cart");
@@ -615,7 +612,14 @@ export default function App() {
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [form, setForm] = useState({ name: "", phone: "", address: "", notes: "", payment: PAYMENT_METHODS[0] });
+  const [form, setForm] = useState({ name: "", phone: "", address: "", notes: "", payment: PAYMENT_METHODS[0], apt: "", city: "", postal: "", email: "" });
+  const [touched, setTouched] = useState({});
+  const [guideOpen, setGuideOpen] = useState(false);
+  function openGuide() { setGuideOpen(true); try { if (window.location.pathname !== "/guide") window.history.pushState({}, "", "/guide"); } catch (e) {} }
+  function closeGuide() { setGuideOpen(false); try { if (window.location.pathname === "/guide") window.history.pushState({}, "", "/"); } catch (e) {} }
+  const [saveInfo, setSaveInfo] = useState(true);
+  const [trackOpen, setTrackOpen] = useState(() => (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("track")) || false);
+  const [waCountdown, setWaCountdown] = useState(null);
   // Website ordering ("Place order"):
   const [honeypot, setHoneypot] = useState(""); // hidden field only bots fill in
   const [phoneTouched, setPhoneTouched] = useState(false);
@@ -634,7 +638,7 @@ export default function App() {
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [promoCodes, setPromoCodes] = useState(PROMO_CODES);
   const [promoError, setPromoError] = useState("");
-  const [products, setProducts] = useState(SEED_PRODUCTS);
+  const [products, setProducts] = useState(() => readShopCache() || SEED_PRODUCTS);
   // True once the products listener has responded at least once (success or
   // failure) — used so a bad /product/xyz or /category/xyz link isn't
   // declared "not found" before Firestore's admin-added products have even
@@ -663,10 +667,21 @@ export default function App() {
   // approved isn't enough on its own — a review also has to be individually
   // starred/featured from the admin portal, so this only ever shows the
   // handful you've picked rather than every approved review on the site.
-  const homepageReviews = useMemo(
-    () => reviews.filter((r) => r.approved && r.featured).slice(0, 6),
-    [reviews]
-  );
+  const homepageReviews = useMemo(() => {
+    const pool = reviews.filter((r) => r.approved && r.featured);
+    if (!settings.reviewsShuffle.on) return pool.slice(0, 6);
+    const limit = Math.max(1, Number(settings.reviewsShuffle.limit) || 6);
+    return orderBySeed(pool, (shuffleSeed + reviewTick * 0.6180339887) % 1).slice(0, limit);
+  }, [reviews, settings.reviewsShuffle.on, settings.reviewsShuffle.limit, shuffleSeed, reviewTick]);
+
+  // Optional: reshuffle by itself every few seconds (Admin → Home sections → Reviews shuffle).
+  useEffect(() => {
+    const r = settings.reviewsShuffle;
+    if (!r.on || !r.auto) return undefined;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const timer = setInterval(() => setReviewTick((n) => n + 1), Math.max(3, Number(r.every) || 8) * 1000);
+    return () => clearInterval(timer);
+  }, [settings.reviewsShuffle.on, settings.reviewsShuffle.auto, settings.reviewsShuffle.every]);
 
   function urlForCategory(cat) {
     return cat === "All" ? "/" : `/category/${categorySlug(cat)}`;
@@ -722,6 +737,9 @@ export default function App() {
         window.history.replaceState({}, "", "/");
         routeAppliedRef.current = true;
       }
+    } else if (path === "/guide" && settings.guide.on) {
+      setGuideOpen(true);
+      routeAppliedRef.current = true;
     } else {
       routeAppliedRef.current = true;
     }
@@ -742,9 +760,12 @@ export default function App() {
         const found = cats.find((c) => categorySlug(c) === slug);
         setActiveCategory(found || "All");
         setQuickViewId(null);
+      } else if (path === "/guide") {
+        setGuideOpen(true);
       } else {
         setActiveCategory("All");
         setQuickViewId(null);
+        setGuideOpen(false);
       }
     }
     window.addEventListener("popstate", onPopState);
@@ -852,12 +873,16 @@ export default function App() {
         });
         const importedSeedIds = new Set(fromFirestore.map((p) => p.seedId).filter(Boolean));
         const remainingSeed = SEED_PRODUCTS.filter((p) => !importedSeedIds.has(p.id));
-        setProducts([...fromFirestore, ...remainingSeed]);
+        const merged = [...fromFirestore, ...remainingSeed];
+        setProducts(merged);
+        liveProductsRef.current = true;
+        if (apiShopRef.current) writeShopCache(merged);
         setProductsLoaded(true);
       },
       () => {
-        // If Firestore can't be reached, fall back to the built-in catalog.
-        setProducts(SEED_PRODUCTS);
+        // If Firestore can't be reached, fall back to the built-in catalog —
+        // or, with "Fast shop data" on, to the last list we saved.
+        setProducts((cur) => (apiShopRef.current && readShopCache() ? cur : SEED_PRODUCTS));
         setProductsLoaded(true);
       }
     );
@@ -879,6 +904,29 @@ export default function App() {
     );
     return () => unsub();
   }, []);
+
+  // "Fast shop data": a quick, cached copy of the products (and settings on a
+  // first visit) from /api/shop, shown until the live Firebase data arrives.
+  useEffect(() => {
+    if (!settings.speed.apiShop) return undefined;
+    let dead = false;
+    fetch("/api/shop")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("api " + r.status))))
+      .then((data) => {
+        if (dead || !data) return;
+        if (Array.isArray(data.products) && !liveProductsRef.current) {
+          const merged = mergeWithSeed(data.products);
+          setProducts(merged);
+          writeShopCache(merged);
+          setProductsLoaded(true);
+        }
+        let hasCached = false;
+        try { hasCached = !!localStorage.getItem(SETTINGS_CACHE_KEY); } catch (e) {}
+        if (data.settings && !hasCached) applySettingsSeed(data.settings);
+      })
+      .catch(() => {}); // Firebase (below) is still the source of truth
+    return () => { dead = true; };
+  }, [settings.speed.apiShop]);
 
   // Re-builds the JSON-LD "structured data" Google uses to understand the
   // catalog. This depends on `products` (not `[]`) on purpose — otherwise it
@@ -927,26 +975,42 @@ export default function App() {
       const q = searchQuery.trim().toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
     }
+    if (settings.priceFilter.on) {
+      const lo = priceMin === "" ? null : Number(priceMin);
+      const hi = priceMax === "" ? null : Number(priceMax);
+      if (lo !== null && Number.isFinite(lo)) list = list.filter((p) => Number(p.price) >= lo);
+      if (hi !== null && Number.isFinite(hi)) list = list.filter((p) => Number(p.price) <= hi);
+    }
     if (sortBy === "price-asc") {
       list = [...list].sort((a, b) => a.price - b.price);
     } else if (sortBy === "price-desc") {
       list = [...list].sort((a, b) => b.price - a.price);
     }
     return list;
-  }, [activeCategory, searchQuery, products, sortBy]);
+  }, [activeCategory, searchQuery, products, sortBy, settings.priceFilter.on, priceMin, priceMax]);
 
   // Jump back to page 1 whenever the category, search, or sort changes —
   // otherwise a customer could be stranded on "page 3" of a filtered/sorted
   // list that only has one page.
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeCategory, searchQuery, sortBy]);
+    setShowAll(false);
+  }, [activeCategory, searchQuery, sortBy, priceMin, priceMax]);
+  const priceBounds = useMemo(() => {
+    const prices = products.map((p) => Number(p.price)).filter((n) => Number.isFinite(n));
+    return { min: prices.length ? Math.min(...prices) : 0, max: prices.length ? Math.max(...prices) : 0 };
+  }, [products]);
 
   const PRODUCTS_PER_PAGE = 20;
   const totalPages = Math.max(1, Math.ceil(visibleProducts.length / PRODUCTS_PER_PAGE));
+  // "Explore more": show a few products first, the rest after one tap.
+  const exploreOn = !!settings.exploreMore.on;
+  const exploreInitial = Math.max(1, Number(settings.exploreMore.initial) || 8);
   const pagedProducts = useMemo(
-    () => visibleProducts.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE),
-    [visibleProducts, currentPage]
+    () => (exploreOn
+      ? (showAll ? visibleProducts : visibleProducts.slice(0, exploreInitial))
+      : visibleProducts.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE)),
+    [visibleProducts, currentPage, exploreOn, showAll, exploreInitial]
   );
 
   const cartItems = useMemo(
@@ -1060,10 +1124,13 @@ export default function App() {
     setPlacedOrder(null);
     setPlaceError(null);
     setPhoneTouched(false);
+    setTouched({});
+    setWaCountdown(null);
   }
   function openQuickView(id, push = true) {
     const p = products.find((pr) => pr.id === id);
     setQuickViewId(id);
+    if (settings.recent.on) recentApi.push(id);
     setQuickViewQty(1);
     setQuickViewSize(p && p.sizes ? p.sizes[0] : null);
     if (push) window.history.pushState({}, "", urlForProduct(id));
@@ -1173,6 +1240,7 @@ export default function App() {
   async function placeWebsiteOrder() {
     if (placingRef.current) return;
     setPhoneTouched(true);
+    setTouched({ name: true, address: true, city: true, email: true, postal: true });
     setPlaceError(null);
     if (!canSubmit) return;
 
@@ -1183,6 +1251,7 @@ export default function App() {
       itemCount: checkoutItems.reduce((n, i) => n + i.qty, 0),
       total: checkoutTotal,
     };
+    const placedText = buildPlacedText;
 
     // Bots fill in the hidden field — pretend it worked and save nothing.
     if (honeypot.trim()) {
@@ -1217,7 +1286,13 @@ export default function App() {
           promo: appliedPromo || null,
           deliveryCharge: null, // delivery is charged separately, confirmed on the call
           total: checkoutTotal,
-          customer: {
+          customer: betterOn ? {
+            name: form.name.trim(),
+            phone: form.phone.trim(),
+            address: [form.address.trim(), form.apt.trim(), form.city.trim() + (form.postal.trim() ? " " + form.postal.trim() : "")].filter(Boolean).join(", "),
+            notes: form.notes.trim(),
+            email: form.email.trim(), city: form.city.trim(), postal: form.postal.trim(), apartment: form.apt.trim(),
+          } : {
             name: form.name.trim(),
             phone: form.phone.trim(),
             address: form.address.trim(),
@@ -1232,7 +1307,8 @@ export default function App() {
         15000
       );
       writeLastOrderAt(Date.now());
-      setPlacedOrder({ ...summary, orderNo });
+      if (betterOn) { try { if (saveInfo) localStorage.setItem("ttc_checkout_info", JSON.stringify({ name: form.name, phone: form.phone, address: form.address, apt: form.apt, city: form.city, postal: form.postal, email: form.email })); else localStorage.removeItem("ttc_checkout_info"); } catch (e) {} }
+      setPlacedOrder({ ...summary, orderNo, waText: placedText(orderNo) });
       if (!directBuyItem) setCart({});
       setAppliedPromo(null);
       setPromoInput("");
@@ -1256,17 +1332,436 @@ export default function App() {
   }
 
   const phoneValid = isValidPkMobile(form.phone);
-  const canSubmit = !!(form.name.trim() && phoneValid && form.address.trim() && checkoutItems.length > 0);
+  const betterOn = !!settings.checkout.betterForm;
+  const nameWords = form.name.trim().split(/\s+/).filter(Boolean);
+  const betterErrors = betterOn ? {
+    name: nameWords.length < 2 ? "Please enter your first and last name." : "",
+    address: !(form.address.trim().length >= 10 && /\d/.test(form.address) && form.address.trim().split(/\s+/).length >= 3) ? "Please write the complete address: house or plot number, street and area." : "",
+    city: form.city.trim().length < 2 ? "Please enter your city." : "",
+    email: form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim()) ? "That email address doesn't look right." : "",
+    postal: form.postal.trim() && !/^\d{4,6}$/.test(form.postal.trim()) ? "The postal code is 4 to 6 digits, e.g. 54000." : "",
+  } : {};
+  const betterOk = Object.values(betterErrors).every((v) => !v);
+  const canSubmit = !!(form.name.trim() && phoneValid && form.address.trim() && checkoutItems.length > 0 && betterOk);
+  // The message the customer sends on WhatsApp right after the order is placed.
+  function buildPlacedText(orderNo) {
+    const lines = checkoutItems.map((i) => `• ${i.name}${i.variantName ? ` (${i.variantName})` : ""} x${i.qty} — Rs${i.price * i.qty}`).join("\n");
+    const addr = betterOn ? [form.address.trim(), form.apt.trim(), form.city.trim()].filter(Boolean).join(", ") : form.address;
+    return `Hi TTC! I placed an order on the website.\nOrder number: ${orderNo}\n\n${lines}\n\nTotal: Rs${checkoutTotal}\n\nName: ${form.name}\nPhone: ${form.phone}\nAddress: ${addr}\nPayment: ${form.payment}\n` + (form.notes ? `Notes: ${form.notes}\n` : "");
+  }
+  // After the thank-you screen: open WhatsApp by itself a moment later, with the order already written.
+  const waAuto = !!(placedOrder && settings.checkout.whatsappAuto && placedOrder.waText);
+  const waLink = waAuto ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(placedOrder.waText)}` : "";
+  useEffect(() => {
+    if (!waAuto) { setWaCountdown(null); return undefined; }
+    let left = Math.min(10, Math.max(1, Number(settings.checkout.whatsappDelay) || 2));
+    setWaCountdown(left);
+    const timer = setInterval(() => {
+      left -= 1;
+      if (left <= 0) { clearInterval(timer); setWaCountdown(null); window.location.href = waLink; }
+      else setWaCountdown(left);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [waAuto, waLink]); // eslint-disable-line
+  // "Save this information for next time" — fill the form again on the next visit.
+  useEffect(() => {
+    if (!betterOn) return;
+    try { const saved = JSON.parse(localStorage.getItem("ttc_checkout_info") || "null"); if (saved) setForm((f) => ({ ...f, ...saved })); } catch (e) {}
+  }, [betterOn]); // eslint-disable-line
+
+  // ----- values used by the page below (all fall back to today's look) -----
+  const arr = (v) => (Array.isArray(v) ? v : []);
+  const num = (v, d) => (v !== "" && v !== null && Number.isFinite(Number(v)) ? Number(v) : d);
+  const cardLayout = settings.cardLayout.on ? Math.min(10, Math.max(1, num(settings.cardLayout.layout, 1))) : 1;
+  const rotWords = arr(lang === "ur" ? settings.rotator.wordsUr : settings.rotator.words).map(String).filter((w) => w.trim());
+  const rotTarget = lang === "ur" ? settings.rotator.targetUr : settings.rotator.target;
+  const fancyHeading = !!settings.heroReveal.on || (!!settings.rotator.on && rotWords.length >= 2 && String(rotTarget || "").trim() !== "");
+  const lk = settings.look;
+  const lookVars = lk.on ? {
+    "--ttc-gap": `${num(lk.gap, 22)}px`,
+    "--ttc-card-radius": `${num(lk.cardRadius, 18)}px`,
+    "--ttc-panel-radius": `${num(lk.panelRadius, 24)}px`,
+    "--ttc-photo-radius": `${num(lk.photoRadius, 14)}px`,
+    "--ttc-section-space": `${num(lk.sectionSpace, 20)}px`,
+  } : {};
+  const freeDeliveryApplies = !!settings.freeDelivery.on && num(settings.freeDelivery.threshold, 0) > 0 && checkoutTotal >= num(settings.freeDelivery.threshold, 0);
+  const timingsText = settings.timings.on ? String(settings.timings.text || "").trim() : "";
+  const footerLinks = settings.footerLinks.on
+    ? arr(settings.footerLinks.links).map((l) => ({ label: String((l && l.label) || "").trim(), href: safeHref(l && l.url) })).filter((l) => l.label && l.href)
+    : [];
+  const designedByName = settings.designedBy.on ? String(settings.designedBy.name || "").trim() : "";
+  const designedByHref = settings.designedBy.on ? safeHref(settings.designedBy.url) : "";
+  const wishButton = settings.wishlist.on ? (
+    <button
+      onClick={() => setWishOpen(true)}
+      aria-label={t("wish.title")}
+      style={{ position: "relative", background: "none", border: "none", color: COLORS.navy, padding: 2, display: "flex", flexShrink: 0 }}
+    >
+      <Heart size={19} />
+      {wishIds.length > 0 && (
+        <span style={{
+          position: "absolute", top: -6, right: -7, background: COLORS.maroon, color: "#fff", fontSize: 10, fontWeight: 700,
+          borderRadius: "50%", width: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          {wishIds.length}
+        </span>
+      )}
+    </button>
+  ) : null;
+
+  const reviewsFx = settings.reviewsShuffle.on && ["rise", "fade", "flip", "pop"].includes(settings.reviewsShuffle.fx) ? settings.reviewsShuffle.fx : null;
+  const reviewsShuffleButton = !!(settings.reviewsShuffle.on && settings.reviewsShuffle.button);
+  const carouselSlides = settings.carousel.on
+    ? arr(settings.carousel.slides).map((sl) => {
+        const prod = sl && sl.productId ? products.find((p) => String(p.id) === String(sl.productId)) : null;
+        if (sl && sl.productId && !prod && productsLoaded) return null;
+        const photo = (prod && mainPhotoFor(prod)) || (sl && sl.photo) || "";
+        return photo ? { photo, productId: prod ? prod.id : null, name: (prod && prod.name) || (sl && sl.name) || "" } : null;
+      }).filter(Boolean)
+    : [];
+  const useCustomCarousel = carouselSlides.length > 0;
+  const carouselFx = ["slide", "fade", "zoom"].includes(settings.carousel.transition) ? settings.carousel.transition : "slide";
+  const mo = settings.motion;
+  const cardsMotion = !!mo.cards.on;
+  const motionClasses = [
+    cardsMotion && mo.cards.hover === "lift" ? "ttc-m-lift" : "",
+    cardsMotion && mo.cards.hover === "zoom" ? "ttc-m-zoom" : "",
+    cardsMotion && mo.cards.enter !== "none" ? "ttc-m-enter" : "",
+    mo.overlays.on ? "ttc-m-ov" : "",
+  ].filter(Boolean).join(" ");
+  const announceNode = settings.announcements.on ? <AnnouncementBars cfg={settings.announcements} lang={lang} t={t} /> : null;
+
+  const heroNode = (
+      <section className="ttc-hero-section" style={{ maxWidth: 1000, margin: "0 auto", position: "relative" }}>
+        <div className="ttc-hero-panel" style={{
+          background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)",
+          borderRadius: "var(--ttc-panel-radius, 24px)",
+        }}>
+          <div style={{ margin: "0 auto 34px" }}>
+            <HeartLineDivider />
+          </div>
+          <div className="ttc-hero-grid">
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
+                <LeafSprig side="left" />
+                <span style={{ fontFamily: "'Caveat', cursive", fontSize: 26, color: COLORS.charcoal }}>
+                  {t("hero.kicker")}
+                </span>
+                <LeafSprig side="right" />
+              </div>
+              {fancyHeading ? (
+                <HeroHeading
+                  key={lang}
+                  lines={[t("hero.l1"), t("hero.l2")]}
+                  reveal={!!settings.heroReveal.on}
+                  revealStyle={settings.heroReveal.style}
+                  revealStep={settings.heroReveal.step}
+                  rotatorFx={settings.rotator.fx}
+                  rotatorWords={settings.rotator.on ? rotWords : null}
+                  rotatorTarget={rotTarget}
+                  rotatorSpeed={settings.rotator.speed}
+                  className="ttc-hero-h1"
+                  style={{
+                    fontFamily: "'Fraunces', serif", fontWeight: 600,
+                    lineHeight: 1.08, color: COLORS.maroonDark, margin: "0 0 16px",
+                  }}
+                />
+              ) : (
+                <h1
+                  className="ttc-hero-h1"
+                  style={{
+                    fontFamily: "'Fraunces', serif", fontWeight: 600,
+                    lineHeight: 1.08, color: COLORS.maroonDark, margin: "0 0 16px",
+                  }}
+                >
+                  {t("hero.l1")}
+                  <br />
+                  {t("hero.l2")}
+                </h1>
+              )}
+              <p style={{ fontSize: 16, lineHeight: 1.6, color: "#5A4E46", maxWidth: 420, marginBottom: 26 }}>
+                {t("hero.sub")}
+              </p>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <a href="#shop" style={{
+                  background: COLORS.navy, color: COLORS.cream, textDecoration: "none",
+                  padding: "13px 24px", borderRadius: 999, fontWeight: 700, fontSize: 14,
+                }}>
+                  {t("hero.cta")}
+                </a>
+                <span style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'Caveat', cursive", fontSize: 22, color: COLORS.charcoal }}>
+                  {t("hero.tag")} <HandDrawnHeart size={18} />
+                </span>
+              </div>
+            </div>
+            <div style={{ position: "relative" }}>
+              {useCustomCarousel ? (
+                <Slideshow
+                  key={carouselSlides.length + ":" + carouselFx}
+                  slides={carouselSlides}
+                  fx={carouselFx}
+                  speed={settings.carousel.speed}
+                  autoplay={settings.carousel.autoplay !== false}
+                  onOpen={(id) => openQuickView(id)}
+                />
+              ) : (
+                <Slideshow slides={HERO_SLIDES} />
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+  );
+  const shopNode = (
+      <section id="shop" className="ttc-shop-section" style={{ maxWidth: 1000, margin: "0 auto" }}>
+        <div className="ttc-shop-panel" style={{ background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)", borderRadius: "var(--ttc-panel-radius, 24px)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 22 }}>
+            <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, color: COLORS.maroonDark, margin: 0 }}>
+              {t("shop.title")}
+            </h2>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "#7A6E64" }}>
+              {t("shop.sortBy")}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                aria-label="Sort products"
+                style={{
+                  border: `1.3px solid ${COLORS.bgSoft}`, borderRadius: 999, padding: "7px 14px",
+                  fontSize: 12.5, fontWeight: 600, color: COLORS.charcoal, background: COLORS.cream,
+                  cursor: "pointer",
+                }}
+              >
+                <option value="featured">{t("shop.featured")}</option>
+                <option value="price-asc">{t("shop.priceAsc")}</option>
+                <option value="price-desc">{t("shop.priceDesc")}</option>
+              </select>
+            </label>
+          </div>
+
+          {settings.priceFilter.on && (
+            <PriceFilter
+              min={priceMin} max={priceMax} onMin={setPriceMin} onMax={setPriceMax}
+              onClear={() => { setPriceMin(""); setPriceMax(""); }} bounds={priceBounds} t={t}
+            />
+          )}
+
+          <div
+            className={"ttc-product-grid" + (cardLayout === 4 ? " ttc-grid-row" : "")}
+            style={{
+              display: "grid",
+              gridTemplateColumns: cardLayout === 4 ? "repeat(auto-fill, minmax(min(100%, 420px), 1fr))" : "repeat(auto-fill, minmax(260px, 1fr))",
+              gap: "var(--ttc-gap, 22px)",
+            }}
+          >
+            {visibleProducts.length === 0 ? (
+              <p style={{ color: "#7A6E64", fontSize: 14, gridColumn: "1/-1" }}>{t("shop.noMatch")}</p>
+            ) : pagedProducts.map((p, pIdx) => {
+              // The color/style currently selected for this product, so the
+              // Add/Buy buttons order exactly what's shown, not whatever the
+              // first swatch happens to be.
+              const selectedIndex = variantIndex[p.id] ?? 0;
+              const selectedVariant = p.variants ? p.variants[selectedIndex] : null;
+              const card = (
+                <ProductCard
+                  key={p.id}
+                  p={p}
+                  layout={cardLayout}
+                  selectedIndex={selectedIndex}
+                  onSelect={(i) => selectVariant(p.id, i)}
+                  onOpen={() => openQuickView(p.id)}
+                  onAdd={() => addToCart(p.id, 1, selectedVariant ? selectedVariant.name : null)}
+                  onBuy={() => buyNow(p.id, 1, selectedVariant ? selectedVariant.name : null)}
+                  reviews={reviewsByProduct[p.id]}
+                  href={urlForProduct(p.id)}
+                  wish={wish}
+                  t={t}
+                />
+              );
+              return cardsMotion ? (
+                <div key={p.id} className="ttc-cw" style={{ display: "contents", "--i": Math.min(pIdx, 12) }}>{card}</div>
+              ) : card;
+            })}
+          </div>
+
+          {exploreOn && !showAll && visibleProducts.length > exploreInitial && (
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 26 }}>
+              <button
+                onClick={() => setShowAll(true)}
+                style={{
+                  background: COLORS.navy, color: COLORS.cream, border: "none", borderRadius: 999,
+                  padding: "12px 30px", fontSize: 14, fontWeight: 700,
+                }}
+              >
+                {t("shop.exploreMore")}
+              </button>
+            </div>
+          )}
+
+          {!exploreOn && totalPages > 1 && (
+            <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 26, flexWrap: "wrap" }}>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => {
+                    setCurrentPage(pageNum);
+                    document.getElementById("shop")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  aria-current={pageNum === currentPage ? "page" : undefined}
+                  style={{
+                    width: 34, height: 34, borderRadius: "50%", border: "none",
+                    background: pageNum === currentPage ? COLORS.navy : COLORS.bgSoft,
+                    color: pageNum === currentPage ? COLORS.cream : COLORS.charcoal,
+                    fontSize: 13, fontWeight: 700, cursor: "pointer",
+                  }}
+                >
+                  {pageNum}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+  );
+  const reviewsNode = (
+          <section style={{ padding: "var(--ttc-section-space, 20px) 20px", maxWidth: 1000, margin: "0 auto" }}>
+            <div className="ttc-shop-panel" style={{ background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)", borderRadius: "var(--ttc-panel-radius, 24px)" }}>
+              {reviewsShuffleButton ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 22 }}>
+                  <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, color: COLORS.maroonDark, margin: 0 }}>
+                    {t("reviews.title")}
+                  </h2>
+                  <button
+                    onClick={() => setReviewTick((n) => n + 1)}
+                    style={{ border: `1.3px solid ${COLORS.navy}`, background: "transparent", color: COLORS.navy, borderRadius: 999, padding: "7px 14px", fontSize: 12.5, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}
+                  >
+                    <Shuffle size={14} /> {t("reviews.shuffle")}
+                  </button>
+                </div>
+              ) : (
+                <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, color: COLORS.maroonDark, marginBottom: 22 }}>
+                  {t("reviews.title")}
+                </h2>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
+                {homepageReviews.map((r, ri) => {
+                  const reviewProduct = products.find((p) => p.id === r.productId);
+                  const reviewPhoto = mainPhotoFor(reviewProduct);
+                  const goToProduct = () => { if (reviewProduct) openQuickView(reviewProduct.id); };
+                  return (
+                    <div
+                      key={reviewsFx ? r.id + ":" + reviewTick : r.id}
+                      className={reviewsFx ? "ttc-rvc ttc-rvc-" + reviewsFx : undefined}
+                      style={{ background: COLORS.cream, borderRadius: 16, padding: 16, position: "relative", ...(reviewsFx ? { "--i": ri } : null) }}
+                    >
+                      <StarRating rating={r.rating} />
+                      <p style={{ fontSize: 13, color: "#5A4E46", lineHeight: 1.5, margin: "8px 0", paddingRight: reviewPhoto ? 56 : 0 }}>
+                        {r.comment}
+                      </p>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal }}>{r.name}</div>
+                      {reviewProduct ? (
+                        <button
+                          onClick={goToProduct}
+                          style={{
+                            fontSize: 11.5, color: COLORS.maroon, background: "none", border: "none",
+                            padding: 0, textDecoration: "underline", cursor: "pointer",
+                          }}
+                        >
+                          on {r.productName}
+                        </button>
+                      ) : (
+                        <div style={{ fontSize: 11.5, color: "#7A6E64" }}>on {r.productName}</div>
+                      )}
+                      {reviewPhoto && (
+                        <button
+                          onClick={goToProduct}
+                          aria-label={`View ${r.productName}`}
+                          style={{
+                            position: "absolute", bottom: 14, right: 14, width: 46, height: 46,
+                            borderRadius: 10, overflow: "hidden", border: `1.5px solid ${COLORS.bgSoft}`,
+                            padding: 0, background: "#fff", cursor: "pointer",
+                          }}
+                        >
+                          <Img
+                            sizes="46px"
+                            widths={[92, 138]}
+                            src={reviewPhoto}
+                            alt={r.productName}
+                            loading="lazy"
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+  );
+
+  // Home-page parts in the order set in Admin → Site settings → Home sections.
+  // With that switch off, the original order is used (hero, shop, reviews).
+  function renderSections() {
+    const lazyBox = (node) => <Suspense fallback={null}>{node}</Suspense>;
+    const withAds = (node, place) => (settings.ads.on && liveAds(settings.ads, place).length
+      ? <>{node}<AdBanners cfg={settings.ads} place={place} t={t} /></> : node);
+    const nodes = {
+      hero: withAds(settings.guide.on && settings.guide.home ? <>{heroNode}<Suspense fallback={null}><GuideBar cfg={settings.guide} onOpen={openGuide} /></Suspense></> : heroNode, "underCarousel"),
+      tiles: withAds(settings.categoryTiles.on ? lazyBox(
+        <CategoryTiles
+          categories={categories} products={products} title={t("tiles.title") === "Shop by category" ? settings.categoryTiles.title : t("tiles.title")}
+          urlFor={urlForCategory} t={t}
+          onSelect={(cat) => { selectCategory(cat); setTimeout(() => { const el = document.getElementById("shop"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); }}
+        />
+      ) : null, "underTiles"),
+      ads: settings.ads.on ? <AdBanners cfg={settings.ads} t={t} /> : null,
+      bento: settings.bento.on ? lazyBox(<BentoStats items={arr(settings.bento.items)} />) : null,
+      shop: withAds(shopNode, "betweenProducts"),
+      recent: settings.recent.on && recentIds.length > 0 ? lazyBox(
+        <RecentStrip ids={recentIds} products={products} onOpen={(id) => openQuickView(id)} urlFor={urlForProduct} t={t} />
+      ) : null,
+      reviews: homepageReviews.length > 0 ? reviewsNode : null,
+      visit: settings.visit.on ? lazyBox(
+        <VisitStore
+          visit={{ ...settings.visit, address: String(settings.visit.address || "").trim() || (brandOn ? brandAddr.join("\n") : ""), title: t("visit.title") === "Visit our store" ? settings.visit.title : t("visit.title"), buttonLabel: t("visit.map") === "Open in Maps" ? settings.visit.buttonLabel : t("visit.map") }}
+          timings={settings.timings} t={t} photos={brandOn && settings.brand.photos.on ? settings.brand.photos.list : null}
+        />
+      ) : null,
+    };
+    const custom = !!settings.sections.on;
+    const order = custom ? normalizedOrder(settings.sections.order) : SECTION_IDS;
+    const visible = settings.sections.visible || {};
+    return order
+      .filter((id) => nodes[id] && (!custom || visible[id] !== false))
+      .map((id) => (
+        <React.Fragment key={id}>
+          {mo.sections.on && id !== "hero" ? <Reveal style={mo.sections.style}>{nodes[id]}</Reveal> : nodes[id]}
+          <StitchDivider />
+        </React.Fragment>
+      ));
+  }
+
+  // Maintenance mode: the shop is replaced by a "back soon" page. Add
+  // ?preview=1 to the address to look at the real shop meanwhile.
+  const maintenancePreview = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("preview") === "1";
+  if (settings.maintenance.on && !maintenancePreview) {
+    return (
+      <Suspense fallback={null}>
+        <MaintenancePage title={settings.maintenance.title} message={settings.maintenance.message} whatsapp={WHATSAPP_NUMBER} />
+      </Suspense>
+    );
+  }
 
   return (
-    <div className="ttc-bg-scroll" style={{
+    <SpeedContext.Provider value={speedCtx}>
+    <div className={"ttc-bg-scroll" + (settings.pwa.safeArea ? " ttc-safe" : "") + (motionClasses ? " " + motionClasses : "")} dir={lang === "ur" ? "rtl" : undefined} style={{
       backgroundColor: COLORS.bg,
       backgroundImage: `url(${BG_SRC})`,
       backgroundSize: "cover",
       backgroundPosition: "top center",
       backgroundAttachment: "fixed",
       minHeight: "100%", color: COLORS.charcoal, fontFamily: "'Karla', sans-serif", position: "relative",
-      overflowX: "hidden", width: "100%",
+      overflowX: "hidden", width: "100%", ...lookVars,
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;700&family=Caveat:wght@600&display=swap');
@@ -1310,8 +1805,45 @@ export default function App() {
       <style>{`
         @media (max-width: 700px) {
           .ttc-bg-scroll { background-attachment: scroll !important; }
+          .ttc-product-grid.ttc-grid-row { grid-template-columns: 1fr !important; }
         }
+        /* Motion options (admin → Look & motion) — only used when switched on */
+        @keyframes ttcCardIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+        @keyframes ttcOvFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes ttcDrawerIn { from { transform: translateX(100%); } to { transform: none; } }
+        @keyframes ttcPopIn { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
+        .ttc-m-lift .ttc-product-card { transition: transform .25s ease, box-shadow .25s ease; }
+        .ttc-m-lift .ttc-product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 26px rgba(43,36,32,0.16); }
+        .ttc-m-zoom .ttc-product-card img { transition: transform .5s ease; }
+        .ttc-m-zoom .ttc-product-card:hover img { transform: scale(1.06); }
+        .ttc-m-enter .ttc-product-card { animation: ttcCardIn .55s cubic-bezier(.22,.61,.36,1) both; animation-delay: calc(var(--i, 0) * 60ms); }
+        .ttc-m-ov .ttc-backdrop { animation: ttcOvFade .25s ease both; }
+        .ttc-m-ov .ttc-drawer-inner { animation: ttcDrawerIn .32s cubic-bezier(.22,.61,.36,1) both; }
+        .ttc-m-ov .ttc-modal-inner { animation: ttcPopIn .3s cubic-bezier(.22,.61,.36,1) both; }
+        @keyframes ttcRvRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+        @keyframes ttcRvFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes ttcRvFlip { from { opacity: 0; transform: perspective(600px) rotateX(-70deg); } to { opacity: 1; transform: none; } }
+        @keyframes ttcRvPop { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: none; } }
+        .ttc-rvc { animation: ttcRvRise .6s cubic-bezier(.22,.61,.36,1) both; animation-delay: calc(var(--i, 0) * 90ms); }
+        .ttc-rvc-fade { animation-name: ttcRvFade; }
+        .ttc-rvc-flip { animation-name: ttcRvFlip; transform-origin: 50% 0; }
+        .ttc-rvc-pop { animation-name: ttcRvPop; }
+        @media (prefers-reduced-motion: reduce) {
+          .ttc-m-enter .ttc-product-card, .ttc-m-ov .ttc-backdrop, .ttc-m-ov .ttc-drawer-inner, .ttc-m-ov .ttc-modal-inner, .ttc-rvc { animation: none !important; }
+          .ttc-m-lift .ttc-product-card:hover { transform: none; }
+        }
+        /* "Safe-area padding" (admin → PWA): keep content out of an iPhone's notch and home bar */
+        .ttc-safe header { padding-top: calc(10px + env(safe-area-inset-top)) !important; padding-left: calc(20px + env(safe-area-inset-left)) !important; padding-right: calc(20px + env(safe-area-inset-right)) !important; }
+        .ttc-safe .ttc-fab-wa { bottom: calc(20px + env(safe-area-inset-bottom)) !important; right: calc(20px + env(safe-area-inset-right)) !important; }
+        .ttc-safe .ttc-fab-top { bottom: calc(20px + env(safe-area-inset-bottom)) !important; left: calc(20px + env(safe-area-inset-left)) !important; }
+        .ttc-safe .ttc-toast { bottom: calc(24px + env(safe-area-inset-bottom)) !important; }
+        .ttc-safe .ttc-drawer-inner { padding-top: calc(22px + env(safe-area-inset-top)) !important; padding-bottom: calc(22px + env(safe-area-inset-bottom)) !important; }
+        .ttc-safe .ttc-modal { padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)) !important; }
+        .ttc-safe footer { padding-bottom: calc(48px + env(safe-area-inset-bottom)) !important; }
+        .ttc-safe .ttc-safe-pad { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
       `}</style>
+
+      {announceNode}
 
       {/* Header */}
       <header
@@ -1337,7 +1869,7 @@ export default function App() {
                 fontSize: 12.5, fontWeight: 700,
               }}
             >
-              {activeCategory === "All" ? "Categories" : activeCategory}
+              {activeCategory === "All" ? t("nav.categories") : activeCategory}
               <ChevronDown size={14} style={{ transform: categoryMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
             </button>
             {categoryMenuOpen && (
@@ -1401,6 +1933,10 @@ export default function App() {
             </a>
           </div>
 
+          {i18nOn && <LangToggle lang={lang} onChange={setLang} />}
+          <InstallButton pwa={installPrompt} t={t} onIosHelp={() => setIosHelp(true)} />
+          {wishButton}
+
           <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
             {searchOpen ? (
               <input
@@ -1408,7 +1944,7 @@ export default function App() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onBlur={() => { if (!searchQuery) setSearchOpen(false); }}
-                placeholder="Search..."
+                placeholder={t("nav.search")}
                 style={{
                   width: 130, padding: "7px 10px", borderRadius: 999,
                   border: `1.3px solid ${COLORS.navy}`, fontSize: 12.5, background: COLORS.cream,
@@ -1434,7 +1970,7 @@ export default function App() {
             }}
           >
             <ShoppingBag size={16} />
-            Cart {cartCount > 0 && `(${cartCount})`}
+            {t("nav.cart")} {cartCount > 0 && `(${cartCount})`}
           </button>
         </div>
 
@@ -1450,7 +1986,7 @@ export default function App() {
               }}
             >
               <Menu size={19} />
-              Menu
+              {t("nav.menu")}
             </button>
             {categoryMenuOpen && (
               <>
@@ -1460,6 +1996,11 @@ export default function App() {
                   background: COLORS.cream, borderRadius: 14, boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
                   padding: 8, minWidth: 190, maxHeight: 300, overflowY: "auto",
                 }}>
+                  {installPrompt.visible && (
+                    <div style={{ padding: "4px 4px 8px" }}>
+                      <InstallButton pwa={installPrompt} t={t} onIosHelp={() => { setCategoryMenuOpen(false); setIosHelp(true); }} compact />
+                    </div>
+                  )}
                   {categories.map((cat) => (
                     <a
                       key={cat}
@@ -1484,7 +2025,7 @@ export default function App() {
           <div style={{ flex: 1 }} />
 
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-            <img src={LOGO_SRC} alt="Twist & Tangle Crochet logo" style={{ height: 30, width: "auto", objectFit: "contain" }} />
+            <img src={CURRENT_LOGO} alt="Twist & Tangle Crochet logo" style={{ height: 30, width: "auto", objectFit: "contain" }} />
             <div className="ttc-mobile-title" style={{ lineHeight: 1.1 }}>
               <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 11, color: COLORS.navy }}>Twist &amp; Tangle</div>
               <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 11, color: COLORS.navy }}>Crochet (TTC)</div>
@@ -1494,13 +2035,15 @@ export default function App() {
           <div style={{ flex: 1 }} />
 
           <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
+            {i18nOn && <LangToggle lang={lang} onChange={setLang} compact />}
+            {wishButton}
             {searchOpen ? (
               <input
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onBlur={() => { if (!searchQuery) setSearchOpen(false); }}
-                placeholder="Search..."
+                placeholder={t("nav.search")}
                 style={{
                   width: 110, padding: "6px 10px", borderRadius: 999,
                   border: `1.2px solid ${COLORS.navy}`, fontSize: 12, background: COLORS.cream,
@@ -1562,267 +2105,29 @@ export default function App() {
         </div>
       )}
 
-      {/* Hero */}
-      <section className="ttc-hero-section" style={{ maxWidth: 1000, margin: "0 auto", position: "relative" }}>
-        <div className="ttc-hero-panel" style={{
-          background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)",
-          borderRadius: 24,
-        }}>
-          <div style={{ margin: "0 auto 34px" }}>
-            <HeartLineDivider />
-          </div>
-          <div className="ttc-hero-grid">
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
-                <LeafSprig side="left" />
-                <span style={{ fontFamily: "'Caveat', cursive", fontSize: 26, color: COLORS.charcoal }}>
-                  Don't Forget to Fall in Love with
-                </span>
-                <LeafSprig side="right" />
-              </div>
-              <h1
-                className="ttc-hero-h1"
-                style={{
-                  fontFamily: "'Fraunces', serif", fontWeight: 600,
-                  lineHeight: 1.08, color: COLORS.maroonDark, margin: "0 0 16px",
-                }}
-              >
-                Handmade with love,
-                <br />
-                stitched just for you.
-              </h1>
-              <p style={{ fontSize: 16, lineHeight: 1.6, color: "#5A4E46", maxWidth: 420, marginBottom: 26 }}>
-                Every piece from Twist &amp; Tangle Crochet is made by hand in small batches —
-                no two are quite the same.
-              </p>
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <a href="#shop" style={{
-                  background: COLORS.navy, color: COLORS.cream, textDecoration: "none",
-                  padding: "13px 24px", borderRadius: 999, fontWeight: 700, fontSize: 14,
-                }}>
-                  Shop the collection
-                </a>
-                <span style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'Caveat', cursive", fontSize: 22, color: COLORS.charcoal }}>
-                  love in every loop <HandDrawnHeart size={18} />
-                </span>
-              </div>
-            </div>
-            <div style={{ position: "relative" }}>
-              <Slideshow slides={HERO_SLIDES} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <StitchDivider />
-
-      {/* Shop grid */}
-      <section id="shop" className="ttc-shop-section" style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <div className="ttc-shop-panel" style={{ background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)", borderRadius: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 22 }}>
-            <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, color: COLORS.maroonDark, margin: 0 }}>
-              The collection
-            </h2>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "#7A6E64" }}>
-              Sort by
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                aria-label="Sort products"
-                style={{
-                  border: `1.3px solid ${COLORS.bgSoft}`, borderRadius: 999, padding: "7px 14px",
-                  fontSize: 12.5, fontWeight: 600, color: COLORS.charcoal, background: COLORS.cream,
-                  cursor: "pointer",
-                }}
-              >
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="ttc-product-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 22 }}>
-            {visibleProducts.length === 0 ? (
-              <p style={{ color: "#7A6E64", fontSize: 14, gridColumn: "1/-1" }}>No items match your search.</p>
-            ) : pagedProducts.map((p) => {
-              // The color/style currently selected for this product, so the
-              // Add/Buy buttons below order exactly what's shown, not
-              // whatever the first swatch happens to be.
-              const selectedIndex = variantIndex[p.id] ?? 0;
-              const selectedVariant = p.variants ? p.variants[selectedIndex] : null;
-              return (
-              <div key={p.id} className="ttc-product-card" style={{ background: COLORS.cream, borderRadius: 18 }}>
-                <div onClick={p.variants ? undefined : () => openQuickView(p.id)} style={{ cursor: p.variants ? "default" : "pointer" }}>
-                  {p.variants ? (
-                    <VariantPicker
-                      variants={p.variants}
-                      name={p.name}
-                      index={selectedIndex}
-                      onSelect={(i) => selectVariant(p.id, i)}
-                      onImageClick={() => openQuickView(p.id)}
-                    />
-                  ) : p.photos ? (
-                    <ProductPhotoGallery photos={p.photos} name={p.name} />
-                  ) : (
-                    <ProductSwatch colors={p.swatch} real={p.real} />
-                  )}
-                </div>
-                <div style={{ marginTop: 12 }}>
-                  {p.real && (
-                    <span style={{
-                      display: "inline-block", marginBottom: 8,
-                      fontSize: 10, fontWeight: 700, letterSpacing: 0.4, textTransform: "uppercase",
-                      color: COLORS.maroon, border: `1px solid ${COLORS.maroon}`,
-                      borderRadius: 999, padding: "3px 9px",
-                    }}>
-                      {p.tag}
-                    </span>
-                  )}
-                  <a
-                    href={urlForProduct(p.id)}
-                    onClick={(e) => { e.preventDefault(); openQuickView(p.id); }}
-                    style={{
-                      display: "block", fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 16,
-                      color: COLORS.charcoal, cursor: "pointer", textDecoration: "none",
-                    }}
-                  >
-                    {p.name}
-                  </a>
-                  <RatingSummary reviews={reviewsByProduct[p.id]} />
-                  <div style={{ fontSize: 13, color: "#7A6E64", margin: "6px 0 10px", lineHeight: 1.4 }}>
-                    {p.desc}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                    <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 17, color: COLORS.maroon }}>
-                      Rs{p.price}
-                    </span>
-                    <button
-                      onClick={() => addToCart(p.id, 1, selectedVariant ? selectedVariant.name : null)}
-                      style={{
-                        background: "transparent", color: COLORS.navy, border: `1.3px solid ${COLORS.navy}`,
-                        borderRadius: 999, padding: "8px 14px", fontSize: 12, fontWeight: 700,
-                        display: "flex", alignItems: "center", gap: 6,
-                      }}
-                    >
-                      <Plus size={13} /> Add
-                    </button>
-                  </div>
-                  <button
-                    onClick={() => buyNow(p.id, 1, selectedVariant ? selectedVariant.name : null)}
-                    style={{
-                      width: "100%", background: COLORS.navy, color: COLORS.cream, border: "none",
-                      borderRadius: 999, padding: "9px 0", fontSize: 12.5, fontWeight: 700,
-                    }}
-                  >
-                    Buy Now
-                  </button>
-                </div>
-              </div>
-              );
-            })}
-          </div>
-
-          {totalPages > 1 && (
-            <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 26, flexWrap: "wrap" }}>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => {
-                    setCurrentPage(pageNum);
-                    document.getElementById("shop")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
-                  aria-current={pageNum === currentPage ? "page" : undefined}
-                  style={{
-                    width: 34, height: 34, borderRadius: "50%", border: "none",
-                    background: pageNum === currentPage ? COLORS.navy : COLORS.bgSoft,
-                    color: pageNum === currentPage ? COLORS.cream : COLORS.charcoal,
-                    fontSize: 13, fontWeight: 700, cursor: "pointer",
-                  }}
-                >
-                  {pageNum}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {homepageReviews.length > 0 && (
-        <>
-          <StitchDivider />
-          {/* What customers say — the most recent approved reviews across every
-              product. Hidden entirely (not shown as an empty section) until
-              at least one review has been approved. */}
-          <section style={{ padding: "20px 20px 20px", maxWidth: 1000, margin: "0 auto" }}>
-            <div className="ttc-shop-panel" style={{ background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)", borderRadius: 24 }}>
-              <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, color: COLORS.maroonDark, marginBottom: 22 }}>
-                What customers say
-              </h2>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
-                {homepageReviews.map((r) => {
-                  const reviewProduct = products.find((p) => p.id === r.productId);
-                  const reviewPhoto = mainPhotoFor(reviewProduct);
-                  const goToProduct = () => { if (reviewProduct) openQuickView(reviewProduct.id); };
-                  return (
-                    <div key={r.id} style={{ background: COLORS.cream, borderRadius: 16, padding: 16, position: "relative" }}>
-                      <StarRating rating={r.rating} />
-                      <p style={{ fontSize: 13, color: "#5A4E46", lineHeight: 1.5, margin: "8px 0", paddingRight: reviewPhoto ? 56 : 0 }}>
-                        {r.comment}
-                      </p>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal }}>{r.name}</div>
-                      {reviewProduct ? (
-                        <button
-                          onClick={goToProduct}
-                          style={{
-                            fontSize: 11.5, color: COLORS.maroon, background: "none", border: "none",
-                            padding: 0, textDecoration: "underline", cursor: "pointer",
-                          }}
-                        >
-                          on {r.productName}
-                        </button>
-                      ) : (
-                        <div style={{ fontSize: 11.5, color: "#7A6E64" }}>on {r.productName}</div>
-                      )}
-                      {reviewPhoto && (
-                        <button
-                          onClick={goToProduct}
-                          aria-label={`View ${r.productName}`}
-                          style={{
-                            position: "absolute", bottom: 14, right: 14, width: 46, height: 46,
-                            borderRadius: 10, overflow: "hidden", border: `1.5px solid ${COLORS.bgSoft}`,
-                            padding: 0, background: "#fff", cursor: "pointer",
-                          }}
-                        >
-                          <img
-                            src={reviewPhoto}
-                            alt={r.productName}
-                            loading="lazy"
-                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                          />
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-        </>
-      )}
-
-      <StitchDivider />
+      {renderSections()}
 
       {/* Footer */}
+      {settings.ads.on && <AdBanners cfg={settings.ads} place="aboveFooter" t={t} />}
+      {settings.footer.on ? (
+        <Suspense fallback={null}>
+          <SiteFooter
+            cfg={settings.footer} shopName={brandShop} logo={CURRENT_LOGO} categories={categories.filter((c) => c !== "All")} whatsapp={WHATSAPP_NUMBER}
+            designedBy={designedByName ? { label: t("footer.designedBy"), name: designedByName, url: designedByHref } : null}
+            footerLinks={footerLinks} guide={settings.guide.on && settings.guide.footer ? { label: settings.guide.buttonText, open: openGuide } : null} trackOn={!!settings.tracking.on} onTrack={(no) => setTrackOpen(no || true)}
+            onTop={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          />
+        </Suspense>
+      ) : (
       <footer style={{ padding: "36px 20px 48px", maxWidth: 1000, margin: "0 auto", textAlign: "center", position: "relative" }}>
-        <div style={{ background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)", borderRadius: 24, padding: "30px 24px" }}>
+        <div style={{ background: "rgba(251,246,240,0.82)", backdropFilter: "blur(4px)", borderRadius: "var(--ttc-panel-radius, 24px)", padding: "30px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: 4 }}>
             <span style={{ fontFamily: "'Caveat', cursive", fontSize: 24, color: COLORS.charcoal }}>
-              Handmade with Love
+              {t("footer.handmade")}
             </span>
             <HandDrawnHeart size={18} />
           </div>
-          <div style={{ fontSize: 13, color: COLORS.charcoal, marginBottom: 22 }}>Love in Every Loop</div>
+          <div style={{ fontSize: 13, color: COLORS.charcoal, marginBottom: 22 }}>{t("footer.loop")}</div>
 
           <div style={{ marginBottom: 22 }}>
             <HeartLineDivider />
@@ -1835,7 +2140,7 @@ export default function App() {
               fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase",
               borderRadius: 999, padding: "8px 22px",
             }}>
-              Contact Us
+              {t("footer.contact")}
             </div>
             <LeafSprig side="right" />
           </div>
@@ -1864,13 +2169,40 @@ export default function App() {
             </a>
           </div>
 
-          <div style={{ fontSize: 12, color: "#7A6E64", marginBottom: 22 }}>Lahore, Punjab, Pakistan</div>
+          <div style={{ fontSize: 12, color: "#7A6E64", marginBottom: 22 }}>{t("footer.location")}</div>
+          {settings.guide.on && settings.guide.footer && <button type="button" onClick={openGuide} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>{settings.guide.buttonText}</button>}
+          {settings.tracking.on && <button type="button" onClick={() => setTrackOpen(true)} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22 }}>Track your order</button>}
+
+          {timingsText && (
+            <div style={{ fontSize: 12.5, color: "#5A4E46", marginBottom: 22, lineHeight: 1.6 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, marginBottom: 2 }}>
+                <Clock size={14} /> {t("footer.hours")}
+              </div>
+              {timingsText.split("\n").map((line, i) => <div key={i}>{line}</div>)}
+            </div>
+          )}
+
+          {footerLinks.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px 18px", marginBottom: 22 }}>
+              {footerLinks.map((l, i) => (
+                <a
+                  key={i}
+                  href={l.href}
+                  target={/^https?:/i.test(l.href) ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  style={{ fontSize: 13, color: COLORS.navy, fontWeight: 700, textDecoration: "underline" }}
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          )}
 
           <div style={{ borderTop: `1px solid ${COLORS.bgSoft}`, paddingTop: 22, display: "flex", justifyContent: "center", gap: 30 }}>
             {[
-              { emoji: "🧶", label: "Handmade", sub: "with Care" },
-              { emoji: "❤️", label: "Unique", sub: "and Beautiful" },
-              { emoji: "🎁", label: "Perfect", sub: "for Every Occasion" },
+              { emoji: "🧶", label: t("footer.b1a"), sub: t("footer.b1b") },
+              { emoji: "❤️", label: t("footer.b2a"), sub: t("footer.b2b") },
+              { emoji: "🎁", label: t("footer.b3a"), sub: t("footer.b3b") },
             ].map((b) => (
               <div key={b.label} style={{ maxWidth: 100 }}>
                 <div style={{ fontSize: 18, marginBottom: 4 }}>{b.emoji}</div>
@@ -1879,8 +2211,20 @@ export default function App() {
               </div>
             ))}
           </div>
+
+          {designedByName && (
+            <div style={{ marginTop: 18, fontSize: 11.5, color: "#7A6E64" }}>
+              {t("footer.designedBy")}{" "}
+              {designedByHref ? (
+                <a href={designedByHref} target="_blank" rel="noopener noreferrer" style={{ color: COLORS.navy, fontWeight: 700 }}>{designedByName}</a>
+              ) : (
+                <strong style={{ color: COLORS.charcoal }}>{designedByName}</strong>
+              )}
+            </div>
+          )}
         </div>
       </footer>
+      )}
 
       {/* Floating WhatsApp button — always reachable while browsing, so a
           customer with a question doesn't have to hunt for the footer link.
@@ -1891,6 +2235,7 @@ export default function App() {
           href={`https://wa.me/${WHATSAPP_NUMBER}`}
           target="_blank"
           rel="noopener noreferrer"
+          className="ttc-fab-wa"
           aria-label="Chat with us on WhatsApp"
           style={{
             position: "fixed", right: 20, bottom: 20, zIndex: 45,
@@ -1909,6 +2254,7 @@ export default function App() {
       {showBackToTop && !drawerOpen && !checkoutOpen && !quickViewId && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="ttc-fab-top"
           aria-label="Back to top"
           style={{
             position: "fixed", left: 20, bottom: 20, zIndex: 45,
@@ -1925,6 +2271,7 @@ export default function App() {
       {/* "Added to cart" confirmation toast */}
       {cartToast && (
         <div
+          className="ttc-toast"
           style={{
             position: "fixed", left: "50%", bottom: 24, transform: "translateX(-50%)",
             zIndex: 60, background: COLORS.maroonDark, color: COLORS.cream,
@@ -1933,7 +2280,7 @@ export default function App() {
             pointerEvents: "none",
           }}
         >
-          <ShoppingBag size={15} /> Added to cart
+          <ShoppingBag size={15} /> {t("cart.added")}
         </div>
       )}
 
@@ -1941,16 +2288,17 @@ export default function App() {
       {drawerOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 40, display: "flex", justifyContent: "flex-end" }}>
           <div
+            className="ttc-backdrop"
             onClick={() => setDrawerOpen(false)}
             style={{ position: "absolute", inset: 0, background: "rgba(43,36,32,0.4)" }}
           />
-          <div style={{
+          <div className="ttc-drawer-inner" style={{
             position: "relative", width: 340, maxWidth: "88vw", background: COLORS.cream,
             height: "100%", padding: 22, display: "flex", flexDirection: "column",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
               <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 20, color: COLORS.maroonDark }}>
-                Your cart
+                {t("cart.title")}
               </span>
               <button onClick={() => setDrawerOpen(false)} style={{ background: "none", border: "none", color: COLORS.charcoal }}>
                 <X size={20} />
@@ -1958,14 +2306,16 @@ export default function App() {
             </div>
 
             {cartItems.length === 0 ? (
-              <p style={{ color: "#7A6E64", fontSize: 14 }}>Your cart is empty — add a piece from the collection.</p>
+              <p style={{ color: "#7A6E64", fontSize: 14 }}>{t("cart.empty")}</p>
             ) : (
               <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 14 }}>
                 {cartItems.map((i) => (
                   <div key={i.cartKey} style={{ display: "flex", gap: 10, alignItems: "center" }}>
                     <div style={{ width: 50, height: 50, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "#fff" }}>
                       {(i.variantPhoto || mainPhotoFor(i)) ? (
-                        <img
+                        <Img
+                          sizes="50px"
+                          widths={[100, 150]}
                           src={i.variantPhoto || mainPhotoFor(i)}
                           alt={i.name}
                           loading="lazy"
@@ -1997,6 +2347,7 @@ export default function App() {
             )}
 
             <div style={{ borderTop: `1px solid ${COLORS.bgSoft}`, paddingTop: 14, marginTop: 14 }}>
+              <FreeDeliveryBar threshold={settings.freeDelivery.on ? settings.freeDelivery.threshold : 0} subtotal={total} t={t} />
               {cartItems.length > 0 && (
                 <div style={{ marginBottom: 14 }}>
                   {appliedPromo ? (
@@ -2017,7 +2368,7 @@ export default function App() {
                         <input
                           value={promoInput}
                           onChange={(e) => { setPromoInput(e.target.value); setPromoError(""); }}
-                          placeholder="Promo code"
+                          placeholder={t("cart.promo")}
                           style={{
                             flex: 1, padding: "8px 12px", borderRadius: 10,
                             border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg,
@@ -2030,7 +2381,7 @@ export default function App() {
                             borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 700,
                           }}
                         >
-                          Apply
+                          {t("cart.apply")}
                         </button>
                       </div>
                       {promoError && (
@@ -2042,17 +2393,17 @@ export default function App() {
               )}
 
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#7A6E64", marginBottom: 4 }}>
-                <span>Subtotal</span>
+                <span>{t("cart.subtotal")}</span>
                 <span>Rs{subtotal}</span>
               </div>
               {discount > 0 && (
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: COLORS.maroon, marginBottom: 4 }}>
-                  <span>Discount</span>
+                  <span>{t("cart.discount")}</span>
                   <span>-Rs{discount}</span>
                 </div>
               )}
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-                <span>Total</span>
+                <span>{t("cart.total")}</span>
                 <span>Rs{total}</span>
               </div>
               <button
@@ -2064,10 +2415,30 @@ export default function App() {
                   fontSize: 14, fontWeight: 700,
                 }}
               >
-                Checkout
+                {t("cart.checkout")}
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {settings.ads.on && <AdPopup cfg={settings.ads} t={t} />}
+
+      {wishOpen && (
+        <Suspense fallback={null}>
+          <WishlistPanel
+            ids={wishIds} products={products} t={t}
+            onClose={() => setWishOpen(false)}
+            onOpen={(id) => openQuickView(id)}
+            onAdd={(p) => addToCart(p.id, 1, p.variants && p.variants[0] ? p.variants[0].name : null)}
+            onRemove={(id) => wishApi.remove(id)}
+          />
+        </Suspense>
+      )}
+
+      {iosHelp && (
+        <div onClick={() => setIosHelp(false)} style={{ position: "fixed", left: 16, right: 16, bottom: 24, zIndex: 70, background: COLORS.maroonDark, color: COLORS.cream, borderRadius: 14, padding: "14px 16px", fontSize: 13.5, lineHeight: 1.5, textAlign: "center", boxShadow: "0 6px 20px rgba(0,0,0,0.25)" }}>
+          {t("install.ios")}
         </div>
       )}
 
@@ -2078,9 +2449,9 @@ export default function App() {
         const qvSelectedIndex = variantIndex[p.id] ?? 0;
         const qvSelectedVariant = p.variants ? p.variants[qvSelectedIndex] : null;
         return (
-          <div style={{ position: "fixed", inset: 0, zIndex: 55, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-            <div onClick={() => closeQuickView()} style={{ position: "absolute", inset: 0, background: "rgba(43,36,32,0.55)" }} />
-            <div style={{
+          <div className="ttc-modal" style={{ position: "fixed", inset: 0, zIndex: 55, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+            <div className="ttc-backdrop" onClick={() => closeQuickView()} style={{ position: "absolute", inset: 0, background: "rgba(43,36,32,0.55)" }} />
+            <div className="ttc-modal-inner" style={{
               position: "relative", background: COLORS.cream, borderRadius: 20,
               width: 720, maxWidth: "100%", maxHeight: "88vh", overflowY: "auto",
             }}>
@@ -2127,12 +2498,32 @@ export default function App() {
                     {p.name}
                   </h3>
                   <RatingSummary reviews={reviewsByProduct[p.id]} style={{ marginBottom: 10 }} />
+                  {settings.wishlist.on && (
+                    <button
+                      onClick={() => wishApi.toggle(p.id)}
+                      aria-pressed={wishApi.has(p.id)}
+                      style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: COLORS.maroon, fontSize: 12.5, fontWeight: 700, padding: 0, marginBottom: 12 }}
+                    >
+                      <Heart size={15} fill={wishApi.has(p.id) ? COLORS.maroon : "none"} />
+                      {wishApi.has(p.id) ? t("wish.remove") : t("wish.add")}
+                    </button>
+                  )}
                   <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 21, color: COLORS.maroon, marginBottom: 14 }}>
                     Rs{p.price}
                   </div>
-                  <p style={{ fontSize: 13.5, color: "#5A4E46", lineHeight: 1.6, marginBottom: 20 }}>
-                    {p.desc}
-                  </p>
+                  {settings.productPage.tabs && String(p.shortLine || "").trim() && (
+                    <div style={{ fontSize: 13, color: "#7A6E64", margin: "-8px 0 12px" }}>{p.shortLine}</div>
+                  )}
+                  {settings.productPage.tabs ? (
+                    <Suspense fallback={null}><ProductTabs product={p} variant={qvSelectedVariant} t={t} /></Suspense>
+                  ) : (
+                    <p style={{ fontSize: 13.5, color: "#5A4E46", lineHeight: 1.6, marginBottom: 20 }}>
+                      {p.desc}
+                    </p>
+                  )}
+                  {(settings.productPage.sizes || settings.productPage.colours || settings.productPage.includes) && (
+                    <Suspense fallback={null}><ProductMeta product={p} cfg={settings.productPage} /></Suspense>
+                  )}
 
                   {p.sizes && (
                     <div style={{ marginBottom: 20 }}>
@@ -2159,7 +2550,7 @@ export default function App() {
                   )}
 
                   <div style={{ marginBottom: 22 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal, marginBottom: 8 }}>Quantity</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal, marginBottom: 8 }}>{t("checkout.qty")}</div>
                     <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                       <button
                         onClick={() => setQuickViewQty((q) => Math.max(1, q - 1))}
@@ -2186,7 +2577,7 @@ export default function App() {
                         fontSize: 14, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                       }}
                     >
-                      <ShoppingBag size={16} /> Add to Cart
+                      <ShoppingBag size={16} /> {t("shop.addToCart")}
                     </button>
                     <button
                       onClick={() => { buyNow(p.id, quickViewQty, qvSelectedVariant ? qvSelectedVariant.name : null); closeQuickView(); }}
@@ -2196,7 +2587,7 @@ export default function App() {
                         fontSize: 14, fontWeight: 700,
                       }}
                     >
-                      Buy Now
+                      {t("shop.buyNow")}
                     </button>
                   </div>
                 </div>
@@ -2211,10 +2602,12 @@ export default function App() {
       })()}
 
       {/* Checkout modal */}
+      {guideOpen && settings.guide.on && <Suspense fallback={null}><GuidePage cfg={settings.guide} whatsapp={WHATSAPP_NUMBER} onClose={closeGuide} /></Suspense>}
+      {trackOpen && <Suspense fallback={null}><TrackOrder initial={typeof trackOpen === "string" ? trackOpen : ""} whatsapp={WHATSAPP_NUMBER} onClose={() => { setTrackOpen(false); try { const u = new URL(window.location.href); if (u.searchParams.has("track")) { u.searchParams.delete("track"); window.history.replaceState({}, "", u.pathname + u.search); } } catch (e) {} }} /></Suspense>}
       {checkoutOpen && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-          <div onClick={closeCheckout} style={{ position: "absolute", inset: 0, background: "rgba(43,36,32,0.5)" }} />
-          <div style={{ position: "relative", background: COLORS.cream, borderRadius: 18, padding: 26, width: 380, maxWidth: "100%", maxHeight: "calc(100vh - 32px)", overflowY: "auto" }}>
+        <div className="ttc-modal" style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div className="ttc-backdrop" onClick={closeCheckout} style={{ position: "absolute", inset: 0, background: "rgba(43,36,32,0.5)" }} />
+          <div className="ttc-modal-inner" style={{ position: "relative", background: COLORS.cream, borderRadius: 18, padding: 26, width: 380, maxWidth: "100%", maxHeight: "calc(100vh - 32px)", overflowY: "auto" }}>
             {placedOrder ? (
               <div style={{ textAlign: "center", padding: "10px 4px" }} role="status">
                 <CheckCircle2 size={48} color={COLORS.maroon} style={{ margin: "0 auto 10px" }} />
@@ -2229,6 +2622,22 @@ export default function App() {
                 <p style={{ fontSize: 13, color: "#5A5048", lineHeight: 1.55, marginBottom: 18 }}>
                   We'll call or WhatsApp you on <strong>{placedOrder.phone}</strong> to confirm your order, delivery charges and payment.
                 </p>
+                {waAuto && (
+                  <div style={{ background: "#E8F6EC", border: "1px solid #BFE3CB", borderRadius: 12, padding: 12, marginBottom: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#1B6B3A", marginBottom: 6 }}>Last step: send your order on WhatsApp</div>
+                    <div style={{ fontSize: 12.5, color: "#3E5A47", marginBottom: 10 }}>
+                      Your order details are already written. {waCountdown ? `Opening WhatsApp in ${waCountdown}…` : "Tap the button to send."}
+                    </div>
+                    <a href={waLink} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#25D366", color: "#fff", borderRadius: 999, padding: "11px 0", fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
+                      <MessageCircle size={16} /> Send order on WhatsApp
+                    </a>
+                  </div>
+                )}
+                {settings.tracking.on && (
+                  <button onClick={() => { const no = placedOrder.orderNo; closeCheckout(); setTrackOpen(no); }} style={{ width: "100%", background: "transparent", color: COLORS.maroon, border: `1.3px solid ${COLORS.maroon}`, borderRadius: 999, padding: "11px 0", fontSize: 14, fontWeight: 700, marginBottom: 10 }}>
+                    Track this order
+                  </button>
+                )}
                 <button
                   onClick={closeCheckout}
                   style={{ width: "100%", background: COLORS.maroon, color: COLORS.cream, border: "none", borderRadius: 999, padding: "12px 0", fontSize: 14, fontWeight: 700 }}
@@ -2239,7 +2648,7 @@ export default function App() {
             ) : (<>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 19, color: COLORS.maroonDark }}>
-                Place your order
+                {t("checkout.title")}
               </span>
               <button onClick={closeCheckout} style={{ background: "none", border: "none", color: COLORS.charcoal }}>
                 <X size={18} />
@@ -2253,8 +2662,8 @@ export default function App() {
                 </div>
               ))}
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "7px 0", borderBottom: `1px solid ${COLORS.bgSoft}` }}>
-                <span>Delivery</span>
-                <span style={{ color: "#7A6E64" }}>{DELIVERY_LABEL}</span>
+                <span>{t("checkout.delivery")}</span>
+                <span style={{ color: "#7A6E64" }}>{freeDeliveryApplies ? t("delivery.freeLabel") : DELIVERY_LABEL}</span>
               </div>
             </div>
             {["name", "phone", "address"].map((field) => {
@@ -2262,7 +2671,7 @@ export default function App() {
               return (
                 <div key={field} style={{ marginBottom: 10 }}>
                   <label htmlFor={`co_${field}`} style={{ display: "block", fontSize: 12, color: "#5A5048", marginBottom: 4 }}>
-                    {field === "name" ? "Full name" : field === "phone" ? "Mobile number" : "Delivery address"}
+                    {t(field === "name" ? "checkout.name" : field === "phone" ? "checkout.phone" : "checkout.address")}
                   </label>
                   <input
                     id={`co_${field}`}
@@ -2273,7 +2682,7 @@ export default function App() {
                     type={field === "phone" ? "tel" : "text"}
                     inputMode={field === "phone" ? "tel" : undefined}
                     autoComplete={field === "name" ? "name" : field === "phone" ? "tel" : "street-address"}
-                    aria-label={field === "name" ? "Full name" : field === "phone" ? "Mobile number" : "Delivery address"}
+                    aria-label={t(field === "name" ? "checkout.name" : field === "phone" ? "checkout.phone" : "checkout.address")}
                     aria-invalid={phoneError ? "true" : undefined}
                     style={{
                       width: "100%", padding: "10px 12px", borderRadius: 10,
@@ -2288,6 +2697,33 @@ export default function App() {
                 </div>
               );
             })}
+            {betterOn && (() => {
+              const err = (k) => touched[k] && betterErrors[k];
+              const box = (k, label, props = {}) => (
+                <div style={{ marginBottom: 10 }}>
+                  <label htmlFor={`co_${k}`} style={{ display: "block", fontSize: 12, color: "#5A5048", marginBottom: 4 }}>{label}</label>
+                  <input id={`co_${k}`} value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })} onBlur={() => setTouched((x) => ({ ...x, [k]: true }))}
+                    aria-invalid={err(k) ? "true" : undefined} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1px solid ${err(k) ? "#C0392B" : COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg }} {...props} />
+                  {err(k) && <div style={{ fontSize: 11.5, color: "#C0392B", marginTop: 4 }}>{betterErrors[k]}</div>}
+                </div>
+              );
+              return (
+                <>
+                  {touched.name && betterErrors.name && <div style={{ fontSize: 11.5, color: "#C0392B", margin: "-6px 0 10px" }}>{betterErrors.name}</div>}
+                  {touched.address && betterErrors.address && <div style={{ fontSize: 11.5, color: "#C0392B", margin: "-6px 0 10px" }}>{betterErrors.address}</div>}
+                  <div style={{ fontSize: 11.5, color: "#8A6A99", margin: "-4px 0 10px", lineHeight: 1.45 }}>Complete address with plot / office / house number, street and area name. Example: House 01, Block 01, Street 01, Bahria Town.</div>
+                  {box("apt", "Apartment, floor, landmark (optional)", { autoComplete: "address-line2" })}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    {box("city", "City", { autoComplete: "address-level2" })}
+                    {box("postal", "Postal code (optional)", { inputMode: "numeric", autoComplete: "postal-code" })}
+                  </div>
+                  {box("email", "Email (optional)", { type: "email", inputMode: "email", autoComplete: "email" })}
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "#5A5048", marginBottom: 12 }}>
+                    <input type="checkbox" checked={saveInfo} onChange={(e) => setSaveInfo(e.target.checked)} style={{ width: 16, height: 16, accentColor: COLORS.maroon }} /> Save this information for next time
+                  </label>
+                </>
+              );
+            })()}
             {/* Honeypot: hidden from people, but spam bots fill it in. */}
             <input
               type="text"
@@ -2299,7 +2735,7 @@ export default function App() {
               aria-hidden="true"
               style={{ position: "absolute", left: -9999, width: 1, height: 1, opacity: 0 }}
             />
-            <label htmlFor="co_payment" style={{ display: "block", fontSize: 12, color: "#5A5048", marginBottom: 4 }}>Payment</label>
+            <label htmlFor="co_payment" style={{ display: "block", fontSize: 12, color: "#5A5048", marginBottom: 4 }}>{t("checkout.payment")}</label>
             <select
               id="co_payment"
               value={form.payment}
@@ -2311,7 +2747,7 @@ export default function App() {
             >
               {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
             </select>
-            <label htmlFor="co_notes" style={{ display: "block", fontSize: 12, color: "#5A5048", marginBottom: 4 }}>Notes (optional)</label>
+            <label htmlFor="co_notes" style={{ display: "block", fontSize: 12, color: "#5A5048", marginBottom: 4 }}>{t("checkout.notes")}</label>
             <textarea
               id="co_notes"
               placeholder="Colour preference, gift message, etc."
@@ -2326,7 +2762,7 @@ export default function App() {
 
             {directBuyItem && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal, marginBottom: 8 }}>Quantity</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal, marginBottom: 8 }}>{t("checkout.qty")}</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <button
                     onClick={() => changeCheckoutQty(-1)}
@@ -2364,7 +2800,7 @@ export default function App() {
                     <input
                       value={promoInput}
                       onChange={(e) => { setPromoInput(e.target.value); setPromoError(""); }}
-                      placeholder="Promo code"
+                      placeholder={t("cart.promo")}
                       style={{
                         flex: 1, padding: "8px 12px", borderRadius: 10,
                         border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg,
@@ -2377,7 +2813,7 @@ export default function App() {
                         borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 700,
                       }}
                     >
-                      Apply
+                      {t("cart.apply")}
                     </button>
                   </div>
                   {promoError && (
@@ -2389,12 +2825,12 @@ export default function App() {
 
             {checkoutDiscount > 0 && (
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: COLORS.maroon, marginBottom: 4 }}>
-                <span>Discount ({appliedPromo})</span>
+                <span>{t("cart.discount")} ({appliedPromo})</span>
                 <span>-Rs{checkoutDiscount}</span>
               </div>
             )}
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
-              <span>Total</span>
+              <span>{t("cart.total")}</span>
               <span>Rs{checkoutTotal}</span>
             </div>
             <div style={{ marginBottom: 12 }} />
@@ -2409,11 +2845,11 @@ export default function App() {
                 cursor: canSubmit && !placing ? "pointer" : "default",
               }}
             >
-              {placing ? "Placing your order…" : `Place order · Rs${checkoutTotal}`}
+              {placing ? "Placing your order…" : `${t("checkout.place")} · Rs${checkoutTotal}`}
             </button>
             {!canSubmit && !placing && (
               <div style={{ fontSize: 11, color: "#A69A8E", marginTop: 8, textAlign: "center" }}>
-                Fill in your name, a mobile number, and your address to continue.
+                {betterOn ? "Please fill in the fields marked in red to continue." : "Fill in your name, a mobile number, and your address to continue."}
               </div>
             )}
             {placeError && (
@@ -2487,5 +2923,6 @@ export default function App() {
         </div>
       )}
     </div>
+    </SpeedContext.Provider>
   );
 }

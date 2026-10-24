@@ -7,7 +7,9 @@
     "node": ">=18"
   },
   "scripts": {
+    "predev": "node scripts/export-i18n.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/export-i18n.mjs",
     "build": "vite build",
     "postbuild": "node scripts/generate-seo.mjs",
     "preview": "vite preview"
