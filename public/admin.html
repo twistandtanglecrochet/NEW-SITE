@@ -429,6 +429,54 @@
   .theme-pickers { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
   .theme-pickers label { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; }
   .theme-pickers input[type="color"] { width: 44px; height: 34px; padding: 2px; border-radius: 8px; border: 1px solid var(--bg-soft); background: #fff; }
+  .money-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 12px; }
+  .money { border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 4px; color: #fff; }
+  .money span { font-size: 13px; font-weight: 700; opacity: .92; } .money b { font-size: 26px; } .money small { opacity: .9; font-size: 12px; }
+  .money.in { background: #1F9D6B; } .money.out { background: #E58A00; } .money.gain { background: var(--maroon); } .money.loss { background: #C0392B; }
+  .sub-h { margin: 18px 0 6px; font-size: 14px; color: var(--charcoal); }
+  .entry-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 8px; }
+  .entry-tab { border: 2px solid var(--bg-soft); background: #fff; border-radius: 14px; padding: 12px; font: inherit; font-weight: 800; font-size: 15px; cursor: pointer; min-height: 48px; color: var(--charcoal); transition: transform .15s; }
+  .entry-tab:active { transform: scale(.97); }
+  .entry-tab.cost.on { background: #E58A00; border-color: #E58A00; color: #fff; } .entry-tab.sale.on { background: #1F9D6B; border-color: #1F9D6B; color: #fff; }
+  .entry-row { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bg-soft); }
+  .entry-badge { font-size: 11px; font-weight: 800; border-radius: 999px; padding: 3px 10px; color: #fff; }
+  .entry-row.cost .entry-badge { background: #E58A00; } .entry-row.sale .entry-badge { background: #1F9D6B; }
+  .entry-main { display: grid; min-width: 0; } .entry-main small { color: #7A6E64; overflow-wrap: anywhere; }
+  .entry-row.cost .entry-amt { color: #B45309; } .entry-row.sale .entry-amt { color: #1B6B3A; }
+  .entry-del { border: 0; background: var(--bg-soft); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 13px; }
+  .dash-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .dash-title { font-family: "Fraunces", Georgia, serif; font-size: 30px; font-weight: 700; color: var(--maroon-dark); }
+  .dash-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .dash-range { margin-bottom: 12px; }
+  .money-grid.kpi { margin: 0 0 14px; }
+  button.money { border: 0; text-align: left; font: inherit; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease; }
+  button.money:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(40,30,60,.2); } button.money:active { transform: scale(.97); }
+  .money.wait { background: #E58A00; }
+  .chart14 { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 5px; height: 170px; align-items: end; margin: 8px 0 14px; }
+  .c14 { display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 4px; height: 100%; font-size: 11px; color: #7A6E64; } .c14 i { align-self: end; } .c14 i { min-height: 2px; }
+  .c14 i { display: block; width: 100%; background: var(--maroon); border-radius: 6px 6px 2px 2px; transition: height .4s ease; }
+  .c14:hover i { background: var(--gold); }
+  .dash-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .dash-two { align-items: start; } .dash-two > .card { margin: 0 !important; }
+  .ctl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin-top: 10px; }
+  .ctl { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1.5px solid var(--bg-soft); border-radius: 14px; background: #fff; transition: background .2s, border-color .2s; }
+  .ctl.on { background: var(--bg); border-color: var(--maroon); }
+  .ctl-sw { position: relative; width: 44px; height: 26px; flex: 0 0 44px; display: block; cursor: pointer; }
+  .ctl-sw input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 2; }
+  .ctl-knob { position: absolute; inset: 0; border-radius: 999px; background: #CFC6BE; transition: background .2s; }
+  .ctl-knob::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .ctl-sw input:checked + .ctl-knob { background: var(--maroon); } .ctl-sw input:checked + .ctl-knob::after { transform: translateX(18px); }
+  .ctl-sw input:focus-visible + .ctl-knob { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .ctl-name { border: 0; background: none; font: inherit; font-weight: 700; font-size: 13px; text-align: left; cursor: pointer; color: var(--charcoal); padding: 6px 0; }
+  .ctl-name:hover { text-decoration: underline; }
+  @media (prefers-reduced-motion: reduce) { .c14 i, .ctl, .ctl-knob, .ctl-knob::after, button.money { transition: none; } }
+  .pick-list { display: grid; gap: 8px; max-height: 420px; overflow-y: auto; margin-top: 10px; padding-right: 4px; }
+  .pick-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 8px 10px; border: 1.5px solid var(--bg-soft); border-radius: 14px; background: #fff; }
+  .pick-row.on { border-color: var(--maroon); background: var(--bg); }
+  .pick-main { display: flex; align-items: center; gap: 10px; flex: 1 1 200px; min-width: 0; font-weight: 700; cursor: pointer; }
+  .pick-main img, .pick-ph { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; background: var(--bg-soft); flex: 0 0 44px; }
+  .pick-main small { display: block; color: #7A6E64; font-weight: 400; }
+  .pick-nums { display: flex; gap: 8px; } .pick-nums label { font-size: 11.5px; display: grid; gap: 2px; } .pick-nums input { width: 86px; }
   .bulk-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; padding: 8px 10px; background: #FBF6F0; border-radius: 12px; }
   .bulk-bar select { width: auto; min-width: 130px; }
   .bulk-bar label { font-size: 13px; font-weight: 700; display: flex; gap: 6px; align-items: center; }
@@ -571,6 +619,8 @@
           <div>
             <label>Price (PKR)</label>
             <input type="number" id="f_price" required min="0" />
+            <label style="margin-top:8px">Old price (optional, shown crossed out in card design 11)</label>
+            <input type="number" id="f_old" min="0" placeholder="e.g. 3500" />
           </div>
           <div>
             <label>Category</label>
@@ -702,6 +752,15 @@
     </section>
 
     <section data-view-panel="reviews" class="hidden">
+    <div class="card" id="revAddCard">
+      <h2>Add a review yourself</h2>
+      <p class="hint">For reviews that reached you on WhatsApp or Instagram: type it here and add the screenshot or photo. It is saved as approved and shown on the shop at once.</p>
+      <div class="row2"><div><label>Customer name *</label><input type="text" id="rv_name" /></div><div><label>Stars</label><select id="rv_stars"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div></div>
+      <label>Review *</label><textarea id="rv_comment" rows="3"></textarea>
+      <div class="row2"><div><label>For which product?</label><select id="rv_prod"><option value="">Custom order</option></select></div><div><label>Photo or screenshot (optional)</label><input type="file" id="rv_photo" accept="image/*" /></div></div>
+      <label class="sw"><input type="checkbox" id="rv_feat" checked /><span>Also show it on the home page (“What customers say”)</span></label>
+      <button type="button" class="btn" id="rv_add">Add review</button><div class="msg" id="rv_msg"></div>
+    </div>
     <div class="card">
       <h2>Reviews waiting for approval (<span id="reviewPendingLabel">0</span>)</h2>
       <p class="hint">A review a customer submits doesn't show on the site until you approve it here. Approved reviews move to Manage reviews.</p>
@@ -2126,6 +2185,7 @@
     $("editId").value = id;
     $("f_name").value = p.name || "";
     $("f_price").value = p.price || "";
+    $("f_old").value = p.oldPrice || "";
     $("f_tag").value = p.tag || "";
     $("f_desc").value = p.desc || "";
     $("f_short").value = p.shortLine || "";
@@ -2242,6 +2302,7 @@
       const data = {
         name: $("f_name").value.trim(),
         price: Number($("f_price").value),
+        oldPrice: Number($("f_old").value) > Number($("f_price").value) ? Number($("f_old").value) : null,
         category,
         tag: $("f_tag").value.trim() || null,
         desc: $("f_desc").value.trim(),
@@ -2297,7 +2358,7 @@
   const SETTINGS_REF = doc(db, "config", "siteSettings");
   const CARD_LAYOUT_NAMES = [
     "1 — Classic (current look)", "2 — Minimal", "3 — Floating info", "4 — Horizontal", "5 — Outlined",
-    "6 — Compact", "7 — Polaroid", "8 — Price badge", "9 — Banner", "10 — Elegant",
+    "6 — Compact", "7 — Polaroid", "8 — Price badge", "9 — Banner", "10 — Elegant", "11 — Quick view & Buy now",
   ];
   const SECTION_LABELS = {
     hero: "Top banner (heading + slideshow)",
@@ -2315,7 +2376,7 @@
     carousel: { title: "Homepage carousel", intro: "The photos that slide at the top of the home page. Add a product's main photo from All products (press “Carousel +”), or add pictures here.", groups: ["carousel"] },
     ads: { title: "Ads", intro: "Picture ads for your own offers: a banner on the home page or a pop-up. Each ad has its own on/off.", groups: ["ads"] },
     hero: { title: "Heading & effects", intro: "The big heading at the top of the home page.", groups: ["hero"] },
-    homesections: { title: "Home sections", intro: "Parts of the home page: reviews, tiles, stats, visit-store and their order.", groups: ["shuffle", "tiles", "bento", "visit", "sections"] },
+    homesections: { title: "Home sections", intro: "Parts of the home page: reviews, tiles, stats, visit-store and their order.", groups: ["shuffle", "reviewsadd", "tiles", "bento", "visit", "sections"] },
     cards: { title: "Product cards & filters", intro: "How products look and how customers find them.", groups: ["cards", "searchf", "price", "wish", "recent", "explore"] },
     offers: { title: "Offers, FAQ & Instagram", intro: "Combo offers, cart extras, the FAQ & returns page and an Instagram strip. Each part has its own switch.", groups: ["bundlesf", "cartplusf", "faqf", "instaf"] },
     productpage: { title: "Product page", intro: "What customers see when they open a product. Fill the details of each product in Add / edit product.", groups: ["ppage"] },
@@ -2332,7 +2393,7 @@
     ["maintenance.on", "Maintenance page", "shopinfo"], ["announcements.on", "Announcement bars", "announce"],
     ["carousel.on", "Homepage carousel", "carousel"], ["ads.on", "Ads", "ads"],
     ["heroReveal.on", "Heading reveal", "hero"], ["rotator.on", "Word rotator", "hero"],
-    ["reviewsShuffle.on", "Reviews shuffle", "homesections"], ["categoryTiles.on", "Category tiles", "homesections"],
+    ["reviewsShuffle.on", "Reviews shuffle", "homesections"], ["reviewsAdd.on", "Write a review button", "homesections"], ["categoryTiles.on", "Category tiles", "homesections"],
     ["bento.on", "Stats boxes", "homesections"], ["visit.on", "Visit-store", "homesections"], ["sections.on", "Custom section order", "homesections"],
     ["cardLayout.on", "Card design", "cards"], ["priceFilter.on", "Price filter", "cards"], ["wishlist.on", "Wishlist", "cards"],
     ["recent.on", "Recently viewed", "cards"], ["exploreMore.on", "Explore more", "cards"],
@@ -2343,6 +2404,9 @@
     ["freeDelivery.on", "Free-delivery bar", "shopinfo"], ["timings.on", "Shop timings", "shopinfo"],
     ["checkout.betterForm", "Better order form", "orderflow"], ["checkout.whatsappAuto", "WhatsApp after order", "orderflow"], ["tracking.on", "Order tracking", "orderflow"], ["orders.numeric", "Numeric order numbers", "orderflow"], ["myOrders.on", "My orders", "orderflow"], ["search.suggest", "Search suggestions", "cards"], ["productPage.full", "Full product page", "productpage"], ["speed.srcset", "Smaller photos", "speed"], ["speed.apiShop", "Fast shop data", "speed"], ["speed.sw", "Offline mode", "speed"],
     ["pwa.install", "Install button", "speed"], ["pwa.safeArea", "Notch padding", "speed"],
+    ["speed.lcp", "First photo first", "speed"], ["speed.boot", "Quick loading screen", "speed"], ["speed.noLive", "Load shop data once", "speed"], ["speed.cv", "Skip drawing footer", "speed"],
+    ["speed.lightMotion", "Lighter motion on phones", "speed"], ["speed.resizeUploads", "Shrink uploads", "speed"], ["orders.slipWA", "Approve & send slip", "orderflow"],
+    ["wishlist.reminders", "Wishlist reminders", "cards"], ["checkout.giftNote", "Gift note", "orderflow"], ["footer.officialIcons", "Official social colours", "footer"], ["footer.floatRight", "Floating buttons on right", "footer"],
   ];
   let S = null;        // the settings being edited
   let SDEF = null;     // starting values (from /site-settings-defaults.json)
@@ -2528,8 +2592,14 @@
       tf("rotator.wordsUr", "Words (Urdu), separated by commas", { rtl: true }));
 
     // ---- Home sections ----
+    G.reviewsadd = group("reviewsadd", "Customers can write a review", "A “Write a review” button under the home-page reviews. Anyone can use it, including people who ordered a custom piece. Each review waits in Reviews for your approval, then star it to show it on the home page.",
+      sw("reviewsAdd.on", "Show the “Write a review” button") +
+      tf("reviewsAdd.button", "Button text", { ph: "Write a review" }) +
+      tf("reviewsAdd.title", "Window title", { ph: "Write a review" }) +
+      tf("reviewsAdd.general", "Name shown when it is not for a shop product", { ph: "Custom order" }));
     G.shuffle = group("shuffle", "Reviews shuffle", "The reviews you starred are shown in a different order on every visit, with a little animation.",
       sw("reviewsShuffle.on", "Shuffle the home-page reviews") +
+      sel("reviewsShuffle.layout", "Look", [["grid", "Grid (as now)"], ["stack", "Stacked cards: the front card goes to the back, like a deck"]]) +
       tf("reviewsShuffle.limit", "How many to show", { type: "num", min: 1 }) +
       sel("reviewsShuffle.fx", "Animation", [["rise", "Rise"], ["fade", "Fade"], ["flip", "Flip"], ["pop", "Pop"], ["none", "None"]]) +
       sw("reviewsShuffle.auto", "Reshuffle by itself while the page is open") +
@@ -2686,7 +2756,7 @@
     G.i18nextra = group("i18nextra", "Other text (any English → Urdu)", "Any English text on the shop that is not in the list above (or that you add later): write it exactly as it shows, and its Urdu. When the shop is in Urdu it is replaced. Rows with an empty Urdu box are ignored.",
       `<p class="hint"><b>${xt.filter((x) => !String(x.ur || "").trim()).length}</b> of ${xt.length} still need Urdu.</p>` +
       xt.map((x, i) => `<div class="srow" style="grid-template-columns:1fr 1fr auto"><input type="text" data-list="i18n.extra" data-idx="${i}" data-prop="en" value="${esc(x.en || "")}" placeholder="English text" /><input type="text" dir="rtl" data-list="i18n.extra" data-idx="${i}" data-prop="ur" value="${esc(x.ur || "")}" placeholder="اردو" style="${String(x.ur || "").trim() ? "" : "border-color:#E0A800"}" /><button type="button" class="move-btn" data-act="rm-xtra" data-idx="${i}" title="Remove">✕</button></div>`).join("") +
-      `<button type="button" class="btn secondary" data-act="add-xtra" style="margin-top:6px">+ Add text</button>`);
+      `<button type="button" class="btn secondary" data-act="add-xtra" style="margin-top:6px">+ Add text</button> <button type="button" class="btn secondary" data-act="scan-xtra" style="margin-top:6px">🔍 Scan shop for missing text</button><p class="hint" id="scanNote"></p>`);
     G.checkoutf = group("checkoutf", "Order form & WhatsApp", "Make the order form stricter and send the customer to WhatsApp after the thank-you screen.",
       sw("checkout.betterForm", "Better order form (first + last name, full address, city, postal code, email, “save for next time”)", "An order is only placed when the details are correct, so you get fewer wrong orders.") +
       sw("checkout.whatsappAuto", "After “Order placed”, open WhatsApp by itself with the order already written") +
@@ -2761,6 +2831,44 @@
     return G;
   }
 
+  // Auto-scan: opens the shop pages in a hidden frame, collects visible English text that has no Urdu yet
+  // (not a product name/description, not a number/price, not already translated) and adds it to "Other text".
+  async function scanShopText(btn) {
+    const note = document.getElementById("scanNote"); const say = (t) => { if (note) note.textContent = t; };
+    if (btn) btn.disabled = true; say("Scanning… (about 10 seconds)");
+    try {
+      const known = new Set();
+      if (IDEF && IDEF.en) Object.values(IDEF.en).forEach((x) => known.add(String(x).trim()));
+      Object.values((S.i18n && S.i18n.en) || {}).forEach((x) => known.add(String(x).trim()));
+      (S.i18n.extra || []).forEach((x) => known.add(String(x.en || "").trim()));
+      (currentProducts || []).forEach((p) => { [p.name, p.description, p.category, p.details].forEach((x) => { if (x) String(x).split(/\n+/).forEach((l) => known.add(l.trim())); }); });
+      (currentReviews || []).forEach((r) => { [r.name, r.comment, r.productName].forEach((x) => { if (x) known.add(String(x).trim()); }); });
+      ["Twist & Tangle", "Crochet (TTC)"].forEach((x) => known.add(x));
+      const found = new Map();
+      const pages = ["/", "/faq", "/guide"]; const first = (currentProducts || [])[0]; if (first) pages.push("/product/" + encodeURIComponent(first.id));
+      for (const path of pages) {
+        const fr = document.createElement("iframe"); fr.style.cssText = "position:fixed;left:-9999px;top:0;width:1200px;height:900px;border:0;visibility:hidden";
+        fr.src = path; document.body.appendChild(fr);
+        await new Promise((r) => { fr.onload = r; setTimeout(r, 8000); }); await new Promise((r) => setTimeout(r, 2500));
+        try {
+          const d = fr.contentDocument; const w = d.createTreeWalker(d.body, NodeFilter.SHOW_TEXT); let n;
+          while ((n = w.nextNode())) {
+            const par = n.parentNode && n.parentNode.nodeName; if (par === "SCRIPT" || par === "STYLE" || par === "NOSCRIPT" || par === "TEXTAREA") continue;
+            const t = n.nodeValue.replace(/\s+/g, " ").trim();
+            if (t.length < 3 || t.length > 90 || !/[A-Za-z]{3}/.test(t) || /[\u0600-\u06FF]/.test(t) || /^[\d\s.,:%\-–+x×()Rs/]+$/i.test(t) || /^Rs\.?\s*[\d,]+/i.test(t) || /@|https?:/.test(t)) continue;
+            if (known.has(t)) continue; found.set(t, 1);
+          }
+        } catch (err) {}
+        fr.remove();
+      }
+      const add = [...found.keys()].slice(0, 60);
+      add.forEach((t) => S.i18n.extra.push({ en: t, ur: "" }));
+      renderSettings();
+      const nn = document.getElementById("scanNote"); if (nn) nn.textContent = add.length ? add.length + " new lines added at the bottom (yellow = Urdu needed). Remove any that are not needed, write the Urdu, then Save." : "Nothing missing found — all English text already has Urdu.";
+    } catch (err) { say("Scan could not finish. Try again."); }
+    if (btn) btn.disabled = false;
+  }
+
   function renderSettings() {
     if (!S) return;
     const scrollY = window.scrollY;
@@ -2803,6 +2911,8 @@
       document.querySelectorAll(".trow[data-search]").forEach((r) => r.classList.toggle("hidden", !!q && !r.getAttribute("data-search").includes(q)));
       return;
     }
+    if (el.type === "checkbox" && el.closest(".ctl")) el.closest(".ctl").classList.toggle("on", el.checked);
+    if (el.id === "ctlFilter") { const q = el.value.trim().toLowerCase(); document.querySelectorAll(".ctl[data-ctl-name]").forEach((r) => r.classList.toggle("hidden", !!q && !r.getAttribute("data-ctl-name").includes(q))); return; }
     if (el.dataset.skin) { if (el.checked) applySkin(el.dataset.skin); return; }
     if (el.dataset.themeColor) {
       adminCustom = { ...themeColours(), [el.dataset.themeColor]: String(el.value).toUpperCase() };
@@ -2893,6 +3003,7 @@
     if (!btn || !btn.closest(".settings-pane")) return;
     const act = btn.dataset.act; const i = Number(btn.dataset.idx);
     if (act === "goto") { showView(btn.dataset.view); return; }
+    if (act === "dash-range") { dashRange = btn.dataset.key; renderDashboard(); return; }
     if (act === "theme") { adminThemeKey = btn.dataset.key; applyTheme(); refreshDash(); return; }
     if (act === "go-shop") { goShop(); return; }
     if (!S) return;
@@ -2909,6 +3020,7 @@
     else if (act === "add-ipost") { if (S.insta.posts.length < 6) S.insta.posts.push({ image: "", link: "" }); renderSettings(); }
     else if (act === "add-xtra") { S.i18n.extra.push({ en: "", ur: "" }); renderSettings(); }
     else if (act === "rm-xtra") { S.i18n.extra.splice(i, 1); renderSettings(); }
+    else if (act === "scan-xtra") { scanShopText(btn || e.target); }
     else if (act === "add-gstep") { S.guide.steps.push({ title: "", text: "" }); renderSettings(); }
     else if (act === "add-link") { S.footerLinks.links.push({ label: "", url: "" }); renderSettings(); }
     else if (act === "add-bar") { S.announcements.bars.push({ on: true, text: "", textUr: "", link: "", linkLabel: "", tone: "maroon", dismissible: true }); renderSettings(); }
@@ -3054,6 +3166,62 @@
 
   // ---- dashboard ----
   function refreshDash() { if (typeof appStarted !== "undefined" && appStarted && currentView === "dashboard") renderDashboard(); }
+  let dashRange = "7d";
+  function dashStart() { const n = new Date(); return dashRange === "today" ? new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime() : dashRange === "7d" ? Date.now() - 7 * 864e5 : dashRange === "30d" ? Date.now() - 30 * 864e5 : 0; }
+  // Money, orders and charts for the chosen time (done orders count as sales, like the Sales page).
+  function dashInsights() {
+    const from = dashStart(); const money = (n) => "Rs. " + Number(n).toLocaleString("en-PK");
+    const at = (o) => tsMs(o.doneAt) || tsMs(o.createdAt);
+    const done = currentOrders.filter((o) => o.status === "done" && at(o) >= from);
+    const inRange = currentOrders.filter((o) => o.status !== "cancelled" && tsMs(o.createdAt) >= from);
+    const total = done.reduce((n, o) => n + (Number(o.total) || 0), 0);
+    const items = inRange.reduce((n, o) => n + (Array.isArray(o.items) ? o.items.reduce((m, i) => m + (Number(i.qty) || 1), 0) : 0), 0);
+    const waiting = currentOrders.filter((o) => o.status === "new").length;
+    const chips = [["today", "Today"], ["7d", "Last 7 days"], ["30d", "Last 30 days"], ["all", "All time"]];
+    const bars = (rows, fmt) => { const mx = Math.max(1, ...rows.map((r) => r[1])); return rows.map(([k, v]) => `<div class="bar-row"><span>${esc(k)}</span><div class="bar"><i style="width:${Math.round(v / mx * 100)}%"></i></div><b>${fmt(v)}</b></div>`).join(""); };
+    // last 14 days
+    const days = []; for (let i = 13; i >= 0; i--) { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i); days.push({ t: d.getTime(), v: 0, l: d.getDate() }); }
+    currentOrders.filter((o) => o.status === "done").forEach((o) => { const t = at(o); const d = days.find((x) => t >= x.t && t < x.t + 864e5); if (d) d.v += Number(o.total) || 0; });
+    const dmax = Math.max(1, ...days.map((d) => d.v));
+    const top = {}; done.forEach((o) => (o.items || []).forEach((i) => { const r = top[i.name] || (top[i.name] = 0); top[i.name] = r + (Number(i.price) || 0) * (Number(i.qty) || 1); }));
+    const cities = {}; inRange.forEach((o) => { const c = o.customer || {}; let city = String(c.city || "").trim(); if (!city && c.address) { const parts = String(c.address).split(",").map((x) => x.trim()).filter(Boolean); city = parts.length > 1 ? parts[parts.length - 1] : ""; } if (city) { city = city.replace(/\d+/g, "").trim(); cities[city] = (cities[city] || 0) + 1; } });
+    const chan = {}; inRange.forEach((o) => { const k = channelLabel(o.channel || "whatsapp"); chan[k] = (chan[k] || 0) + 1; });
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const adsEnding = S ? (S.ads.items || []).filter((a) => a && a.on !== false && a.until && new Date(a.until + "T23:59:59").getTime() >= today.getTime() && new Date(a.until + "T00:00:00").getTime() <= today.getTime() + 3 * 864e5) : [];
+    const topRows = Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const cityRows = Object.entries(cities).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const chRows = Object.entries(chan).sort((a, b) => b[1] - a[1]);
+    return `<div class="dash-head"><div><div class="dash-title">Dashboard</div><p class="hint" style="margin:2px 0 0">Your shop at a glance.</p></div>
+        <div class="dash-actions"><button type="button" class="btn" data-act="goto" data-view="add">+ Add product</button><button type="button" class="btn secondary" data-act="goto" data-view="orders">Open orders (${waiting})</button></div></div>
+      <div class="chips dash-range">${chips.map(([k, l]) => `<button type="button" class="chip ${k === dashRange ? "active" : ""}" data-act="dash-range" data-key="${k}">${l}</button>`).join("")}</div>
+      <div class="money-grid kpi">
+        <button type="button" class="money in" data-act="goto" data-view="sales"><span>Sales (done orders)</span><b>${money(total)}</b><small>${esc((chips.find((c) => c[0] === dashRange) || [])[1].toLowerCase())}</small></button>
+        <button type="button" class="money gain" data-act="goto" data-view="orders"><span>Orders</span><b>${inRange.length}</b><small>${items} item${items === 1 ? "" : "s"}</small></button>
+        <div class="money out"><span>Average order</span><b>${money(done.length ? Math.round(total / done.length) : 0)}</b><small>per done order</small></div>
+        <button type="button" class="money wait" data-act="goto" data-view="orders"><span>Waiting for you</span><b>${waiting}</b><small>new orders →</small></button>
+      </div>
+      ${adsEnding.length ? `<div class="card"><h2>Ads ending soon</h2>${adsEnding.map((a) => `<p style="margin:4px 0"><b>${esc(a.title || "Ad")}</b> · ends ${esc(a.until)}</p>`).join("")}<button type="button" class="pill" data-act="goto" data-view="ads">Open Ads</button></div>` : ""}
+      <div class="card"><h2>Sales, last 14 days</h2>
+        <div class="chart14" role="img" aria-label="Sales for each of the last 14 days">${days.map((d) => `<div class="c14" title="${money(d.v)}"><i style="height:${Math.max(2, Math.round(d.v / dmax * 100))}%"></i><span>${d.l}</span></div>`).join("")}</div>
+        <p class="hint" style="margin-bottom:0">Only done orders. Tap Sales above to see costs and profit.</p></div>
+      <div class="dash-two">
+        <div class="card"><h2>Best sellers</h2>${topRows.length ? bars(topRows, money) : '<p class="hint">No done orders in this time yet.</p>'}</div>
+        <div class="card"><h2>Top cities</h2>${cityRows.length ? bars(cityRows, (n) => n + " order" + (n === 1 ? "" : "s")) : '<p class="hint">Cities appear when customers give one (turn on the better order form).</p>'}</div>
+        <div class="card"><h2>Where orders came from</h2>${chRows.length ? bars(chRows, (n) => n + " order" + (n === 1 ? "" : "s")) : '<p class="hint">No orders in this time yet.</p>'}</div>
+      </div>`;
+  }
+  // Control centre: every on/off switch of the shop in one place.
+  function controlCentre() {
+    if (!S) return "";
+    const rows = FEATURES.filter((f, i, a) => a.findIndex((x) => x[0] === f[0]) === i);
+    const onCount = rows.filter((f) => getPath(S, f[0])).length;
+    return `<div class="card" id="controlCentre"><h2>Control centre</h2>
+      <p class="hint" style="margin-top:0"><b>${onCount} of ${rows.length}</b> switches are on. Tap a switch to turn it on or off, then press Save once. The name opens the page with its settings.</p>
+      <input type="search" id="ctlFilter" placeholder="Find a switch…" aria-label="Find a switch" />
+      <div class="ctl-grid">${rows.map((f) => `<div class="ctl ${getPath(S, f[0]) ? "on" : ""}" data-ctl-name="${esc(f[1].toLowerCase())}"><label class="ctl-sw"><input type="checkbox" data-path="${f[0]}" data-type="bool" ${getPath(S, f[0]) ? "checked" : ""} aria-label="${esc(f[1])}" /><span class="ctl-knob"></span></label><button type="button" class="ctl-name" data-act="goto" data-view="${f[2]}">${esc(f[1])}</button></div>`).join("")}</div>
+      <div class="savebar" style="margin-top:12px"><button type="button" class="btn" data-act="save-settings">Save</button><span class="hint settingsMsg" style="margin:0"></span></div>
+    </div>`;
+  }
   function renderDashboard() {
     const pane = document.querySelector('.settings-pane[data-pane="dashboard"]');
     if (!pane) return;
@@ -3064,7 +3232,8 @@
     const tile = (n, label, view, tone) => `<button type="button" class="dash-tile ${tone}" data-act="goto" data-view="${view}"><span class="dash-n">${n}</span><span>${label}</span></button>`;
     const skin = document.body.classList.contains("skin-new") ? "new" : "classic";
     pane.innerHTML = `
-      <div class="card"><h2>Dashboard</h2>
+      ${dashInsights()}
+      <div class="card"><h2>At a glance</h2>
         <div class="dash-grid">
           ${tile(fresh, "new orders", "orders", "t-red")}
           ${tile(open, "orders not done", "orders", "t-amber")}
@@ -3074,6 +3243,7 @@
         </div>
       </div>
       ${appTiles()}
+      ${controlCentre()}
       ${(() => {
         const old = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled" && tsMs(o.createdAt) && Date.now() - tsMs(o.createdAt) > 3 * 864e5).length;
         const noTrack = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled" && !(o.tracking && o.tracking.stage)).length;
@@ -3472,6 +3642,7 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
 
   // ---- place an order by hand (WhatsApp / phone / shop customers) ----
   let manualItems = [{ name: "", price: "", qty: 1, photo: "", variant: "" }];
+  let moPickOpen = false, moPick = {}, moDate = "", moDone = false; // "choose from all products" list; old-sale date + "already delivered"
   let manualDone = "";
   function renderManual() {
     const pane = $("manualRoot"); if (!pane) return;
@@ -3486,6 +3657,10 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
         <div class="row2"><div><label>City</label><input type="text" id="mo_city" value="${esc(keep.city)}" /></div><div><label>Order came from</label><select id="mo_channel">${CHANNELS.map(([v, l]) => `<option value="${v}" ${keep.channel === v ? "selected" : ""}>${l}</option>`).join("")}</select></div></div>
       </div>
       <div class="card"><h2>Items</h2>
+        <button type="button" class="btn ${moPickOpen ? "secondary" : ""}" id="mo_togglepick">${moPickOpen ? "Hide the product list" : "＋ Choose from all products"}</button>
+        ${moPickOpen ? `<p class="hint">Tick the products, set the quantity, and change the price if you gave a special price. The price you type here is used only in this order; the product itself does not change.</p>
+        <div class="pick-list">${currentProducts.map((p) => { const k = String(p.id); const st = moPick[k] || { sel: false, qty: 1, price: p.price }; const ph = heroPhotoOf(p); return `<div class="pick-row ${st.sel ? "on" : ""}"><label class="pick-main"><input type="checkbox" data-pksel="${esc(k)}" ${st.sel ? "checked" : ""} />${ph ? `<img src="${esc(ph)}" alt="" />` : '<span class="pick-ph"></span>'}<span>${esc(p.name)}<small>Rs${esc(p.price)}</small></span></label><div class="pick-nums"><label>Price<input type="number" min="0" data-pk="${esc(k)}" data-f="price" value="${esc(st.price)}" /></label><label>Qty<input type="number" min="1" data-pk="${esc(k)}" data-f="qty" value="${esc(st.qty)}" /></label></div></div>`; }).join("")}</div>
+        <button type="button" class="btn" id="mo_addpicked" style="margin:10px 0 14px">Add the ticked products to this order</button>` : ""}
         ${manualItems.map((it, i) => `<div class="lrow">
           <div class="lrow-head"><b>Item ${i + 1}</b><span class="lrow-actions">${manualItems.length > 1 ? `<button type="button" class="move-btn" data-mo-rm="${i}" title="Remove">✕</button>` : ""}</span></div>
           <label>Pick a product (optional — fills the name, price and picture)</label>
@@ -3499,6 +3674,7 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
       </div>
       <div class="card"><h2>Payment &amp; total</h2>
         <div class="row2"><div><label>Delivery charge (Rs)</label><input type="number" min="0" id="mo_delivery" value="${esc(keep.delivery)}" /></div><div><label>Discount (Rs)</label><input type="number" min="0" id="mo_discount" value="${esc(keep.discount)}" /></div></div>
+        <div class="row2"><div><label>Order date (empty = today)</label><input type="date" id="mo_date" value="${esc(moDate)}" /></div><div><label>For old sales</label><label class="sw"><input type="checkbox" id="mo_done" ${moDone ? "checked" : ""} /><span>Already delivered: save as Done so it counts in Sales</span></label></div></div>
         <label>Payment</label><select id="mo_pay">${["Cash on Delivery", "JazzCash", "Easypaisa", "Bank transfer", "Paid already"].map((m) => `<option ${keep.pay === m ? "selected" : ""}>${m}</option>`).join("")}</select>
         <label>Notes</label><input type="text" id="mo_notes" value="${esc(keep.notes)}" />
         <p style="font-size:18px;margin:14px 0 4px"><b>Total: Rs<span id="mo_total">${sub}</span></b></p>
@@ -3515,6 +3691,10 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
   pageRoot.addEventListener("input", (e) => {
     const el = e.target; if (!el.closest || !el.closest("#manualRoot")) return;
     if (el.dataset.mo !== undefined) { const it = manualItems[Number(el.dataset.mo)]; if (it) it[el.dataset.f] = el.value; }
+    if (el.id === "mo_date") moDate = el.value;
+    if (el.id === "mo_done") moDone = el.checked;
+    if (el.dataset.pk !== undefined) { const k = el.dataset.pk; const pr = currentProducts.find((x) => String(x.id) === k); const st = moPick[k] || (moPick[k] = { sel: false, qty: 1, price: pr ? pr.price : 0 }); st[el.dataset.f] = el.value; }
+    if (el.dataset.pksel !== undefined) { const k = el.dataset.pksel; const pr = currentProducts.find((x) => String(x.id) === k); const st = moPick[k] || (moPick[k] = { sel: false, qty: 1, price: pr ? pr.price : 0 }); st.sel = el.checked; el.closest(".pick-row").classList.toggle("on", el.checked); }
     updateManualTotal();
   });
   pageRoot.addEventListener("change", async (e) => {
@@ -3529,6 +3709,14 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
   });
   pageRoot.addEventListener("click", async (e) => {
     if (!e.target.closest("#manualRoot")) return;
+    if (e.target.id === "mo_togglepick") { moPickOpen = !moPickOpen; renderManual(); return; }
+    if (e.target.id === "mo_addpicked") {
+      const chosen = Object.entries(moPick).filter(([, st]) => st.sel);
+      if (!chosen.length) { alert("Tick at least one product first."); return; }
+      if (manualItems.length === 1 && !String(manualItems[0].name).trim() && !String(manualItems[0].price).trim()) manualItems = [];
+      chosen.forEach(([k, st]) => { const pr = currentProducts.find((x) => String(x.id) === k); if (pr) manualItems.push({ name: pr.name, price: Number(st.price) || 0, qty: Math.max(1, Number(st.qty) || 1), photo: heroPhotoOf(pr), variant: "" }); });
+      moPick = {}; moPickOpen = false; renderManual(); return;
+    }
     if (e.target.id === "mo_add") { manualItems.push({ name: "", price: "", qty: 1, photo: "", variant: "" }); renderManual(); return; }
     const rm = e.target.closest("[data-mo-rm]"); if (rm) { manualItems.splice(Number(rm.dataset.moRm), 1); renderManual(); return; }
     if (e.target.id !== "mo_place") return;
@@ -3547,7 +3735,9 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
       await addDoc(collection(db, "orders"), {
         orderNo, items, subtotal, discount, deliveryCharge: delivery, total: Math.max(0, subtotal + delivery - discount), promo: null,
         customer: { name, phone, address: [$("mo_address").value.trim(), $("mo_city").value.trim()].filter(Boolean).join(", "), notes: $("mo_notes").value.trim() },
-        paymentMethod: $("mo_pay").value, channel: $("mo_channel").value, status: "new", starred: false, manual: true, createdAt: serverTimestamp(),
+        paymentMethod: $("mo_pay").value, channel: $("mo_channel").value, status: moDone ? "done" : "new", starred: false, manual: true,
+        createdAt: moDate ? new Date(moDate + "T12:00:00") : serverTimestamp(),
+        ...(moDone ? { doneAt: moDate ? new Date(moDate + "T12:00:00") : serverTimestamp(), tracking: { stage: "delivered" } } : {}),
       });
       manualItems = [{ name: "", price: "", qty: 1, photo: "", variant: "" }];
       manualDone = "Order " + orderNo + " placed. You can find it in Orders.";
@@ -3556,13 +3746,40 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     } catch (err) { msg.textContent = "Couldn't place the order (" + (err.code || err.message) + ")."; $("mo_place").disabled = false; }
   });
 
+  // ---- add a review yourself (WhatsApp / Instagram reviews, with a photo) ----
+  function fillRevProducts() {
+    const sel = $("rv_prod"); if (!sel) return; const keep = sel.value;
+    sel.innerHTML = '<option value="">Custom order</option>' + currentProducts.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
+    sel.value = keep;
+  }
+  document.addEventListener("click", async (e) => {
+    if (e.target.id !== "rv_add") return;
+    const m = $("rv_msg"); m.className = "msg error";
+    const name = $("rv_name").value.trim(), comment = $("rv_comment").value.trim();
+    if (!name || !comment) { m.textContent = "Please add the customer's name and the review."; return; }
+    const pr = currentProducts.find((x) => x.id === $("rv_prod").value);
+    const btn = $("rv_add"); btn.disabled = true; m.className = "msg"; m.textContent = "Saving…";
+    try {
+      let photo = ""; const f = $("rv_photo").files && $("rv_photo").files[0];
+      if (f) photo = await uploadToCloudinary(f);
+      const ref = await addDoc(collection(db, "reviews"), { productId: pr ? pr.id : "", productName: pr ? pr.name : "Custom order", name, rating: Number($("rv_stars").value) || 5, comment, photo: photo || null, approved: false, featured: false, manual: true, createdAt: serverTimestamp() });
+      await updateDoc(doc(db, "reviews", ref.id), { approved: true, featured: $("rv_feat").checked });
+      ["rv_name", "rv_comment", "rv_photo"].forEach((id) => { $(id).value = ""; });
+      m.className = "msg success"; m.textContent = "Review added. It is now on the shop.";
+    } catch (err) { m.className = "msg error"; m.textContent = "Couldn't save (" + (err.code || err.message) + ")."; }
+    btn.disabled = false;
+  });
+
   // ---- sales (done orders only) ----
   let salesRange = "month";
+  let entryTab = "cost";
+  const SALE_TYPES = [["whatsapp", "WhatsApp / phone order"], ["instagram", "Instagram / Facebook"], ["shop", "In person / in the shop"], ["custom", "Custom order"], ["other", "Other"]];
   let salesFrom = "", salesTo = "";
   // Expenses (ads, product cost, delivery, …) are kept in the "expenses" collection (admins only).
   let expenses = []; let expUnsub = null; let expErr = "";
   const EXP_TYPES = [["ads", "Ads (Facebook / Instagram)"], ["product", "Product cost (yarn, stock)"], ["delivery", "Delivery / courier"], ["packaging", "Packaging"], ["tools", "Tools & equipment"], ["staff", "Helper / salary"], ["other", "Other"]];
   const expLabel = (k) => (EXP_TYPES.find((t) => t[0] === k) || [0, "Other"])[1];
+  const entryLabel = (e) => e.kind === "sale" ? ((SALE_TYPES.find((t) => t[0] === e.type) || [0, "Other"])[1]) : expLabel(e.type);
   function startExpenses() {
     if (expUnsub) return;
     expUnsub = onSnapshot(query(collection(db, "expenses"), orderBy("date", "desc")), (snap) => { expenses = snap.docs.map((d) => ({ id: d.id, ...d.data() })); expErr = ""; renderSales(); },
@@ -3587,7 +3804,10 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     const done = currentOrders.filter((o) => { const t = tsMs(o.doneAt) || tsMs(o.createdAt); return o.status === "done" && t >= from && t <= upto; });
     const other = currentOrders.filter((o) => o.status !== "done" && tsMs(o.createdAt) >= from && tsMs(o.createdAt) <= upto);
     const dayMs = (d) => new Date(String(d) + "T12:00:00").getTime();
-    const exps = expenses.filter((e) => { const t = dayMs(e.date); return t >= from - 43200000 && t <= (upto === Infinity ? Infinity : upto); });
+    const allEntries = expenses.filter((e) => { const t = dayMs(e.date); return t >= from - 43200000 && t <= (upto === Infinity ? Infinity : upto); });
+    const exps = allEntries.filter((e) => e.kind !== "sale");
+    const addedSales = allEntries.filter((e) => e.kind === "sale");
+    const addedTotal = addedSales.reduce((n, e) => n + (Number(e.amount) || 0), 0);
     const expTotal = exps.reduce((n, e) => n + (Number(e.amount) || 0), 0);
     const byType = {}; exps.forEach((e) => { byType[e.type] = (byType[e.type] || 0) + (Number(e.amount) || 0); });
     const total = done.reduce((n, o) => n + (Number(o.total) || 0), 0);
@@ -3597,6 +3817,8 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     const top = {}; done.forEach((o) => (o.items || []).forEach((i) => { const r = top[i.name] || (top[i.name] = { q: 0, rs: 0 }); r.q += Number(i.qty) || 1; r.rs += (Number(i.price) || 0) * (Number(i.qty) || 1); }));
     const topRows = Object.entries(top).sort((a, b) => b[1].rs - a[1].rs).slice(0, 8);
     const fmt = (n) => "Rs. " + Number(n).toLocaleString("en-PK");
+    const net = total + addedTotal - expTotal;
+    const margin = total + addedTotal > 0 ? Math.round((net / (total + addedTotal)) * 100) : 0;
     const chips = [["today", "Today"], ["7d", "Last 7 days"], ["month", "This month"], ["30d", "Last 30 days"], ["all", "All time"], ["custom", "Pick dates"]];
     const label = (chips.find((c) => c[0] === salesRange) || [])[1].toLowerCase();
     const maxCh = Math.max(1, ...Object.values(byCh));
@@ -3612,31 +3834,40 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
       </div>
       ${done.length === 0 ? `<p class="empty">No done orders ${label}. When you deliver an order, open Orders and press <b>Move to done</b>.</p>` : ""}
     </div>
-    <div class="card"><h2>Costs &amp; profit <span class="hint" style="font-weight:400">· ${label}</span></h2>
-      <div class="sales-grid">
-        <div class="sale-tile"><span>Sales</span><b>${fmt(total)}</b><small>done orders</small></div>
-        <div class="sale-tile"><span>Costs</span><b>${fmt(expTotal)}</b><small>${exps.length} entries</small></div>
-        <div class="sale-tile" style="${total - expTotal < 0 ? "border-color:#C0392B" : ""}"><span>${total - expTotal < 0 ? "Loss" : "Profit"}</span><b style="${total - expTotal < 0 ? "color:#C0392B" : "color:#1B6B3A"}">${fmt(total - expTotal)}</b><small>${total ? Math.round(((total - expTotal) / total) * 100) + "% of sales" : "no sales yet"}</small></div>
-      </div>
+    <div class="card"><h2>Money in &amp; out <span class="hint" style="font-weight:400">· ${label}</span></h2>
       ${expErr ? `<div class="msg error">${esc(expErr)}</div>` : ""}
-      ${Object.keys(byType).length ? Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div class="bar-row"><span>${esc(expLabel(k))}</span><div class="bar"><i style="width:${Math.round((v / Math.max(1, expTotal)) * 100)}%"></i></div><b>${fmt(v)}</b></div>`).join("") : '<p class="empty">No costs for this time. Add one below.</p>'}
-      <h3 style="margin:16px 0 6px;font-size:15px">Add a cost</h3>
-      <div class="row2"><div><label>Date</label><input type="date" id="ex_date" value="${new Date().toISOString().slice(0, 10)}" /></div><div><label>Type</label><select id="ex_type">${EXP_TYPES.map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join("")}</select></div></div>
-      <div class="row2"><div><label>Amount (Rs)</label><input type="number" min="1" id="ex_amount" placeholder="e.g. 3000" /></div><div><label>Note (optional)</label><input type="text" id="ex_note" placeholder="e.g. Instagram ad, 5 days" /></div></div>
-      <button type="button" class="btn" id="ex_add">Add cost</button><div id="ex_msg" class="msg"></div>
-      ${exps.length ? `<h3 style="margin:16px 0 6px;font-size:15px">Costs in this time</h3>` + exps.map((e) => `<div class="bar-row"><span>${esc(e.date)} · ${esc(expLabel(e.type))}${e.note ? " · " + esc(e.note) : ""}</span><b>${fmt(Number(e.amount) || 0)}</b><button type="button" class="del-link" data-ex-del="${esc(e.id)}">Delete</button></div>`).join("") : ""}
+      <div class="money-grid">
+        <div class="money in"><span>Money in</span><b>${fmt(total + addedTotal)}</b><small>${fmt(total)} website orders${addedTotal ? " + " + fmt(addedTotal) + " added by you" : ""}</small></div>
+        <div class="money out"><span>Money out</span><b>${fmt(expTotal)}</b><small>${exps.length} cost${exps.length === 1 ? "" : "s"}</small></div>
+        <div class="money ${net < 0 ? "loss" : "gain"}"><span>${net < 0 ? "Loss" : "Profit"}</span><b>${fmt(net)}</b><small>${total + addedTotal === 0 && expTotal === 0 ? "nothing added yet" : net < 0 ? "you spent more than you earned" : net === 0 ? "break-even" : (margin + "% of money in")}</small></div>
+      </div>
+      ${Object.keys(byType).length ? `<h3 class="sub-h">Where the money went</h3>` + Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div class="bar-row"><span>${esc(expLabel(k))}</span><div class="bar"><i style="width:${Math.round((v / Math.max(1, expTotal)) * 100)}%"></i></div><b>${fmt(v)}</b></div>`).join("") : ""}
+    </div>
+    <div class="card"><h2>Add to your books</h2>
+      <p class="hint">Costs are what you spent. Sales are money you got outside the website (for example a WhatsApp or custom order you did not enter as an order).</p>
+      <div class="entry-tabs" role="tablist">
+        <button type="button" class="entry-tab cost ${entryTab === "cost" ? "on" : ""}" data-entry-tab="cost">− Add a cost</button>
+        <button type="button" class="entry-tab sale ${entryTab === "sale" ? "on" : ""}" data-entry-tab="sale">+ Add a sale</button>
+      </div>
+      <div class="row2"><div><label>Date</label><input type="date" id="ex_date" value="${new Date().toISOString().slice(0, 10)}" /></div><div><label>${entryTab === "sale" ? "Where from" : "What for"}</label><select id="ex_type">${(entryTab === "sale" ? SALE_TYPES : EXP_TYPES).map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join("")}</select></div></div>
+      <div class="row2"><div><label>Amount (Rs)</label><input type="number" min="1" id="ex_amount" placeholder="${entryTab === "sale" ? "e.g. 2500" : "e.g. 3000"}" /></div><div><label>Note (optional)</label><input type="text" id="ex_note" placeholder="${entryTab === "sale" ? "e.g. custom bag for Sara" : "e.g. Instagram ad, 5 days"}" /></div></div>
+      <button type="button" class="btn" id="ex_add">${entryTab === "sale" ? "Add sale" : "Add cost"}</button><div id="ex_msg" class="msg"></div>
+    </div>
+    <div class="card"><h2>Your entries <span class="hint" style="font-weight:400">· ${label}</span></h2>
+      ${allEntries.length ? allEntries.map((e) => { const sale = e.kind === "sale"; return `<div class="entry-row ${sale ? "sale" : "cost"}"><span class="entry-badge">${sale ? "Sale" : "Cost"}</span><div class="entry-main"><b>${esc(entryLabel(e))}</b><small>${esc(e.date)}${e.note ? " · " + esc(e.note) : ""}</small></div><b class="entry-amt">${sale ? "+" : "−"} ${fmt(Number(e.amount) || 0)}</b><button type="button" class="entry-del" data-ex-del="${e.id}" aria-label="Delete this entry">✕</button></div>`; }).join("") : `<p class="empty">Nothing added ${label}. Use “Add to your books” above.</p>`}
     </div>
     ${done.length ? `<div class="card"><h2>By channel</h2>${Object.entries(byCh).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div class="bar-row"><span>${esc(channelLabel(k))}</span><div class="bar"><i style="width:${Math.round(v / maxCh * 100)}%"></i></div><b>${fmt(v)}</b></div>`).join("")}</div>
     <div class="card"><h2>Best sellers</h2>${topRows.map(([n, r]) => `<div class="bar-row"><span>${esc(n)}</span><span class="hint" style="margin:0">× ${r.q}</span><b>${fmt(r.rs)}</b></div>`).join("")}</div>` : ""}`;
   }
   pageRoot.addEventListener("click", (e) => {
     const b = e.target.closest("[data-sales]"); if (b) { salesRange = b.dataset.sales; renderSales(); return; }
+    const tab = e.target.closest("[data-entry-tab]"); if (tab) { entryTab = tab.dataset.entryTab; renderSales(); return; }
     const del = e.target.closest("[data-ex-del]");
-    if (del) { if (!confirm("Delete this cost?")) return; deleteDoc(doc(db, "expenses", del.dataset.exDel)).catch((err) => alert("Couldn't delete: " + err.message)); return; }
+    if (del) { if (!confirm("Delete this entry?")) return; deleteDoc(doc(db, "expenses", del.dataset.exDel)).catch((err) => alert("Couldn't delete: " + err.message)); return; }
     if (e.target.id === "ex_add") {
       const amount = Number($("ex_amount").value); const date = $("ex_date").value; const m = $("ex_msg");
       if (!(amount > 0) || !date) { m.className = "msg error"; m.textContent = "Please enter the date and an amount above 0."; return; }
-      addDoc(collection(db, "expenses"), { date, type: $("ex_type").value, amount, note: $("ex_note").value.trim().slice(0, 120), createdAt: serverTimestamp() })
+      addDoc(collection(db, "expenses"), { date, type: $("ex_type").value, kind: entryTab === "sale" ? "sale" : "cost", amount, note: $("ex_note").value.trim().slice(0, 120), createdAt: serverTimestamp() })
         .catch((err) => { expErr = err.code === "permission-denied" ? "Add the Firestore rule for “expenses” (see firestore.rules) to save costs." : "Couldn't save (" + err.message + ")."; renderSales(); });
     }
   });
@@ -3797,6 +4028,7 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     if (name === "neworder") renderManual();
     if (name === "sales") renderSales();
     if (name === "orders") renderOrders();
+    if (name === "reviews") fillRevProducts();
     if (name === "customers") renderCustomers();
     if (name === "backup") renderBackup();
     if (name === "links") renderLinks();
