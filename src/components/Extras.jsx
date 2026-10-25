@@ -102,3 +102,128 @@ export function CartSuggest({ cartItems, products, onAdd }) {
     </div>
   );
 }
+
+// ---- Reviews: card-deck style + "Write a review" (each has its own switch, OFF by default) ----
+const Stars = ({ n }) => (
+  <span aria-label={n + " out of 5 stars"} style={{ color: COLORS.gold, letterSpacing: 1, fontSize: 15 }}>{"★".repeat(Math.max(0, Math.min(5, Math.round(n || 0))))}<span style={{ opacity: 0.25 }}>{"★".repeat(5 - Math.max(0, Math.min(5, Math.round(n || 0))))}</span></span>
+);
+
+// A stack of review cards: the front card flies to the back, one after another.
+export function ReviewDeck({ reviews, products, onOpen, auto, every }) {
+  const [order, setOrder] = React.useState(() => reviews.map((_, i) => i));
+  const [leaving, setLeaving] = React.useState(false);
+  const hold = React.useRef(false);
+  const n = reviews.length;
+  React.useEffect(() => { setOrder(reviews.map((_, i) => i)); }, [n]);
+  const reduce = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const next = React.useCallback(() => {
+    if (n < 2) return;
+    if (reduce) { setOrder((o) => [...o.slice(1), o[0]]); return; }
+    setLeaving(true);
+    setTimeout(() => { setOrder((o) => [...o.slice(1), o[0]]); setLeaving(false); }, 420);
+  }, [n, reduce]);
+  const prev = () => { if (n > 1) setOrder((o) => [o[o.length - 1], ...o.slice(0, -1)]); };
+  React.useEffect(() => {
+    if (!auto || n < 2 || reduce) return undefined;
+    const t = setInterval(() => { if (!hold.current) next(); }, Math.max(3, Number(every) || 5) * 1000);
+    return () => clearInterval(t);
+  }, [auto, every, n, reduce, next]);
+  if (!n) return null;
+  const shown = order.slice(0, 3);
+  return (
+    <div onMouseEnter={() => { hold.current = true; }} onMouseLeave={() => { hold.current = false; }} onTouchStart={() => { hold.current = true; setTimeout(() => { hold.current = false; }, 6000); }}>
+      <div style={{ position: "relative", maxWidth: 440, margin: "0 auto", height: 236, paddingTop: 4 }}>
+        {shown.map((idx, pos) => {
+          const r = reviews[idx]; if (!r) return null;
+          const prod = (products || []).find((p) => p.id === r.productId);
+          const front = pos === 0;
+          const base = [
+            "translateY(0) scale(1) rotate(0deg)",
+            "translateY(14px) scale(0.955) rotate(-2deg)",
+            "translateY(28px) scale(0.91) rotate(2deg)",
+          ];
+          const tf = leaving ? (front ? "translate(70px,-34px) scale(1.02) rotate(7deg)" : base[pos - 1]) : base[pos]; // the others move up one place while the front leaves
+          return (
+            <div key={r.id || idx} style={{
+              position: "absolute", left: 0, right: 0, top: 0, minHeight: 196, background: COLORS.cream, borderRadius: 18, padding: "18px 20px",
+              boxShadow: "0 8px 22px rgba(60,30,40,0.14)", border: `1px solid ${COLORS.bgSoft}`, zIndex: 10 - pos,
+              transform: tf, opacity: leaving && front ? 0 : 1, transition: reduce ? "none" : "transform .42s ease, opacity .42s ease", cursor: n > 1 && front ? "pointer" : "default",
+            }} onClick={front ? next : undefined}>
+              <Stars n={r.rating} />
+              <p style={{ fontSize: 14, color: "#5A4E46", lineHeight: 1.55, margin: "10px 0", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{r.comment}</p>
+              <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.charcoal }}>{r.name}</div>
+              {front && /^https?:\/\//i.test(String(r.photo || "")) && (
+                <a href={r.photo} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} aria-label="Open the photo of this review"><img src={r.photo} alt={"Photo shared by " + r.name} loading="lazy" style={{ margin: "6px 0", height: 54, borderRadius: 8, display: "block", objectFit: "cover" }} /></a>
+              )}
+              {prod && front
+                ? <button type="button" onClick={(e) => { e.stopPropagation(); onOpen && onOpen(prod.id); }} style={{ fontSize: 12, color: COLORS.maroon, background: "none", border: "none", padding: 0, textDecoration: "underline", cursor: "pointer" }}>on {r.productName}</button>
+                : <div style={{ fontSize: 12, color: "#7A6E64" }}>{r.productName ? "on " + r.productName : ""}</div>}
+            </div>
+          );
+        })}
+      </div>
+      {n > 1 && (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 14, marginTop: 8 }}>
+          <button type="button" onClick={prev} aria-label="Previous review" style={{ border: `1.3px solid ${COLORS.navy}`, background: "transparent", color: COLORS.navy, borderRadius: 999, width: 40, height: 40, fontSize: 18, cursor: "pointer" }}>‹</button>
+          <span style={{ fontSize: 12, color: "#7A6E64" }}>Tap the card or press ›</span>
+          <button type="button" onClick={next} aria-label="Next review" style={{ border: `1.3px solid ${COLORS.navy}`, background: "transparent", color: COLORS.navy, borderRadius: 999, width: 40, height: 40, fontSize: 18, cursor: "pointer" }}>›</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// "Write a review" window. Reviews wait for your approval in Admin → Reviews before anyone sees them.
+export function ReviewWriter({ cfg, products, onClose, save }) {
+  const [name, setName] = React.useState("");
+  const [rating, setRating] = React.useState(0);
+  const [comment, setComment] = React.useState("");
+  const [pid, setPid] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const [done, setDone] = React.useState(false);
+  const [err, setErr] = React.useState("");
+  const list = (products || []).filter((p) => p && p.id && p.name);
+  async function submit(e) {
+    e.preventDefault();
+    if (!name.trim() || !comment.trim() || rating < 1) { setErr("Please add your name, a star rating and a short comment."); return; }
+    const p = list.find((x) => String(x.id) === pid);
+    setErr(""); setBusy(true);
+    try { await save({ productId: p ? String(p.id) : "", productName: p ? p.name : (cfg.general || "Custom order"), name: name.trim(), rating, comment: comment.trim() }); setDone(true); }
+    catch (x) { setErr("Couldn't send your review. Please check your connection and try again."); }
+    finally { setBusy(false); }
+  }
+  const inp = { width: "100%", border: `1.3px solid ${COLORS.bgSoft}`, borderRadius: 12, padding: "11px 12px", fontSize: 14, background: "#fff", fontFamily: "inherit", boxSizing: "border-box" };
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Write a review" onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 70, background: "rgba(40,20,28,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: COLORS.cream, borderRadius: 20, width: "100%", maxWidth: 440, maxHeight: "92vh", overflowY: "auto", padding: 22, position: "relative" }}>
+        <button type="button" onClick={onClose} aria-label="Close" style={{ position: "absolute", top: 12, right: 12, border: "none", background: "transparent", cursor: "pointer", color: COLORS.charcoal }}><X size={20} /></button>
+        <div style={{ ...head, fontSize: 22, marginBottom: 4 }}>{cfg.title || "Write a review"}</div>
+        {done ? (
+          <p style={{ fontSize: 14, color: "#5A4E46", lineHeight: 1.6 }}>Thank you! Your review will appear on the shop once we have approved it. 🧶</p>
+        ) : (
+          <form onSubmit={submit} style={{ display: "grid", gap: 12 }}>
+            <p style={{ fontSize: 13, color: "#7A6E64", margin: 0 }}>Bought from us, or ordered a custom piece? Tell others how it was.</p>
+            <label style={{ fontSize: 12.5, fontWeight: 700 }}>Your name<input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} style={{ ...inp, marginTop: 4 }} autoComplete="name" /></label>
+            <div>
+              <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 4 }}>Your rating</div>
+              <div role="radiogroup" aria-label="Star rating" style={{ display: "flex", gap: 4 }}>
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button key={s} type="button" role="radio" aria-checked={rating === s} aria-label={s + " star" + (s > 1 ? "s" : "")} onClick={() => setRating(s)} style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: 30, lineHeight: 1, padding: 2, color: s <= rating ? COLORS.gold : "#D9CFC6" }}>★</button>
+                ))}
+              </div>
+            </div>
+            <label style={{ fontSize: 12.5, fontWeight: 700 }}>What was it for?
+              <select value={pid} onChange={(e) => setPid(e.target.value)} style={{ ...inp, marginTop: 4 }}>
+                <option value="">{cfg.general || "Custom order"}</option>
+                {list.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
+              </select>
+            </label>
+            <label style={{ fontSize: 12.5, fontWeight: 700 }}>Your review<textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={4} maxLength={600} style={{ ...inp, marginTop: 4, resize: "vertical" }} /></label>
+            {err && <div role="alert" style={{ color: "#B3261E", fontSize: 13 }}>{err}</div>}
+            <button type="submit" disabled={busy} style={{ border: "none", background: COLORS.maroon, color: COLORS.cream, borderRadius: 999, padding: "12px 18px", fontWeight: 700, fontSize: 14, cursor: "pointer", opacity: busy ? 0.6 : 1 }}>{busy ? "Sending…" : "Send review"}</button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}

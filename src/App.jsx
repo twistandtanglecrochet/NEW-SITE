@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
+import React, { useState, useMemo, useEffect, useRef, useContext, lazy, Suspense } from "react";
 import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star, ArrowUp, CheckCircle2, Clock, Shuffle, Package } from "lucide-react";
 import { watch, loadOnce } from "./lib/live";
 import { collection, doc, query, orderBy, addDoc, serverTimestamp, runTransaction } from "firebase/firestore";
@@ -68,6 +68,10 @@ import { rememberOrder } from "./components/MyOrders.jsx";
 const FaqPage = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.FaqPage })));
 const ComboStrip = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.ComboStrip })));
 const InstaStrip = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.InstaStrip })));
+const GamesSection = lazy(() => import("./components/Games.jsx").then((m) => ({ default: m.GamesSection })));
+const GamesModal = lazy(() => import("./components/Games.jsx").then((m) => ({ default: m.GamesModal })));
+const ReviewDeck = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.ReviewDeck })));
+const ReviewWriter = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.ReviewWriter })));
 const CartSuggest = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.CartSuggest })));
 const SearchSuggest = lazy(() => import("./components/SearchSuggest.jsx"));
 const SiteFooter = lazy(() => import("./components/SiteFooter.jsx"));
@@ -146,7 +150,7 @@ function mainPhotoFor(item) {
 
 function StitchDivider() {
   return (
-    <svg viewBox="0 0 400 20" preserveAspectRatio="none" style={{ width: "100%", height: 16, display: "block" }}>
+    <svg viewBox="0 0 400 20" preserveAspectRatio="none" style={{ width: "100%", height: "var(--ttc-divider, 16px)", display: "block" }}>
       <line
         x1="0" y1="10" x2="400" y2="10"
         stroke={COLORS.maroon}
@@ -298,6 +302,9 @@ function ReviewsSection({ productId, productName, reviews }) {
                 <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.charcoal }}>{r.name}</span>
               </div>
               <p style={{ fontSize: 13, color: "#5A4E46", lineHeight: 1.5, margin: 0 }}>{r.comment}</p>
+              {/^https?:\/\//i.test(String(r.photo || "")) && (
+                <a href={r.photo} target="_blank" rel="noopener noreferrer" aria-label="Open the photo of this review"><img src={r.photo} alt={"Photo shared by " + r.name} loading="lazy" style={{ marginTop: 8, maxWidth: "100%", maxHeight: 180, borderRadius: 10, display: "block", objectFit: "cover" }} /></a>
+              )}
             </div>
           ))}
         </div>
@@ -392,6 +399,7 @@ const slideCss = `
 // `fx` is null for the original slideshow; "slide" | "fade" | "zoom" for the
 // admin-managed carousel (Admin → Marketing → Homepage carousel).
 function Slideshow({ slides, fx, speed, autoplay = true, onOpen }) {
+  const bigDots = !!useContext(SpeedContext).touch; // Admin → Speed & access: bigger tap area for the little dots
   const [index, setIndex] = useState(0);
   const [prev, setPrev] = useState(-1);
   const ms = fx ? Math.max(1200, Number(speed) || 2500) : 2500;
@@ -431,8 +439,17 @@ function Slideshow({ slides, fx, speed, autoplay = true, onOpen }) {
       >
         <ChevronRight size={16} />
       </button>
-      <div style={{ position: "absolute", bottom: 10, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 6, zIndex: 3 }}>
-        {slides.map((_, i) => (
+      <div style={{ position: "absolute", bottom: bigDots ? 1 : 10, left: 0, right: 0, display: "flex", justifyContent: "center", gap: bigDots ? 0 : 6, zIndex: 3 }}>
+        {slides.map((_, i) => bigDots ? (
+          <button
+            key={i}
+            onClick={() => { setPrev(cur); setIndex(i); }}
+            aria-label={`Go to slide ${i + 1}`}
+            style={{ width: 24, height: 24, padding: 0, border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          >
+            <span style={{ display: "block", width: i === cur ? 16 : 6, height: 6, borderRadius: 999, background: i === cur ? COLORS.cream : "rgba(251,246,240,0.5)", transition: "width 0.2s" }} />
+          </button>
+        ) : (
           <button
             key={i}
             onClick={() => { setPrev(cur); setIndex(i); }}
@@ -568,7 +585,7 @@ export default function App() {
   const [showAll, setShowAll] = useState(false);
   const [shuffleSeed] = useState(() => Math.random());
   const [reviewTick, setReviewTick] = useState(0);
-  const speedCtx = useMemo(() => ({ srcset: !!settings.speed.srcset, lcp: !!settings.speed.lcp }), [settings.speed.srcset, settings.speed.lcp]);
+  const speedCtx = useMemo(() => ({ srcset: !!settings.speed.srcset, lcp: !!settings.speed.lcp, touch: !!settings.access.touch, contrast: !!settings.access.contrast }), [settings.speed.srcset, settings.speed.lcp, settings.access.touch, settings.access.contrast]);
   const apiShopRef = useRef(false);
   apiShopRef.current = !!settings.speed.apiShop;
   const liveProductsRef = useRef(false);
@@ -646,6 +663,8 @@ export default function App() {
   const [touched, setTouched] = useState({});
   const [guideOpen, setGuideOpen] = useState(false);
   const [myOrdersOpen, setMyOrdersOpen] = useState(false);
+  const [reviewWriteOpen, setReviewWriteOpen] = useState(false);
+  const [gamesOpen, setGamesOpen] = useState(null); // null | "" (menu) | "match" | "puzzle" | "wheel"
   const [faqOpen, setFaqOpen] = useState(false);
   function openFaq() { setFaqOpen(true); try { if (window.location.pathname !== "/faq") window.history.pushState({}, "", "/faq"); } catch (e) {} }
   function closeFaq() { setFaqOpen(false); try { if (window.location.pathname === "/faq") window.history.pushState({}, "", "/"); } catch (e) {} }
@@ -704,10 +723,17 @@ export default function App() {
   // handful you've picked rather than every approved review on the site.
   const homepageReviews = useMemo(() => {
     const pool = reviews.filter((r) => r.approved && r.featured);
-    if (!settings.reviewsShuffle.on) return pool.slice(0, 6);
-    const limit = Math.max(1, Number(settings.reviewsShuffle.limit) || 6);
+    const more = !!settings.reviewsMore.on; // "Explore more" needs the whole starred list, not only the first few
+    if (!settings.reviewsShuffle.on) return pool.slice(0, more ? 60 : 6);
+    const limit = more ? 60 : Math.max(1, Number(settings.reviewsShuffle.limit) || 6);
     return orderBySeed(pool, (shuffleSeed + reviewTick * 0.6180339887) % 1).slice(0, limit);
-  }, [reviews, settings.reviewsShuffle.on, settings.reviewsShuffle.limit, shuffleSeed, reviewTick]);
+  }, [reviews, settings.reviewsShuffle.on, settings.reviewsShuffle.limit, settings.reviewsMore.on, shuffleSeed, reviewTick]);
+  const [reviewsExpanded, setReviewsExpanded] = useState(false);
+  const stackLook = settings.reviewsShuffle.on && settings.reviewsShuffle.layout === "stack";
+  const reviewsFirst = Math.max(1, Number(settings.reviewsMore.initial) || 3);
+  // With "Explore more" on, the grid starts with the first few; the stacked deck keeps its normal handful.
+  const reviewsShown = settings.reviewsMore.on && !stackLook && !reviewsExpanded ? homepageReviews.slice(0, reviewsFirst) : homepageReviews;
+  const deckReviews = settings.reviewsMore.on ? homepageReviews.slice(0, settings.reviewsShuffle.on ? Math.max(1, Number(settings.reviewsShuffle.limit) || 6) : 6) : homepageReviews;
 
   // Optional: reshuffle by itself every few seconds (Admin → Home sections → Reviews shuffle).
   useEffect(() => {
@@ -1124,6 +1150,7 @@ export default function App() {
     return d;
   }
   function calcDiscount(subtotalAmount, items) {
+    if (settings.promoRules && settings.promoRules.mode === "best") return Math.min(subtotalAmount, Math.max(calcPromoDiscount(subtotalAmount, items), bundleDiscount(items)));
     return Math.min(subtotalAmount, calcPromoDiscount(subtotalAmount, items) + bundleDiscount(items));
   }
   function calcPromoDiscount(subtotalAmount, items) {
@@ -1480,11 +1507,13 @@ export default function App() {
   // ----- values used by the page below (all fall back to today's look) -----
   const arr = (v) => (Array.isArray(v) ? v : []);
   const num = (v, d) => (v !== "" && v !== null && Number.isFinite(Number(v)) ? Number(v) : d);
-  const cardLayout = settings.cardLayout.on ? Math.min(10, Math.max(1, num(settings.cardLayout.layout, 1))) : 1;
+  const cardLayout = settings.cardLayout.on ? Math.min(11, Math.max(1, num(settings.cardLayout.layout, 1))) : 1;
   const rotWords = arr(lang === "ur" ? settings.rotator.wordsUr : settings.rotator.words).map(String).filter((w) => w.trim());
   const rotTarget = lang === "ur" ? settings.rotator.targetUr : settings.rotator.target;
   const fancyHeading = !!settings.heroReveal.on || (!!settings.rotator.on && rotWords.length >= 2 && String(rotTarget || "").trim() !== "");
   const lk = settings.look;
+  // "Tighter spacing": smaller gaps between home sections, around the order-guide bar and inside the stats tiles.
+  const tightVars = lk.tight ? { "--ttc-section-space": "8px", "--ttc-divider": "8px", "--ttc-guide-pad": "0px 20px 6px", "--ttc-tile-pad": "14px 14px" } : {};
   const lookVars = lk.on ? {
     "--ttc-gap": `${num(lk.gap, 22)}px`,
     "--ttc-card-radius": `${num(lk.cardRadius, 18)}px`,
@@ -1764,8 +1793,11 @@ export default function App() {
                   {t("reviews.title")}
                 </h2>
               )}
+              {settings.reviewsShuffle.on && settings.reviewsShuffle.layout === "stack" && homepageReviews.length > 0 ? (
+                <Suspense fallback={null}><ReviewDeck reviews={deckReviews} products={products} onOpen={(id) => openQuickView(id)} auto={!!settings.reviewsShuffle.auto} every={settings.reviewsShuffle.every} /></Suspense>
+              ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
-                {homepageReviews.map((r, ri) => {
+                {reviewsShown.map((r, ri) => {
                   const reviewProduct = products.find((p) => p.id === r.productId);
                   const reviewPhoto = mainPhotoFor(reviewProduct);
                   const goToProduct = () => { if (reviewProduct) openQuickView(reviewProduct.id); };
@@ -1780,6 +1812,9 @@ export default function App() {
                         {r.comment}
                       </p>
                       <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal }}>{r.name}</div>
+                      {/^https?:\/\//i.test(String(r.photo || "")) && (
+                        <a href={r.photo} target="_blank" rel="noopener noreferrer" aria-label="Open the photo of this review"><img src={r.photo} alt={"Photo shared by " + r.name} loading="lazy" style={{ margin: "8px 0 4px", width: "100%", maxHeight: 150, borderRadius: 10, display: "block", objectFit: "cover" }} /></a>
+                      )}
                       {reviewProduct ? (
                         <button
                           onClick={goToProduct}
@@ -1817,6 +1852,21 @@ export default function App() {
                   );
                 })}
               </div>
+              )}
+              {settings.reviewsMore.on && !stackLook && homepageReviews.length > reviewsFirst && (
+                <div style={{ textAlign: "center", marginTop: 20 }}>
+                  <button type="button" onClick={() => setReviewsExpanded((x) => !x)} aria-expanded={reviewsExpanded} style={{ border: `1.5px solid ${COLORS.navy}`, background: "transparent", color: COLORS.navy, borderRadius: 999, padding: "10px 22px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+                    {reviewsExpanded ? (settings.reviewsMore.less || "Show less") : (settings.reviewsMore.more || "Explore more")}
+                  </button>
+                </div>
+              )}
+              {settings.reviewsAdd.on && (
+                <div style={{ textAlign: "center", marginTop: 22 }}>
+                  <button type="button" onClick={() => setReviewWriteOpen(true)} style={{ border: `1.5px solid ${COLORS.maroon}`, background: "transparent", color: COLORS.maroon, borderRadius: 999, padding: "10px 20px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+                    ✎ {settings.reviewsAdd.button || "Write a review"}
+                  </button>
+                </div>
+              )}
             </div>
           </section>
   );
@@ -1843,7 +1893,8 @@ export default function App() {
       recent: settings.recent.on && recentIds.length > 0 ? lazyBox(
         <RecentStrip ids={recentIds} products={products} onOpen={(id) => openQuickView(id)} urlFor={urlForProduct} t={t} />
       ) : null,
-      reviews: homepageReviews.length > 0 || settings.insta.on ? <>{homepageReviews.length > 0 ? reviewsNode : null}{settings.insta.on ? <Suspense fallback={null}><InstaStrip cfg={settings.insta} /></Suspense> : null}</> : null,
+      reviews: homepageReviews.length > 0 || settings.insta.on || settings.reviewsAdd.on ? <>{homepageReviews.length > 0 || settings.reviewsAdd.on ? reviewsNode : null}{settings.insta.on ? <Suspense fallback={null}><InstaStrip cfg={settings.insta} /></Suspense> : null}</> : null,
+      games: settings.games.on && settings.games.where !== "footer" ? lazyBox(<GamesSection cfg={settings.games} onOpen={(k) => setGamesOpen(k)} />) : null,
       visit: settings.visit.on ? lazyBox(
         <VisitStore
           visit={{ ...settings.visit, address: String(settings.visit.address || "").trim() || (brandOn ? brandAddr.join("\n") : ""), title: t("visit.title") === "Visit our store" ? settings.visit.title : t("visit.title"), buttonLabel: t("visit.map") === "Open in Maps" ? settings.visit.buttonLabel : t("visit.map") }}
@@ -1884,7 +1935,7 @@ export default function App() {
       backgroundPosition: "top center",
       backgroundAttachment: "fixed",
       minHeight: "100%", color: COLORS.charcoal, fontFamily: "'Karla', sans-serif", position: "relative",
-      overflowX: "hidden", width: "100%", ...lookVars,
+      overflowX: "hidden", width: "100%", ...tightVars, ...lookVars,
     }}>
       <style>{`
         * { box-sizing: border-box; }
@@ -2031,7 +2082,7 @@ export default function App() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              style={{ background: "none", border: "none", color: COLORS.navy, padding: 6, display: "flex", textDecoration: "none" }}
+              style={{ background: "none", border: "none", color: settings.headerSocial.official ? "#C13584" : COLORS.navy, padding: 6, display: "flex", textDecoration: "none" }}
             >
               <Instagram size={18} />
             </a>
@@ -2040,7 +2091,7 @@ export default function App() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook"
-              style={{ background: "none", border: "none", color: COLORS.navy, padding: 6, display: "flex", textDecoration: "none" }}
+              style={{ background: "none", border: "none", color: settings.headerSocial.official ? "#1877F2" : COLORS.navy, padding: 6, display: "flex", textDecoration: "none" }}
             >
               <Facebook size={18} />
             </a>
@@ -2049,7 +2100,7 @@ export default function App() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"
-              style={{ background: "none", border: "none", color: COLORS.navy, padding: 6, display: "flex", textDecoration: "none" }}
+              style={{ background: "none", border: "none", color: settings.headerSocial.official ? "#25D366" : COLORS.navy, padding: 6, display: "flex", textDecoration: "none" }}
             >
               <MessageCircle size={18} />
             </a>
@@ -2231,12 +2282,20 @@ export default function App() {
 
       {/* Footer */}
       {settings.ads.on && <AdBanners cfg={settings.ads} place="aboveFooter" t={t} />}
+      {settings.reviewsAdd.on && settings.reviewsAdd.aboveFooter && (
+        <div style={{ textAlign: "center", padding: "26px 16px 6px" }}>
+          <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 18, color: COLORS.maroonDark, marginBottom: 10 }}>{settings.reviewsAdd.footerText || "Bought from us? Tell us how it went"}</div>
+          <button type="button" onClick={() => setReviewWriteOpen(true)} style={{ border: `1.5px solid ${COLORS.maroon}`, background: "transparent", color: COLORS.maroon, borderRadius: 999, padding: "11px 22px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+            ✎ {settings.reviewsAdd.button || "Write a review"}
+          </button>
+        </div>
+      )}
       {settings.footer.on ? (
         <Suspense fallback={null}>
           <SiteFooter
             cfg={settings.footer} shopName={brandShop} logo={CURRENT_LOGO} categories={categories.filter((c) => c !== "All")} whatsapp={WHATSAPP_NUMBER}
             designedBy={designedByName ? { label: t("footer.designedBy"), name: designedByName, url: designedByHref } : null}
-            footerLinks={footerLinks} guide={settings.guide.on && settings.guide.footer ? { label: settings.guide.buttonText, open: openGuide } : null} trackOn={!!settings.tracking.on} myOrders={settings.myOrders.on ? () => setMyOrdersOpen(true) : null} faq={settings.faq.on && settings.faq.footer ? { label: settings.faq.title, open: openFaq } : null} onTrack={(no) => setTrackOpen(no || true)}
+            footerLinks={footerLinks} guide={settings.guide.on && settings.guide.footer ? { label: settings.guide.buttonText, open: openGuide } : null} trackOn={!!settings.tracking.on} myOrders={settings.myOrders.on ? () => setMyOrdersOpen(true) : null} wishlist={settings.wishlist.on ? () => setWishOpen(true) : null} games={settings.games.on && settings.games.where !== "section" ? { label: settings.games.footerLabel || "Get Fun", open: () => setGamesOpen("") } : null} faq={settings.faq.on && settings.faq.footer ? { label: settings.faq.title, open: openFaq } : null} onTrack={(no) => setTrackOpen(no || true)}
             onTop={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           />
         </Suspense>
@@ -2270,21 +2329,21 @@ export default function App() {
           <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center", maxWidth: 320, margin: "0 auto 22px" }}>
             <a href="https://www.instagram.com/twisttanglecrochet/" target="_blank" rel="noopener noreferrer"
                style={{ display: "flex", alignItems: "center", gap: 10, color: COLORS.charcoal, background: "none", border: "none", fontSize: 14, textDecoration: "none" }}>
-              <span style={{ background: COLORS.navy, color: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ background: settings.footer.officialIcons ? "#C13584" : COLORS.navy, color: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Instagram size={14} />
               </span>
               twisttanglecrochet
             </a>
             <a href="https://www.facebook.com/twisttanlecrochet" target="_blank" rel="noopener noreferrer"
                style={{ display: "flex", alignItems: "center", gap: 10, color: COLORS.charcoal, background: "none", border: "none", fontSize: 14, textDecoration: "none" }}>
-              <span style={{ background: COLORS.navy, color: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ background: settings.footer.officialIcons ? "#1877F2" : COLORS.navy, color: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Facebook size={14} />
               </span>
               twisttanglecrochet
             </a>
             <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer"
                style={{ display: "flex", alignItems: "center", gap: 10, color: COLORS.charcoal, background: "none", border: "none", fontSize: 14, textDecoration: "none" }}>
-              <span style={{ background: COLORS.navy, color: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ background: settings.footer.officialIcons ? "#25D366" : COLORS.navy, color: "#fff", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <MessageCircle size={14} />
               </span>
               0302 7609899
@@ -2295,6 +2354,8 @@ export default function App() {
           {settings.guide.on && settings.guide.footer && <button type="button" onClick={openGuide} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>{settings.guide.buttonText}</button>}
           {settings.faq.on && settings.faq.footer && <button type="button" onClick={openFaq} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>{settings.faq.title}</button>}
           {settings.myOrders.on && <button type="button" onClick={() => setMyOrdersOpen(true)} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>My orders</button>}
+          {settings.games.on && settings.games.where !== "section" && <button type="button" onClick={() => setGamesOpen("")} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>{settings.games.footerLabel || "Get Fun"}</button>}
+          {settings.wishlist.on && <button type="button" onClick={() => setWishOpen(true)} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>My wishlist</button>}
           {settings.tracking.on && <button type="button" onClick={() => setTrackOpen(true)} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22 }}>Track your order</button>}
 
           {timingsText && (
@@ -2555,6 +2616,15 @@ export default function App() {
 
       {settings.ads.on && <AdPopup cfg={settings.ads} t={t} />}
 
+      {gamesOpen !== null && settings.games.on && (
+        <Suspense fallback={null}><GamesModal cfg={settings.games} products={products} initial={gamesOpen} onClose={() => setGamesOpen(null)} onOpenProduct={(id) => openQuickView(id)} /></Suspense>
+      )}
+      {reviewWriteOpen && (
+        <Suspense fallback={null}>
+          <ReviewWriter cfg={settings.reviewsAdd} products={products} onClose={() => setReviewWriteOpen(false)}
+            save={(d) => addDoc(collection(db, "reviews"), { ...d, approved: false, createdAt: serverTimestamp() })} />
+        </Suspense>
+      )}
       {wishOpen && (
         <Suspense fallback={null}>
           <WishlistPanel

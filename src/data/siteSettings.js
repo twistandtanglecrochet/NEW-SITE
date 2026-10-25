@@ -9,7 +9,7 @@ export const SETTINGS_PATH = ["config", "siteSettings"];
 export const SETTINGS_CACHE_KEY = "ttc_settings_v1";
 
 // Home-page parts that can be re-ordered / hidden from the admin panel.
-export const SECTION_IDS = ["hero", "ads", "tiles", "bento", "shop", "recent", "reviews", "visit"];
+export const SECTION_IDS = ["hero", "ads", "tiles", "bento", "shop", "recent", "reviews", "visit", "games"];
 
 export const DEFAULT_SETTINGS = {
   // 0. Maintenance mode — shows a "back soon" page instead of the shop.
@@ -29,7 +29,7 @@ export const DEFAULT_SETTINGS = {
       { value: 100, suffix: "%", label: "Handmade" },
     ],
   },
-  reviewsShuffle: { on: false, limit: 6, fx: "rise", auto: false, every: 8, button: false }, // fx: none | rise | fade | flip | pop
+  reviewsShuffle: { on: false, limit: 6, fx: "rise", auto: false, every: 8, button: false, layout: "grid" }, reviewsAdd: { on: false, title: "Write a review", button: "Write a review", general: "Custom order", aboveFooter: false, footerText: "Bought from us? Tell us how it went" }, // fx: none | rise | fade | flip | pop
   categoryTiles: { on: false, title: "Shop by category" },
   visit: { on: false, title: "Visit our store", address: "", mapUrl: "", buttonLabel: "Open in Maps" },
   // Section order / visibility. While `on` is false the home page keeps its
@@ -37,8 +37,28 @@ export const DEFAULT_SETTINGS = {
   sections: {
     on: false,
     order: [...SECTION_IDS],
-    visible: { hero: true, ads: true, tiles: true, bento: true, shop: true, recent: true, reviews: true, visit: true },
+    visible: { hero: true, ads: true, tiles: true, bento: true, shop: true, recent: true, reviews: true, visit: true, games: true },
   },
+
+  // "Get Fun" games (Yarn match, Photo puzzle, Spin the wheel). where: section | footer | both
+  games: {
+    on: false, title: "Get Fun by Playing Games", subtitle: "Play a quick game and win a little treat.", where: "section", footerLabel: "Get Fun",
+    match: { on: true, size: "4x5", choose: true, code: "", prizeText: "" },
+    puzzle: { on: true, size: 3, choose: true, pick: "random", ids: [], code: "", prizeText: "" },
+    wheel: { on: true, oncePerDay: true, prizeText: "Use this code in your cart.", prizes: [{ label: "5% off", code: "", chance: 25 }, { label: "Free delivery", code: "", chance: 10 }, { label: "Try again", code: "", chance: 55 }, { label: "10% off", code: "", chance: 10 }] },
+  },
+
+  // Discount rules. mode: "both" = a promo code and a combo price add up (as it always was) | "best" = only the bigger one counts
+  promoRules: { mode: "both" },
+
+  // Header social icons (Instagram / Facebook / WhatsApp) in their own brand colours
+  headerSocial: { official: false },
+
+  // Home reviews: show the first few, then an "Explore more" button; "Show less" folds them back
+  reviewsMore: { on: false, initial: 3, more: "Explore more", less: "Show less" },
+
+  // Accessibility (PageSpeed): contrast = easier-to-read "Go" button and footer headings; touch = bigger tap area for the carousel dots
+  access: { contrast: false, touch: false },
 
   // Marketing
   announcements: { on: false, style: "rotate", transition: "fade", speed: 4000, bars: [] }, // style: rotate | stack | marquee
@@ -115,7 +135,7 @@ export const DEFAULT_SETTINGS = {
   designedBy: { on: false, name: "", url: "" },
 
   // Look (defaults below equal today's look)
-  look: { on: false, gap: 22, cardRadius: 18, panelRadius: 24, photoRadius: 14, sectionSpace: 20 },
+  look: { on: false, tight: false, gap: 22, cardRadius: 18, panelRadius: 24, photoRadius: 14, sectionSpace: 20 },
 
   // Languages
   i18n: { on: false, defaultLang: "en", en: {}, ur: {}, extra: [{"en": "Description", "ur": ""}, {"en": "Details", "ur": ""}, {"en": "Sizes available", "ur": ""}, {"en": "Colours available", "ur": ""}, {"en": "Price includes:", "ur": ""}, {"en": "My orders", "ur": ""}, {"en": "Track this order", "ur": ""}, {"en": "You may also like", "ur": ""}, {"en": "Notify me when it's back", "ur": ""}, {"en": "Complete order guide", "ur": ""}, {"en": "Start shopping", "ur": ""}, {"en": "Ask on WhatsApp", "ur": ""}, {"en": "Good to know", "ur": ""}, {"en": "Goes well with your order", "ur": ""}, {"en": "Add combo to cart", "ur": ""}, {"en": "Follow us on Instagram", "ur": ""}, {"en": "Combo offers", "ur": ""}, {"en": "Questions & returns", "ur": ""}, {"en": "Home", "ur": ""}, {"en": "See all results", "ur": ""}, {"en": "Add to Cart", "ur": ""}, {"en": "Buy Now", "ur": ""}] }, // extra: any English text on the shop -> your Urdu
@@ -155,6 +175,8 @@ export function readCachedSettings() {
     const raw = localStorage.getItem(SETTINGS_CACHE_KEY);
     if (raw) return mergeSettings(JSON.parse(raw));
   } catch (e) {}
+  // First visit: index.html asked /api/shop for the live settings while the page was loading.
+  try { if (typeof window !== "undefined" && window.__ttcEarlySettings) return mergeSettings(window.__ttcEarlySettings); } catch (e) {}
   return mergeSettings({});
 }
 

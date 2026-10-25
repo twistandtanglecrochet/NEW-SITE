@@ -57,7 +57,7 @@ export default function BentoStats({ items }) {
           const tone = TONES[i % TONES.length];
           return (
             <div key={i} style={{
-              background: tone.bg, borderRadius: "var(--ttc-card-radius, 18px)", padding: "22px 18px",
+              background: tone.bg, borderRadius: "var(--ttc-card-radius, 18px)", padding: "var(--ttc-tile-pad, 22px 18px)",
               textAlign: "center", gridColumn: list.length >= 3 && i === 0 ? "span 2" : undefined,
             }}>
               <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 34, color: tone.fg, lineHeight: 1.1 }}>

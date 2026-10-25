@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import { X, BookOpen, ArrowRight, MessageCircle, Lightbulb } from "lucide-react";
 import { COLORS } from "../data/colors.js";
+import { SpeedContext } from "../lib/cloudinary.jsx";
 
 // "Complete order guide": a bar under the top banner + a full guide page.
 // Steps, tips and texts are edited in Admin → Website → Order guide.
 export function GuideBar({ cfg, onOpen }) {
+  const strong = !!useContext(SpeedContext).contrast; // easier-to-read "Go" button when Admin → Accessibility is on
   return (
-    <div style={{ display: "flex", justifyContent: "center", padding: "6px 20px 18px" }}>
+    <div style={{ display: "flex", justifyContent: "center", padding: "var(--ttc-guide-pad, 6px 20px 18px)" }}>
       <button
         type="button"
         onClick={onOpen}
@@ -15,7 +17,7 @@ export function GuideBar({ cfg, onOpen }) {
         <span style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", fontWeight: 700, fontSize: 14, color: COLORS.charcoal }}>
           <BookOpen size={18} color={COLORS.maroon} /> {cfg.buttonText}
         </span>
-        <span style={{ background: COLORS.gold, color: COLORS.cream, display: "flex", alignItems: "center", gap: 6, padding: "0 18px", fontWeight: 800, fontSize: 14 }}>
+        <span style={{ background: strong ? "#8A6516" : COLORS.gold, color: COLORS.cream, display: "flex", alignItems: "center", gap: 6, padding: "0 18px", fontWeight: 800, fontSize: 14 }}>
           {cfg.goText} <ArrowRight size={15} />
         </span>
       </button>

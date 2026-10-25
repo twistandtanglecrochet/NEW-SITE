@@ -119,3 +119,12 @@ Admin: up to 5 product photos upload at the same time; ◀ ▶ buttons re-order 
 
 ## Round 10 (admin look)
 Admin is now Lavender + New look by default (saved per browser). Dashboard → "Admin colours": 6 themes (Lavender, Maroon old, Sage, Rose, Terracotta, Teal) and 7 colour pickers for your own. Dashboard → "Open anything": every admin page as a tile with live counts. The Classic look is still available. The shop is not affected.
+
+## Round 11
+Shop: reviews can be shown as a stack of cards (Home sections → Reviews shuffle → Look = Stacked cards); new "Write a review" button (Home sections, OFF) that also works for custom orders; "My wishlist" link in both footers (shown when Wishlist is on). Admin → Sales: "Money in & out" tiles, "Add to your books" with Add a cost / Add a sale tabs (sales are saved in the same `expenses` collection with kind "sale", so no new rules), and one list of entries.
+
+## Round 12
+Admin Dashboard: range chips (Today / 7 / 30 days / All time), KPI tiles, 14-day sales chart, best sellers, top cities, where orders came from, ads ending soon, and a **Control centre** with every on/off switch in one place (toggle, then Save once). Place an order: "Choose from all products" (tick, quantity, price for this order only), order date and "already delivered" for old sales. Reviews: "Add a review yourself" with a photo/screenshot; review photos show on the shop (home cards, stack, product page).
+
+## Round 13
+Product card design 11 "Quick view & Buy now": a Quick view pill on the photo, optional crossed-out old price (new "Old price" field in the product form), one wide Buy now button and a small cart button. Pick it in Admin → Cards → Product card design.

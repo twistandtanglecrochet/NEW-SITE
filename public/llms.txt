@@ -1,0 +1,14 @@
+# Twist & Tangle Crochet (TTC)
+
+> Handmade crochet shop in Lahore, Pakistan. Flowers, earrings, keychains, hair clips, pouches and more, made to order. Customers can order on the website or on WhatsApp.
+
+## Shop
+
+- [Home and all products](https://ttcshop.vercel.app/): the full collection with prices and photos
+- [Order guide](https://ttcshop.vercel.app/guide): how to place an order step by step
+- [FAQ and returns](https://ttcshop.vercel.app/faq): questions, delivery and exchange rules
+
+## Contact
+
+- [WhatsApp](https://wa.me/923027609899): fastest way to reach the shop
+- [Instagram](https://www.instagram.com/twisttanglecrochet/): new pieces and customer photos

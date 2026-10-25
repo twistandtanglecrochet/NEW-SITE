@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Instagram, Facebook, MessageCircle, Clock } from "lucide-react";
 import { COLORS } from "../data/colors.js";
 import { categorySlug } from "../data/slug.js";
+import { SpeedContext } from "../lib/cloudinary.jsx";
 
 // A sorted footer (switch on in Admin → Website → Footer): big line + button,
 // link columns, "track your order", local time, social icons and credits.
 const linkStyle = { color: "rgba(251,246,240,0.9)", fontSize: 14, textDecoration: "none", background: "none", border: "none", padding: 0, textAlign: "left", cursor: "pointer", font: "inherit" };
-const head = { fontSize: 12, fontWeight: 700, letterSpacing: 0.6, color: "rgba(251,246,240,0.6)", marginBottom: 12 };
+const headBase = { fontSize: 12, fontWeight: 700, letterSpacing: 0.6, color: "rgba(251,246,240,0.6)", marginBottom: 12 };
 const TikTok = ({ size = 15 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 3c.3 2.3 1.7 3.9 4 4.1v3.2c-1.5.1-2.9-.4-4-1.1v6.2c0 3.2-2.5 5.6-5.6 5.6S5.4 18.6 5.4 15.4c0-3.4 2.9-5.9 6.2-5.5v3.3c-1.6-.4-3 .8-3 2.2 0 1.3 1 2.3 2.3 2.3s2.4-1 2.4-2.4V3h3.3z" /></svg>
 );
@@ -22,7 +23,9 @@ const toMin = (hhmm) => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(hhmm || ""
 const fmt12 = (hhmm) => { const m = toMin(hhmm); if (m === null) return ""; const h = Math.floor(m / 60); return `${((h + 11) % 12) + 1}${m % 60 ? ":" + String(m % 60).padStart(2, "0") : ""} ${h < 12 ? "am" : "pm"}`; };
 const safe = (u) => (/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(String(u || "").trim()) ? String(u).trim() : "");
 
-export default function SiteFooter({ cfg, shopName, logo, categories, whatsapp, designedBy, footerLinks, onTrack, trackOn, onTop, guide, myOrders, faq }) {
+export default function SiteFooter({ cfg, shopName, logo, categories, whatsapp, designedBy, footerLinks, onTrack, trackOn, onTop, guide, myOrders, wishlist, faq, games }) {
+  const strong = !!useContext(SpeedContext).contrast; // clearer small headings when Admin → Accessibility is on
+  const head = strong ? { ...headBase, color: "rgba(251,246,240,0.88)" } : headBase;
   const [now, setNow] = useState(() => pkTime());
   useEffect(() => { const id = setInterval(() => setNow(pkTime()), 30000); return () => clearInterval(id); }, []);
   const o = toMin(cfg.hours && cfg.hours.open); const c = toMin(cfg.hours && cfg.hours.close);
@@ -62,6 +65,8 @@ export default function SiteFooter({ cfg, shopName, logo, categories, whatsapp, 
             {guide && <button type="button" onClick={guide.open} style={linkStyle}>{guide.label}</button>}
             {faq && <button type="button" onClick={faq.open} style={linkStyle}>{faq.label}</button>}
             {myOrders && <button type="button" onClick={myOrders} style={linkStyle}>My orders</button>}
+            {wishlist && <button type="button" onClick={wishlist} style={linkStyle}>My wishlist</button>}
+            {games && <button type="button" onClick={games.open} style={linkStyle}>{games.label}</button>}
             <a href={wa} target="_blank" rel="noopener noreferrer" style={linkStyle}>Chat on WhatsApp</a>
             <button type="button" onClick={onTop} style={linkStyle}>Back to top</button>
           </div></div>

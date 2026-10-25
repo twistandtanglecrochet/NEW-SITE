@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, Heart } from "lucide-react";
+import { Plus, Heart, Eye, ShoppingCart } from "lucide-react";
 import { COLORS } from "../data/colors.js";
 import { VariantPicker, ProductPhotoGallery, ProductSwatch, RatingSummary } from "./shared.jsx";
 
@@ -18,6 +18,7 @@ export const CARD_LAYOUT_NAMES = [
   "Price badge",
   "Banner",
   "Elegant",
+  "Quick view & Buy now",
 ];
 
 const serif = "'Fraunces', serif";
@@ -298,6 +299,38 @@ export default function ProductCard(props) {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {addBtn()}
             {buyBtn()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 11 — Quick view & Buy now: a "Quick view" pill on the photo, the old price crossed out, one wide Buy now button and a small cart button.
+  if (layout === 11) {
+    const old = Number(p.oldPrice) > Number(p.price) ? Number(p.oldPrice) : 0;
+    const line = String(p.shortLine || p.desc || "").trim();
+    return (
+      <div className="ttc-product-card" style={{ background: COLORS.cream, borderRadius: cardRadius, border: `1.5px solid ${COLORS.gold}`, padding: 10, overflow: "hidden" }}>
+        <div style={{ position: "relative" }}>
+          {media}
+          {heart}
+          <button
+            type="button" onClick={onOpen} aria-label={"Quick view " + p.name}
+            style={{ position: "absolute", left: 10, top: 10, zIndex: 3, display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.95)", color: COLORS.charcoal, border: "none", borderRadius: 999, padding: "7px 13px", fontSize: 12.5, fontWeight: 700, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", cursor: "pointer" }}
+          >
+            <Eye size={15} /> Quick view
+          </button>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <NameLink p={p} href={href} onOpen={onOpen} style={{ fontFamily: "inherit", fontSize: 15.5 }} />
+          {line && <div style={{ fontSize: 12.5, color: "#7A6E64", margin: "3px 0 8px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{line}</div>}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
+            <span style={{ ...priceStyle, fontSize: 18 }}>Rs. {Number(p.price).toLocaleString("en-PK")}</span>
+            {old > 0 && <span style={{ fontSize: 12.5, color: "#8A7E74", textDecoration: "line-through" }}>Rs. {old.toLocaleString("en-PK")}</span>}
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button onClick={onBuy} style={{ flex: 1, background: COLORS.gold, color: COLORS.maroonDark, border: "none", borderRadius: 999, padding: "11px 0", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>{t("shop.buyNow")}</button>
+            <button onClick={onAdd} aria-label={t("shop.add")} style={{ width: 44, height: 44, flex: "0 0 44px", borderRadius: "50%", background: "transparent", color: COLORS.maroonDark, border: `1.5px solid ${COLORS.gold}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><ShoppingCart size={18} /></button>
           </div>
         </div>
       </div>

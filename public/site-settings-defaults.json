@@ -44,7 +44,16 @@
       "fx": "rise",
       "auto": false,
       "every": 8,
-      "button": false
+      "button": false,
+      "layout": "grid"
+    },
+    "reviewsAdd": {
+      "on": false,
+      "title": "Write a review",
+      "button": "Write a review",
+      "general": "Custom order",
+      "aboveFooter": false,
+      "footerText": "Bought from us? Tell us how it went"
     },
     "categoryTiles": {
       "on": false,
@@ -67,7 +76,8 @@
         "shop",
         "recent",
         "reviews",
-        "visit"
+        "visit",
+        "games"
       ],
       "visible": {
         "hero": true,
@@ -77,8 +87,75 @@
         "shop": true,
         "recent": true,
         "reviews": true,
-        "visit": true
+        "visit": true,
+        "games": true
       }
+    },
+    "games": {
+      "on": false,
+      "title": "Get Fun by Playing Games",
+      "subtitle": "Play a quick game and win a little treat.",
+      "where": "section",
+      "footerLabel": "Get Fun",
+      "match": {
+        "on": true,
+        "size": "4x5",
+        "choose": true,
+        "code": "",
+        "prizeText": ""
+      },
+      "puzzle": {
+        "on": true,
+        "size": 3,
+        "choose": true,
+        "pick": "random",
+        "ids": [],
+        "code": "",
+        "prizeText": ""
+      },
+      "wheel": {
+        "on": true,
+        "oncePerDay": true,
+        "prizeText": "Use this code in your cart.",
+        "prizes": [
+          {
+            "label": "5% off",
+            "code": "",
+            "chance": 25
+          },
+          {
+            "label": "Free delivery",
+            "code": "",
+            "chance": 10
+          },
+          {
+            "label": "Try again",
+            "code": "",
+            "chance": 55
+          },
+          {
+            "label": "10% off",
+            "code": "",
+            "chance": 10
+          }
+        ]
+      }
+    },
+    "promoRules": {
+      "mode": "both"
+    },
+    "headerSocial": {
+      "official": false
+    },
+    "reviewsMore": {
+      "on": false,
+      "initial": 3,
+      "more": "Explore more",
+      "less": "Show less"
+    },
+    "access": {
+      "contrast": false,
+      "touch": false
     },
     "announcements": {
       "on": false,
@@ -314,6 +391,7 @@
     },
     "look": {
       "on": false,
+      "tight": false,
       "gap": 22,
       "cardRadius": 18,
       "panelRadius": 24,
@@ -441,6 +519,7 @@
     "shop",
     "recent",
     "reviews",
-    "visit"
+    "visit",
+    "games"
   ]
 }

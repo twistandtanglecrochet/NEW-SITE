@@ -491,6 +491,22 @@
   }
   .savebar { position: sticky; bottom: 8px; display: flex; gap: 12px; align-items: center; background: #fff; border-radius: 14px; padding: 10px 14px; box-shadow: 0 4px 18px rgba(63,18,32,.15); }
   @media (max-width: 760px) { .prow { grid-template-columns: 1fr 96px; } .prow select { grid-column: 1 / -1; } .prow.head span:last-child { display: none; } }
+  .rep-chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .rep-chip { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border:1.5px solid var(--line, #d9cfe6); border-radius:999px; font-size:13px; cursor:pointer; background:#fff; }
+  .rep-chip.cost { border-color:#E8B9B6; }
+  .rep-chip input { width:auto; margin:0; }
+  .order-sum { display:flex; align-items:center; gap:12px; width:100%; background:none; border:0; padding:0; text-align:left; cursor:pointer; font:inherit; color:inherit; }
+  .order-sum .os-thumbs { display:flex; flex:0 0 auto; }
+  .order-sum .os-thumbs img, .order-sum .os-ph { width:40px; height:40px; border-radius:10px; object-fit:cover; margin-left:-10px; border:2px solid #fff; background:#f1ebf7; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .order-sum .os-thumbs > :first-child { margin-left:0; }
+  .order-sum .os-main { flex:1; min-width:0; display:flex; flex-direction:column; }
+  .order-sum .os-main b { font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .order-sum small { font-size:12px; color:#7a7285; }
+  .order-sum .os-end { display:flex; flex-direction:column; align-items:flex-end; flex:0 0 auto; }
+  .order-sum .os-end b { font-size:15px; }
+  .order-sum .os-caret { font-size:11px; color:#7a7285; }
+  .order-body { margin-top:12px; padding-top:12px; border-top:1px dashed #e3d9ee; }
+  .order-body[hidden] { display:none; }
   .order-extra { margin-top: 10px; display: grid; gap: 8px; }
   .oe-row { display: flex; align-items: center; gap: 10px; } .oe-row label { margin: 0; font-size: 12px; font-weight: 700; color: #5A5048; } .oe-row select { flex: 1; max-width: 220px; }
   .track-box { border: 1px dashed #D8CCC3; border-radius: 12px; padding: 10px 12px; background: var(--bg-soft); }
@@ -582,6 +598,7 @@
       <button type="button" class="nav-item" data-view="brand" data-kw="brand logo name address colours colors fonts website text photos" title="Look &amp; brand"><span class="nav-ic t-pink"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="15.5" cy="10" r="1"/></svg></span><span class="nav-label">Look &amp; brand</span></button>
       <button type="button" class="nav-item" data-view="hero" data-kw="heading reveal word rotator transition" title="Heading & effects"><span class="nav-ic t-purple"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6h14M5 12h10M5 18h6"/></svg></span><span class="nav-label">Heading & effects</span></button>
       <button type="button" class="nav-item" data-view="homesections" data-kw="reviews shuffle tiles stats bento visit order" title="Home sections"><span class="nav-ic t-teal"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="6" rx="1.5"/><rect x="3" y="12" width="8" height="9" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/></svg></span><span class="nav-label">Home sections</span></button>
+      <button type="button" class="nav-item" data-view="games" data-kw="games fun puzzle spin wheel match play" title="Get Fun games"><span class="nav-ic t-pink"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11.5" r="1"/><circle cx="18.5" cy="14" r="1"/></svg></span><span class="nav-label">Get Fun games</span></button>
       <button type="button" class="nav-item" data-view="cards" data-kw="layout price filter wishlist recently explore" title="Product cards & filters"><span class="nav-ic t-green"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 14h14"/></svg></span><span class="nav-label">Product cards & filters</span></button>
       <button type="button" class="nav-item" data-view="look" data-kw="spacing corners animation scroll" title="Look & motion"><span class="nav-ic t-pink"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="15.5" cy="10" r="1"/></svg></span><span class="nav-label">Look & motion</span></button>
       <button type="button" class="nav-item" data-view="offers" data-kw="combo bundle gift faq returns instagram cart suggestions" title="Offers, FAQ &amp; Instagram"><span class="nav-ic t-pink"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18"/><path d="M12 8c-2 0-4-1-4-3s3-2 4 1c1-3 4-3 4-1s-2 3-4 3z"/></svg></span><span class="nav-label">Offers, FAQ &amp; Instagram</span></button>
@@ -871,6 +888,7 @@
     <section data-view-panel="ads" class="hidden"><div class="settings-pane" data-pane="ads"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="hero" class="hidden"><div class="settings-pane" data-pane="hero"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="homesections" class="hidden"><div class="settings-pane" data-pane="homesections"><div class="card"><p class="hint">Loading…</p></div></div></section>
+    <section data-view-panel="games" class="hidden"><div class="settings-pane" data-pane="games"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="cards" class="hidden"><div class="settings-pane" data-pane="cards"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="look" class="hidden"><div class="settings-pane" data-pane="look"><div class="card"><p class="hint">Loading…</p></div></div></section>
     <section data-view-panel="offers" class="hidden"><div class="settings-pane" data-pane="offers"><div class="card"><p class="hint">Loading…</p></div></div></section>
@@ -1011,7 +1029,7 @@
   });
 
   // ---- sidebar navigation (Keep-style) ----
-  const VIEWS = ["dashboard", "import", "add", "products", "prices", "brand", "sales", "customers", "backup", "links", "neworder", "orderflow", "reviews", "manageReviews", "orders", "promos", "tools", "announce", "carousel", "ads", "hero", "homesections", "cards", "offers", "productpage", "guide", "look", "footer", "i18n", "shopinfo", "speed"];
+  const VIEWS = ["dashboard", "import", "add", "products", "prices", "brand", "sales", "customers", "backup", "links", "neworder", "orderflow", "reviews", "manageReviews", "orders", "promos", "tools", "announce", "carousel", "ads", "hero", "homesections", "games", "cards", "offers", "productpage", "guide", "look", "footer", "i18n", "shopinfo", "speed"];
   const isPhone = () => window.matchMedia("(max-width: 760px)").matches;
 
   let currentView = "dashboard";
@@ -1551,6 +1569,7 @@
     return ts.toDate().toLocaleString("en-PK", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
   }
 
+  const ordOpen = new Set(); // orders whose full details are open
   function renderOrders() {
     const fresh = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled");
     const done = currentOrders.filter((o) => o.status === "done");
@@ -1597,7 +1616,17 @@
       const card = document.createElement("div");
       card.className = "order-card" + (o.starred ? " is-starred" : "") + (isDone ? " is-done" : "");
       const wa = waNumber(c.phone);
+      const open = ordOpen.has(o.id);
+      const qtyAll = items.reduce((n, i) => n + (Number(i.qty) || 1), 0);
+      card.classList.toggle("is-open", open);
       card.innerHTML = `
+        <button type="button" class="order-sum" data-order-open="${o.id}" aria-expanded="${open}">
+          <span class="os-thumbs">${items.slice(0, 3).map((i) => i.photo ? `<img src="${escapeHtml(i.photo)}" alt="" />` : `<span class="os-ph">🧶</span>`).join("")}</span>
+          <span class="os-main"><b>${escapeHtml(c.name || "No name")}</b><small>${o.orderNo ? escapeHtml(o.orderNo) + " · " : ""}${qtyAll} item${qtyAll === 1 ? "" : "s"} · ${escapeHtml(channelLabel(o.channel))}</small></span>
+          <span class="os-end"><b>Rs${Number(o.total) || 0}</b><small>${escapeHtml(formatOrderDate(o.createdAt))}${isDone ? " · Done" : ""}</small></span>
+          <span class="os-caret" aria-hidden="true">${open ? "▲" : "▼"}</span>
+        </button>
+        <div class="order-body" ${open ? "" : "hidden"}>
         <div class="order-top">
           <div>
             <div class="order-who">${escapeHtml(c.name || "No name")}</div>
@@ -1634,10 +1663,18 @@
             : `<button type="button" class="done-btn" data-order-done="${o.id}">Move to done</button>`}
           <button type="button" class="del-btn" data-order-delete="${o.id}">Delete</button>
         </div>
+        </div>
       `;
       list.appendChild(card);
     });
 
+    list.querySelectorAll("[data-order-open]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-order-open"); const card = btn.closest(".order-card"); const body = card.querySelector(".order-body");
+        const nowOpen = body.hidden; body.hidden = !nowOpen; card.classList.toggle("is-open", nowOpen); btn.setAttribute("aria-expanded", String(nowOpen)); btn.querySelector(".os-caret").textContent = nowOpen ? "▲" : "▼";
+        if (nowOpen) ordOpen.add(id); else ordOpen.delete(id);
+      })
+    );
     list.querySelectorAll("[data-order-star]").forEach((btn) =>
       btn.addEventListener("click", () => {
         const o = currentOrders.find((x) => x.id === btn.getAttribute("data-order-star"));
@@ -2369,6 +2406,7 @@
     recent: "Recently viewed",
     reviews: "What customers say",
     visit: "Visit our store",
+    games: "Get Fun games",
   };
   // Which groups of switches live on which admin page.
   const PANES = {
@@ -2376,7 +2414,8 @@
     carousel: { title: "Homepage carousel", intro: "The photos that slide at the top of the home page. Add a product's main photo from All products (press “Carousel +”), or add pictures here.", groups: ["carousel"] },
     ads: { title: "Ads", intro: "Picture ads for your own offers: a banner on the home page or a pop-up. Each ad has its own on/off.", groups: ["ads"] },
     hero: { title: "Heading & effects", intro: "The big heading at the top of the home page.", groups: ["hero"] },
-    homesections: { title: "Home sections", intro: "Parts of the home page: reviews, tiles, stats, visit-store and their order.", groups: ["shuffle", "reviewsadd", "tiles", "bento", "visit", "sections"] },
+    homesections: { title: "Home sections", intro: "Parts of the home page: reviews, tiles, stats, visit-store and their order.", groups: ["shuffle", "reviewsmore", "reviewsadd", "tiles", "bento", "visit", "sections"] },
+    games: { title: "Get Fun games", intro: "Small games for your customers: Yarn match, Photo puzzle and Spin the wheel. Everything is OFF until you switch it on.", groups: ["gamesmain", "gmatch", "gpuzzle", "gwheel", "gdisc"] },
     cards: { title: "Product cards & filters", intro: "How products look and how customers find them.", groups: ["cards", "searchf", "price", "wish", "recent", "explore"] },
     offers: { title: "Offers, FAQ & Instagram", intro: "Combo offers, cart extras, the FAQ & returns page and an Instagram strip. Each part has its own switch.", groups: ["bundlesf", "cartplusf", "faqf", "instaf"] },
     productpage: { title: "Product page", intro: "What customers see when they open a product. Fill the details of each product in Add / edit product.", groups: ["ppage"] },
@@ -2387,14 +2426,14 @@
     i18n: { title: "Translations", intro: "English / اردو for the whole shop.", groups: ["i18n", "i18nextra"] },
     shopinfo: { title: "Shop info & delivery", intro: "Maintenance page, free-delivery bar and shop timings.", groups: ["maint", "delivery", "timings"] },
     orderflow: { title: "Order & checkout", intro: "How customers place and follow their orders.", groups: ["checkoutf", "ordnof", "trackingf"] },
-    speed: { title: "Speed & app", intro: "Faster loading and the phone-app options.", groups: ["speed", "pwa"] },
+    speed: { title: "Speed & app", intro: "Faster loading and the phone-app options.", groups: ["speed", "pwa", "accessf"] },
   };
   const FEATURES = [
     ["maintenance.on", "Maintenance page", "shopinfo"], ["announcements.on", "Announcement bars", "announce"],
     ["carousel.on", "Homepage carousel", "carousel"], ["ads.on", "Ads", "ads"],
     ["heroReveal.on", "Heading reveal", "hero"], ["rotator.on", "Word rotator", "hero"],
-    ["reviewsShuffle.on", "Reviews shuffle", "homesections"], ["reviewsAdd.on", "Write a review button", "homesections"], ["categoryTiles.on", "Category tiles", "homesections"],
-    ["bento.on", "Stats boxes", "homesections"], ["visit.on", "Visit-store", "homesections"], ["sections.on", "Custom section order", "homesections"],
+    ["reviewsShuffle.on", "Reviews shuffle", "homesections"], ["reviewsAdd.on", "Write a review button", "homesections"], ["reviewsMore.on", "Reviews: Explore more", "homesections"], ["categoryTiles.on", "Category tiles", "homesections"],
+    ["bento.on", "Stats boxes", "homesections"], ["visit.on", "Visit-store", "homesections"], ["games.on", "Get Fun games", "games"], ["sections.on", "Custom section order", "homesections"], ["look.tight", "Tighter spacing", "look"], ["access.contrast", "Easier-to-read text", "speed"], ["access.touch", "Bigger dot tap area", "speed"],
     ["cardLayout.on", "Card design", "cards"], ["priceFilter.on", "Price filter", "cards"], ["wishlist.on", "Wishlist", "cards"],
     ["recent.on", "Recently viewed", "cards"], ["exploreMore.on", "Explore more", "cards"],
     ["productPage.tabs", "Description / Details tabs", "productpage"], ["productPage.sizes", "Sizes available", "productpage"], ["productPage.colours", "Colours available", "productpage"], ["productPage.includes", "Price includes", "productpage"], ["guide.on", "Order guide", "guide"],
@@ -2406,7 +2445,7 @@
     ["pwa.install", "Install button", "speed"], ["pwa.safeArea", "Notch padding", "speed"],
     ["speed.lcp", "First photo first", "speed"], ["speed.boot", "Quick loading screen", "speed"], ["speed.noLive", "Load shop data once", "speed"], ["speed.cv", "Skip drawing footer", "speed"],
     ["speed.lightMotion", "Lighter motion on phones", "speed"], ["speed.resizeUploads", "Shrink uploads", "speed"], ["orders.slipWA", "Approve & send slip", "orderflow"],
-    ["wishlist.reminders", "Wishlist reminders", "cards"], ["checkout.giftNote", "Gift note", "orderflow"], ["footer.officialIcons", "Official social colours", "footer"], ["footer.floatRight", "Floating buttons on right", "footer"],
+    ["wishlist.reminders", "Wishlist reminders", "cards"], ["checkout.giftNote", "Gift note", "orderflow"], ["footer.officialIcons", "Official social colours", "footer"], ["headerSocial.official", "Header icons in own colours", "footer"], ["footer.floatRight", "Floating buttons on right", "footer"],
   ];
   let S = null;        // the settings being edited
   let SDEF = null;     // starting values (from /site-settings-defaults.json)
@@ -2592,9 +2631,49 @@
       tf("rotator.wordsUr", "Words (Urdu), separated by commas", { rtl: true }));
 
     // ---- Home sections ----
+    const gprizes = v("games.wheel.prizes") || [];
+    const gids = v("games.puzzle.ids") || [];
+    G.gamesmain = group("gamesmain", "Get Fun (games)", "A block on the home page and/or a link in the footer where customers play. Name it however you like, for example “Get Fun by Playing Games”. If you use the block, you can move it in Home sections → order.",
+      sw("games.on", "Show the games on the shop") +
+      tf("games.title", "Heading") + tf("games.subtitle", "Line under the heading") +
+      sel("games.where", "Where it shows", [["section", "A block on the home page"], ["footer", "A link in the footer only"], ["both", "Both"]]) +
+      tf("games.footerLabel", "Footer link text", { ph: "Get Fun" }));
+    G.gmatch = group("gmatch", "Yarn match (find the pairs)", "Customers flip tiles with your product photos and find the pairs. More tiles = harder.",
+      sw("games.match.on", "Use this game") +
+      sel("games.match.size", "How many tiles at the start", [["3x4", "12 tiles"], ["4x4", "16 tiles"], ["4x5", "20 tiles"], ["5x6", "30 tiles"], ["6x6", "36 tiles"]]) +
+      sw("games.match.choose", "Let the customer choose the number of tiles") +
+      tf("games.match.code", "Prize code when finished (optional)", { ph: "e.g. MATCH5", hint: "Create the same code in Promo codes. One prize per customer per day. Leave empty for no prize." }) +
+      tf("games.match.prizeText", "Prize message", { ph: "5% off your next order" }));
+    G.gpuzzle = group("gpuzzle", "Photo puzzle (slide the pieces)", "A picture of one of your products is cut into pieces. The customer slides them back into place. A different product is shown each time.",
+      sw("games.puzzle.on", "Use this game") +
+      sel("games.puzzle.size", "Pieces at the start", [["3", "8 pieces (3 × 3)"], ["4", "15 pieces (4 × 4)"]]) +
+      sw("games.puzzle.choose", "Let the customer choose 8 or 15 pieces") +
+      sel("games.puzzle.pick", "Which pictures", [["random", "Any product, different each time"], ["chosen", "Only the products ticked below"]]) +
+      (v("games.puzzle.pick") === "chosen" ? `<div class="chk-grid" style="display:grid;gap:6px;max-height:220px;overflow:auto;margin:8px 0">${(currentProducts || []).filter((p) => heroPhotoOf(p)).map((p) => `<label class="sw" style="margin:0"><input type="checkbox" data-gid="${esc(p.id)}" ${gids.includes(p.id) ? "checked" : ""} /><span>${esc(p.name)}</span></label>`).join("")}</div>` : "") +
+      tf("games.puzzle.code", "Prize code when solved (optional)", { ph: "e.g. PUZZLE5", hint: "Create the same code in Promo codes. One prize per customer per day." }) +
+      tf("games.puzzle.prizeText", "Prize message", { ph: "5% off your next order" }));
+    G.gdisc = group("gdisc", "Discounts: one at a time", "A customer can always use only ONE promo code in an order (a prize code from a game is a promo code too, so two codes never work together). Choose what happens when a promo code and a combo offer are both in the cart.",
+      sel("promoRules.mode", "Promo code + combo price", [["both", "Add up both discounts (as before)"], ["best", "Only the bigger discount counts"]]));
+    G.gwheel = group("gwheel", "Spin the wheel", "Add 2 to 10 prizes. Give a prize a code to make it a discount; leave the code empty for “Try again” type segments. Create each code in Promo codes too.",
+      sw("games.wheel.on", "Use this game") +
+      sw("games.wheel.oncePerDay", "One spin per customer per day") +
+      tf("games.wheel.prizeText", "Message shown with the code", { ph: "Use this code in your cart." }) +
+      `<p class="hint"><b>Chance %</b> is how many out of 100 spins land on that prize. The numbers do not have to add up to 100 (they are scaled). Leave all empty for equal chances. Total now: <b>${gprizes.reduce((n, x) => n + (Number(x.chance) > 0 ? Number(x.chance) : 0), 0)}</b>.</p>` +
+      gprizes.map((x, i) => `<div class="srow" style="grid-template-columns:1fr 1fr 80px auto auto auto">${listIn("games.wheel.prizes", i, "label", x.label, "text", 'placeholder="Name on the wheel, e.g. 10% off"')}${listIn("games.wheel.prizes", i, "code", x.code, "text", 'placeholder="Promo code (optional)"')}${listIn("games.wheel.prizes", i, "chance", x.chance, "num", 'min="0" placeholder="Chance %" title="Chance %"')}${moveBtns("gprize", i, gprizes.length)}</div>`).join("") +
+      (gprizes.length < 10 ? `<button type="button" class="btn secondary" data-act="add-gprize" style="margin-top:6px">+ Add a prize</button>` : ""));
+    G.accessf = group("accessf", "Easier to read & tap (Google PageSpeed)", "Two small fixes Google asks for. They change the look only a little.",
+      sw("access.contrast", "Easier-to-read text: a slightly deeper gold on the “Go” button and clearer small headings in the footer") +
+      sw("access.touch", "Bigger tap area for the little dots under the photo slideshows (the dots look the same)"));
+    G.reviewsmore = group("reviewsmore", "Reviews: Explore more / Show less", "Show only the first few reviews on the home page, with an “Explore more” button that opens the rest and a “Show less” button that folds them back. It uses all the reviews you starred (up to 60). Works with the Grid look; the stacked deck keeps its own handful.",
+      sw("reviewsMore.on", "Use Explore more / Show less") +
+      tf("reviewsMore.initial", "How many reviews show first", { type: "num", min: 1 }) +
+      tf("reviewsMore.more", "Button text to open more", { ph: "Explore more" }) +
+      tf("reviewsMore.less", "Button text to fold back", { ph: "Show less" }));
     G.reviewsadd = group("reviewsadd", "Customers can write a review", "A “Write a review” button under the home-page reviews. Anyone can use it, including people who ordered a custom piece. Each review waits in Reviews for your approval, then star it to show it on the home page.",
       sw("reviewsAdd.on", "Show the “Write a review” button") +
       tf("reviewsAdd.button", "Button text", { ph: "Write a review" }) +
+      sw("reviewsAdd.aboveFooter", "Also show it just above the footer on every page", "A small strip with the button, right above the footer.") +
+      tf("reviewsAdd.footerText", "Text above that button", { ph: "Bought from us? Tell us how it went" }) +
       tf("reviewsAdd.title", "Window title", { ph: "Write a review" }) +
       tf("reviewsAdd.general", "Name shown when it is not for a shop product", { ph: "Custom order" }));
     G.shuffle = group("shuffle", "Reviews shuffle", "The reviews you starred are shown in a different order on every visit, with a little animation.",
@@ -2651,6 +2730,7 @@
 
     // ---- Look & motion ----
     G.look = group("look", "Spacing and corners", "Fine-tune spacing and roundness on the home page and product cards. Colors and fonts are not touched. The numbers below are today's look.",
+      sw("look.tight", "Tighter spacing: less empty space between home sections, around the order-guide bar and inside the stats boxes", "Quick fix for big gaps. The numbers below can still override it when “Use these values” is on.") +
       sw("look.on", "Use these values") +
       `<div class="row2">${tf("look.gap", "Space between products (px)", { type: "num", min: 0 })}${tf("look.sectionSpace", "Space between home sections (px)", { type: "num", min: 0 })}</div>` +
       `<div class="row2">${tf("look.cardRadius", "Card corners (px)", { type: "num", min: 0 })}${tf("look.panelRadius", "Big panel corners (px)", { type: "num", min: 0 })}</div>` +
@@ -2802,7 +2882,7 @@
     // ---- Sorted footer ----
     const fc = v("footer.columns") || [];
     G.footerpro = group("footerpro", "Sorted footer", "Replaces the footer with a dark footer: big line and button, link columns, “track your order”, local time, social icons and credits.",
-      sw("footer.on", "Use the sorted footer") + sw("footer.officialIcons", "Social icons in their own colours (Instagram, Facebook, TikTok) in the Follow column") + sw("footer.floatRight", "Back-to-top button goes to the bottom right, just above the WhatsApp button") + tf("footer.headline", "Big line", { area: true, rows: 2 }) + tf("footer.button", "Round button text (empty = hide)") +
+      sw("headerSocial.official", "Header icons in their own colours (Instagram pink, Facebook blue, WhatsApp green)") + sw("footer.on", "Use the sorted footer") + sw("footer.officialIcons", "Social icons in their own colours (Instagram, Facebook, WhatsApp, TikTok): the round icons in the footer and the Follow column of the sorted footer") + sw("footer.floatRight", "Back-to-top button goes to the bottom right, just above the WhatsApp button") + tf("footer.headline", "Big line", { area: true, rows: 2 }) + tf("footer.button", "Round button text (empty = hide)") +
       sw("footer.shopColumn", "Show a “Shop” column with your categories") + sw("footer.track", "Show the “Track your order” box (needs Order tracking on)") +
       `<div style="margin-top:8px">${fc.map((c, i) => `<div class="lrow"><div class="lrow-head"><b>Column ${i + 1}</b><span class="lrow-actions"><button type="button" class="move-btn" data-act="rm-fcol" data-idx="${i}" title="Remove">✕</button></span></div>
         <label>Title</label><input type="text" data-fcol="${i}" data-f="title" value="${esc(c.title || "")}" />
@@ -2957,6 +3037,12 @@
       b.productIds = (b.productIds || []).map(String).filter((x) => x !== el.value); if (el.checked) b.productIds.push(el.value);
       return;
     }
+    if (el.dataset.gid !== undefined) {
+      const ids = Array.isArray(S.games.puzzle.ids) ? S.games.puzzle.ids : (S.games.puzzle.ids = []);
+      const k = el.dataset.gid; const at = ids.indexOf(k);
+      if (el.checked && at < 0) ids.push(k); else if (!el.checked && at >= 0) ids.splice(at, 1);
+      return;
+    }
     if (el.dataset.list) {
       const list = getPath(S, el.dataset.list); const i = Number(el.dataset.idx);
       if (!list || !list[i]) return;
@@ -2975,6 +3061,7 @@
     if (path === "rotator.words" || path === "rotator.wordsUr") value = String(el.value).split(",").map((x) => x.trim()).filter(Boolean);
     setPath(S, path, value);
     if (path.startsWith("brand.colors.") && e.type === "change") renderSettings();
+    if (path === "games.puzzle.pick" && e.type === "change") renderSettings();
   }
   const pageRoot = document.querySelector("main.wrap");
   pageRoot.addEventListener("input", onSettingInput);
@@ -3007,8 +3094,8 @@
     if (act === "theme") { adminThemeKey = btn.dataset.key; applyTheme(); refreshDash(); return; }
     if (act === "go-shop") { goShop(); return; }
     if (!S) return;
-    const L = { bento: S.bento.items, link: S.footerLinks.links, bar: S.announcements.bars, ad: S.ads.items, slide: S.carousel.slides, gstep: S.guide.steps, bun: S.bundles.items, faq: S.faq.items, ipost: S.insta.posts };
-    const m = /^(up|down|rm)-(bento|link|bar|ad|slide|gstep|bun|faq|ipost)$/.exec(act);
+    const L = { bento: S.bento.items, link: S.footerLinks.links, bar: S.announcements.bars, ad: S.ads.items, slide: S.carousel.slides, gstep: S.guide.steps, bun: S.bundles.items, faq: S.faq.items, ipost: S.insta.posts, gprize: S.games.wheel.prizes };
+    const m = /^(up|down|rm)-(bento|link|bar|ad|slide|gstep|bun|faq|ipost|gprize)$/.exec(act);
     if (m) {
       const list = L[m[2]];
       if (m[1] === "rm") list.splice(i, 1); else swap(list, i, m[1] === "up" ? i - 1 : i + 1);
@@ -3018,6 +3105,7 @@
     else if (act === "add-bun") { S.bundles.items.push({ name: "", price: 0, productIds: [] }); renderSettings(); }
     else if (act === "add-faq") { S.faq.items.push({ q: "", a: "" }); renderSettings(); }
     else if (act === "add-ipost") { if (S.insta.posts.length < 6) S.insta.posts.push({ image: "", link: "" }); renderSettings(); }
+    else if (act === "add-gprize") { if (S.games.wheel.prizes.length < 10) S.games.wheel.prizes.push({ label: "", code: "", chance: "" }); renderSettings(); }
     else if (act === "add-xtra") { S.i18n.extra.push({ en: "", ur: "" }); renderSettings(); }
     else if (act === "rm-xtra") { S.i18n.extra.splice(i, 1); renderSettings(); }
     else if (act === "scan-xtra") { scanShopText(btn || e.target); }
@@ -3775,6 +3863,9 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
   let entryTab = "cost";
   const SALE_TYPES = [["whatsapp", "WhatsApp / phone order"], ["instagram", "Instagram / Facebook"], ["shop", "In person / in the shop"], ["custom", "Custom order"], ["other", "Other"]];
   let salesFrom = "", salesTo = "";
+  let repOff = new Set();      // report: cost types the owner un-ticked (everything is ticked by default)
+  let repOrders = true, repSales = true; // report: include website orders / sales added by hand
+  let lastReport = null;
   // Expenses (ads, product cost, delivery, …) are kept in the "expenses" collection (admins only).
   let expenses = []; let expUnsub = null; let expErr = "";
   const EXP_TYPES = [["ads", "Ads (Facebook / Instagram)"], ["product", "Product cost (yarn, stock)"], ["delivery", "Delivery / courier"], ["packaging", "Packaging"], ["tools", "Tools & equipment"], ["staff", "Helper / salary"], ["other", "Other"]];
@@ -3790,6 +3881,8 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     const now = new Date();
     if (salesRange === "custom") return salesFrom ? new Date(salesFrom + "T00:00:00").getTime() : 0;
     if (salesRange === "today") return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    if (salesRange === "week") { const d = new Date(now.getFullYear(), now.getMonth(), now.getDate()); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.getTime(); }
+    if (salesRange === "year") return new Date(now.getFullYear(), 0, 1).getTime();
     if (salesRange === "7d") return Date.now() - 7 * 864e5;
     if (salesRange === "30d") return Date.now() - 30 * 864e5;
     if (salesRange === "month") return new Date(now.getFullYear(), now.getMonth(), 1).getTime();
@@ -3819,9 +3912,21 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     const fmt = (n) => "Rs. " + Number(n).toLocaleString("en-PK");
     const net = total + addedTotal - expTotal;
     const margin = total + addedTotal > 0 ? Math.round((net / (total + addedTotal)) * 100) : 0;
-    const chips = [["today", "Today"], ["7d", "Last 7 days"], ["month", "This month"], ["30d", "Last 30 days"], ["all", "All time"], ["custom", "Pick dates"]];
+    const chips = [["today", "Today"], ["week", "This week"], ["7d", "Last 7 days"], ["month", "This month"], ["30d", "Last 30 days"], ["year", "This year"], ["all", "All time"], ["custom", "Pick dates"]];
     const label = (chips.find((c) => c[0] === salesRange) || [])[1].toLowerCase();
     const maxCh = Math.max(1, ...Object.values(byCh));
+    const rpCosts = exps.filter((e) => !repOff.has(e.type));
+    const rpSalesList = repSales ? addedSales : [];
+    const rpDone = repOrders ? done : [];
+    const rpIn = rpDone.reduce((n, o) => n + (Number(o.total) || 0), 0) + rpSalesList.reduce((n, e) => n + (Number(e.amount) || 0), 0);
+    const rpOut = rpCosts.reduce((n, e) => n + (Number(e.amount) || 0), 0);
+    const rpNet = rpIn - rpOut;
+    const dstr = (t) => new Date(t).toISOString().slice(0, 10);
+    lastReport = { label, from, upto, rows: [
+      ...rpDone.map((o) => ({ date: dstr(tsMs(o.doneAt) || tsMs(o.createdAt)), kind: "Order", what: "Order " + (o.orderNo || o.id.slice(0, 6)) + " · " + ((o.customer || {}).name || ""), note: (o.items || []).map((i) => i.name + " ×" + (i.qty || 1)).join(", "), amount: Number(o.total) || 0 })),
+      ...rpSalesList.map((e) => ({ date: e.date, kind: "Sale", what: entryLabel(e), note: e.note || "", amount: Number(e.amount) || 0 })),
+      ...rpCosts.map((e) => ({ date: e.date, kind: "Cost", what: entryLabel(e), note: e.note || "", amount: -(Number(e.amount) || 0) })),
+    ].sort((a, b) => String(b.date).localeCompare(String(a.date))), rpIn, rpOut, rpNet };
     pane.innerHTML = `<div class="card"><h2>Sales</h2>
       <p class="hint">Only orders you moved to <b>Done</b> are counted here. New and open orders, cancelled orders and your own test orders are never added. <b>Test order?</b> Cancel it instead of moving it to Done.</p>
       <div class="chips">${chips.map(([k, l]) => `<button type="button" class="chip ${k === salesRange ? "active" : ""}" data-sales="${k}">${l}</button>`).join("")}</div>
@@ -3843,6 +3948,20 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
       </div>
       ${Object.keys(byType).length ? `<h3 class="sub-h">Where the money went</h3>` + Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div class="bar-row"><span>${esc(expLabel(k))}</span><div class="bar"><i style="width:${Math.round((v / Math.max(1, expTotal)) * 100)}%"></i></div><b>${fmt(v)}</b></div>`).join("") : ""}
     </div>
+    <div class="card"><h2>Report <span class="hint" style="font-weight:400">· ${label}</span></h2>
+      <p class="hint">Pick what goes into the report. Only costs that really exist in this period are listed, so nothing empty appears. Change the period with the buttons at the top.</p>
+      <div class="rep-chips">
+        <label class="rep-chip"><input type="checkbox" data-rep="orders" ${repOrders ? "checked" : ""} /> Website orders (done)</label>
+        ${addedSales.length ? `<label class="rep-chip"><input type="checkbox" data-rep="sales" ${repSales ? "checked" : ""} /> Sales I added</label>` : ""}
+        ${Object.keys(byType).map((k) => `<label class="rep-chip cost"><input type="checkbox" data-rep-type="${esc(k)}" ${repOff.has(k) ? "" : "checked"} /> ${esc(expLabel(k))} · ${fmt(byType[k])}</label>`).join("")}
+      </div>
+      <div class="money-grid" style="margin-top:12px">
+        <div class="money in"><span>Money in</span><b>${fmt(rpIn)}</b><small>in this report</small></div>
+        <div class="money out"><span>Money out</span><b>${fmt(rpOut)}</b><small>${rpCosts.length} cost${rpCosts.length === 1 ? "" : "s"}</small></div>
+        <div class="money ${rpNet < 0 ? "loss" : "gain"}"><span>${rpNet < 0 ? "Loss" : "Profit"}</span><b>${fmt(rpNet)}</b><small>${rpIn ? Math.round(rpNet / rpIn * 100) + "% of money in" : "nothing to show"}</small></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button type="button" class="btn" data-act="rep-html">⬇ Download interactive report</button><button type="button" class="btn secondary" data-act="rep-csv">⬇ Download as spreadsheet (CSV)</button></div>
+    </div>
     <div class="card"><h2>Add to your books</h2>
       <p class="hint">Costs are what you spent. Sales are money you got outside the website (for example a WhatsApp or custom order you did not enter as an order).</p>
       <div class="entry-tabs" role="tablist">
@@ -3859,7 +3978,34 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     ${done.length ? `<div class="card"><h2>By channel</h2>${Object.entries(byCh).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div class="bar-row"><span>${esc(channelLabel(k))}</span><div class="bar"><i style="width:${Math.round(v / maxCh * 100)}%"></i></div><b>${fmt(v)}</b></div>`).join("")}</div>
     <div class="card"><h2>Best sellers</h2>${topRows.map(([n, r]) => `<div class="bar-row"><span>${esc(n)}</span><span class="hint" style="margin:0">× ${r.q}</span><b>${fmt(r.rs)}</b></div>`).join("")}</div>` : ""}`;
   }
+  function reportHtml(R) {
+    const data = JSON.stringify({ shop: "Twist & Tangle Crochet", label: R.label, rows: R.rows, rpIn: R.rpIn, rpOut: R.rpOut, rpNet: R.rpNet, made: new Date().toISOString().slice(0, 10) }).replace(/</g, "\\u003c");
+    return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sales report</title><style>
+body{font-family:system-ui,sans-serif;margin:0;background:#F6F2FA;color:#2B2433}.w{max-width:900px;margin:0 auto;padding:18px 16px 40px}h1{margin:0 0 2px;font-size:22px}.sub{color:#6c6475;margin:0 0 16px;font-size:13px}
+.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.k div{background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 1px 3px #0001}.k span{font-size:12px;color:#6c6475}.k b{display:block;font-size:20px;margin-top:4px}
+.in b{color:#1B7A43}.out b{color:#B3261E}.bars{background:#fff;border-radius:14px;padding:14px;margin:14px 0;box-shadow:0 1px 3px #0001}.br{display:grid;grid-template-columns:130px 1fr auto;gap:8px;align-items:center;margin:6px 0;font-size:13px;cursor:pointer}.br i{display:block;height:12px;border-radius:7px;background:#7B5EA7}.br.c i{background:#C0504D}.br:hover i{filter:brightness(1.15)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tools button,.tools input{font:inherit;padding:8px 12px;border-radius:999px;border:1px solid #cdbfe0;background:#fff}.tools button.on{background:#7B5EA7;color:#fff;border-color:#7B5EA7}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;font-size:13px}th,td{padding:9px 10px;text-align:left;border-bottom:1px solid #eee}th{cursor:pointer;background:#EFE8F7}td.a{text-align:right;white-space:nowrap}.pos{color:#1B7A43}.neg{color:#B3261E}.wrap{overflow-x:auto}</style></head><body><div class="w">
+<h1>Sales report</h1><p class="sub" id="sub"></p><div class="k" id="k"></div><div class="bars" id="bars"></div>
+<div class="tools"><button data-f="all" class="on">All</button><button data-f="Order">Orders</button><button data-f="Sale">Sales</button><button data-f="Cost">Costs</button><input id="q" placeholder="Search…"></div>
+<div class="wrap"><table><thead><tr><th data-s="date">Date ↕</th><th data-s="kind">Type ↕</th><th data-s="what">What ↕</th><th>Note</th><th data-s="amount" style="text-align:right">Amount ↕</th></tr></thead><tbody id="tb"></tbody></table></div></div>
+<script>var D=${data},f="all",q="",sk="date",sd=-1;function m(n){return (n<0?"− ":"")+"Rs. "+Math.abs(n).toLocaleString("en-PK")}
+function e(t){var d=document.createElement("div");d.textContent=t==null?"":t;return d.innerHTML}
+document.getElementById("sub").textContent=D.shop+" · "+D.label+" · made "+D.made;
+document.getElementById("k").innerHTML='<div class="in"><span>Money in</span><b>'+m(D.rpIn)+'</b></div><div class="out"><span>Money out</span><b>'+m(D.rpOut)+'</b></div><div><span>'+(D.rpNet<0?"Loss":"Profit")+'</span><b class="'+(D.rpNet<0?"neg":"pos")+'">'+m(D.rpNet)+'</b></div><div><span>Entries</span><b>'+D.rows.length+'</b></div>';
+var g={};D.rows.forEach(function(r){var k=r.kind+"|"+r.what.replace(/ · .*/,"").replace(/^Order .*/,"Website orders");g[k]=(g[k]||0)+r.amount});var mx=Math.max.apply(null,Object.values(g).map(Math.abs).concat([1]));
+document.getElementById("bars").innerHTML="<b>Where it came from / went (tap a bar to filter)</b>"+Object.keys(g).sort(function(a,b){return Math.abs(g[b])-Math.abs(g[a])}).map(function(k){var p=k.split("|");return '<div class="br '+(g[k]<0?"c":"")+'" data-k="'+e(p[0])+'"><span>'+e(p[1])+'</span><i style="width:'+Math.round(Math.abs(g[k])/mx*100)+'%"></i><b>'+m(g[k])+'</b></div>'}).join("");
+function draw(){var r=D.rows.filter(function(x){return(f=="all"||x.kind==f)&&(!q||(x.what+" "+x.note+" "+x.date).toLowerCase().indexOf(q)>-1)}).sort(function(a,b){var A=a[sk],B=b[sk];return(A>B?1:A<B?-1:0)*sd});
+document.getElementById("tb").innerHTML=r.map(function(x){return"<tr><td>"+e(x.date)+"</td><td>"+e(x.kind)+"</td><td>"+e(x.what)+"</td><td>"+e(x.note)+'</td><td class="a '+(x.amount<0?"neg":"pos")+'">'+m(x.amount)+"</td></tr>"}).join("")||'<tr><td colspan="5">Nothing here.</td></tr>'}
+document.querySelectorAll(".tools button").forEach(function(b){b.onclick=function(){f=b.dataset.f;document.querySelectorAll(".tools button").forEach(function(x){x.classList.toggle("on",x==b)});draw()}});
+document.getElementById("q").oninput=function(){q=this.value.toLowerCase();draw()};
+document.querySelectorAll("th[data-s]").forEach(function(h){h.onclick=function(){sd=sk==h.dataset.s?-sd:-1;sk=h.dataset.s;draw()}});
+document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".br");if(!b)return;f=b.dataset.k;document.querySelectorAll(".tools button").forEach(function(x){x.classList.toggle("on",x.dataset.f==f)});draw()};draw();<\/script></body></html>`;
+  }
   pageRoot.addEventListener("click", (e) => {
+    const rb = e.target.closest("[data-act]");
+    if (rb && rb.dataset.act === "rep-html" && lastReport) { downloadFile("TTC-report-" + new Date().toISOString().slice(0, 10) + ".html", reportHtml(lastReport), "text/html;charset=utf-8"); return; }
+    if (rb && rb.dataset.act === "rep-csv" && lastReport) { downloadFile("TTC-report-" + new Date().toISOString().slice(0, 10) + ".csv", "\ufeff" + ["Date,Type,What,Note,Amount"].concat(lastReport.rows.map((r) => [r.date, r.kind, r.what, r.note, r.amount].map(csvCell).join(","))).join("\n"), "text/csv;charset=utf-8"); return; }
     const b = e.target.closest("[data-sales]"); if (b) { salesRange = b.dataset.sales; renderSales(); return; }
     const tab = e.target.closest("[data-entry-tab]"); if (tab) { entryTab = tab.dataset.entryTab; renderSales(); return; }
     const del = e.target.closest("[data-ex-del]");
@@ -3872,6 +4018,9 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     }
   });
   pageRoot.addEventListener("change", (e) => {
+    if (e.target.dataset && e.target.dataset.rep === "orders") { repOrders = e.target.checked; renderSales(); return; }
+    if (e.target.dataset && e.target.dataset.rep === "sales") { repSales = e.target.checked; renderSales(); return; }
+    if (e.target.dataset && e.target.dataset.repType) { if (e.target.checked) repOff.delete(e.target.dataset.repType); else repOff.add(e.target.dataset.repType); renderSales(); return; }
     if (e.target.id === "sales_from") { salesFrom = e.target.value; renderSales(); }
     else if (e.target.id === "sales_to") { salesTo = e.target.value; renderSales(); }
   });
