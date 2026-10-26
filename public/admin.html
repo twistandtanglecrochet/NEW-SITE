@@ -315,7 +315,9 @@
   .msg { font-size: 13px; margin-top: 10px; }
   .msg.error { color: #C0392B; }
   .msg.success { color: #2E7D32; }
-  .hidden { display: none !important; }
+  .hidden, .role-hide { display: none !important; }
+  .role-badge { background: #FBF0D4; color: #6B4E10; border: 1px solid #E8CF8C; border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 700; }
+  .role-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #3F1220; color: #fff; padding: 10px 18px; border-radius: 12px; font-size: 14px; z-index: 9999; max-width: 90vw; }
   .swatchrow { display: flex; gap: 10px; align-items: center; }
   .swatchrow input[type="color"] { width: 44px; height: 36px; border: none; padding: 0; border-radius: 6px; background: none; }
   .qr-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; margin-top: 14px; }
@@ -397,7 +399,7 @@
   .settings-pane .card + .card { margin-top: 16px; }
   #productFilter, #priceFilter { width: 100%; box-sizing: border-box; margin-bottom: 4px; padding: 10px 14px; border-radius: 10px; border: 1px solid #E4D8CE; font: inherit; }
   .ptable { border: 1px solid #E8DDD3; border-radius: 14px; overflow: hidden; margin: 10px 0 14px; }
-  .prow { display: grid; grid-template-columns: 1fr 120px 160px; gap: 10px; align-items: center; padding: 10px 14px; border-top: 1px solid #EFE6DD; }
+  .prow { display: grid; grid-template-columns: 1fr 120px 160px 90px; gap: 10px; align-items: center; padding: 10px 14px; border-top: 1px solid #EFE6DD; }
   .prow.head { border-top: none; background: var(--bg-soft); font-size: 12px; font-weight: 700; color: #5A5048; }
   .prow.changed { background: #FFF6CC; }
   .prow img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; }
@@ -490,7 +492,8 @@
     main, .content { padding-bottom: 90px; }
   }
   .savebar { position: sticky; bottom: 8px; display: flex; gap: 12px; align-items: center; background: #fff; border-radius: 14px; padding: 10px 14px; box-shadow: 0 4px 18px rgba(63,18,32,.15); }
-  @media (max-width: 760px) { .prow { grid-template-columns: 1fr 96px; } .prow select { grid-column: 1 / -1; } .prow.head span:last-child { display: none; } }
+  @media (max-width: 760px) { .prow { grid-template-columns: 1fr 96px 80px; } .prow select { grid-column: 1 / -1; } .prow.head span:nth-child(3) { display: none; } }
+  .prow .low { outline: 2px solid #E0A100; background: #FFF6CC; }
   .rep-chips { display:flex; flex-wrap:wrap; gap:8px; }
   .rep-chip { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border:1.5px solid var(--line, #d9cfe6); border-radius:999px; font-size:13px; cursor:pointer; background:#fff; }
   .rep-chip.cost { border-color:#E8B9B6; }
@@ -560,7 +563,9 @@
     <a class="brand" id="brandLink" href="/" title="Back to the shop">TTC Admin</a>
     <a class="signout" id="viewShop" href="/?preview=1" target="_blank" rel="noopener" title="Open the shop in a new tab">View shop ↗</a>
     <button type="button" class="signout" id="skinBtn" title="Switch between the Classic and New look of this admin panel">New look</button>
+    <span class="role-badge hidden" id="roleBadge"></span>
     <button type="button" class="signout" id="signOutBtn">Sign out</button>
+    <div class="role-toast hidden" id="roleToast" role="alert"></div>
   </header>
   <div class="order-alert hidden" id="orderAlert" role="alert">
     <span class="order-alert-dot" aria-hidden="true"></span>
@@ -712,6 +717,7 @@
       <input type="search" id="priceFilter" placeholder="Filter products" aria-label="Filter products" />
       <div class="ptable" id="priceTable"></div>
       <div class="savebar"><button type="button" class="btn" id="priceSave" disabled>Save changes</button><span class="hint" id="priceMsg" style="margin:0">Tag “Sold Out” shows the Sold Out badge on the shop.</span></div>
+      <p class="hint" style="margin-top:10px">Stock is optional and only for you (customers don't see it). Warn me on the dashboard when a product has <input type="number" min="0" id="lowLevel" style="width:70px;display:inline-block" /> or fewer left.</p>
     </div>
     </section>
 
@@ -908,9 +914,34 @@
     getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDoc, setDoc, runTransaction,
+    getFirestore, collection, addDoc as _addDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc, doc, getDoc, setDoc as _setDoc, runTransaction as _runTransaction,
     onSnapshot, query, orderBy, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ---- access levels (Tools → Admin list) ----
+  // owner = everything (the e-mails listed in ADMIN_EMAILS below, and anyone in the list left on "Owner").
+  // editor = products, orders, reviews, promos, sales (cannot change the website look/settings, backup or the admin list).
+  // viewer = can look at orders, products, reviews and sales, but cannot change anything.
+  let role = "owner";
+  const ROLE_VIEWS = {
+    editor: ["dashboard", "orders", "neworder", "promos", "add", "products", "prices", "import", "reviews", "manageReviews", "sales", "customers", "links"],
+    viewer: ["dashboard", "orders", "products", "reviews", "manageReviews", "sales", "links"],
+  };
+  function guardWrite(ref) {
+    if (role === "owner") return;
+    if (role === "viewer") throw new Error("View-only access: you can look, but not change anything.");
+    let path = ""; try { path = (ref && ref.path) || ""; } catch (e) {}
+    if (/^config\/(siteSettings|admins)/.test(path)) throw new Error("Your access level cannot change this.");
+  }
+  const addDoc = (...a) => { try { guardWrite(a[0]); } catch (e) { return Promise.reject(e); } return _addDoc(...a); };
+  const updateDoc = (...a) => { try { guardWrite(a[0]); } catch (e) { return Promise.reject(e); } return _updateDoc(...a); };
+  const deleteDoc = (...a) => { try { guardWrite(a[0]); } catch (e) { return Promise.reject(e); } return _deleteDoc(...a); };
+  const setDoc = (...a) => { try { guardWrite(a[0]); } catch (e) { return Promise.reject(e); } return _setDoc(...a); };
+  const runTransaction = (...a) => { if (role === "viewer") return Promise.reject(new Error("View-only access: you can look, but not change anything.")); return _runTransaction(...a); };
+  window.addEventListener("unhandledrejection", (ev) => {
+    const m = ev && ev.reason && ev.reason.message;
+    if (m && /View-only access|cannot change this/.test(m)) { ev.preventDefault(); const t = document.getElementById("roleToast"); if (t) { t.textContent = m; t.classList.remove("hidden"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.add("hidden"), 4000); } }
+  });
 
   const firebaseConfig = {
     apiKey: "AIzaSyDWU7UDR7Q0s9k1ZAfdiqmoupKoOAVHuC8",
@@ -999,14 +1030,38 @@
   // owner has added them under Tools → Admin list (saved in config/admins;
   // the Firestore rules only let listed admins read that document).
   let isOwner = false;
-  async function isListedAdmin(email) {
+  // Returns null (not on the list) or the person's level: "owner" (default, as before), "editor" or "viewer".
+  async function listedLevel(email) {
     try {
       const snap = await getDoc(doc(db, "config", "admins"));
-      const emails = (snap.exists() && Array.isArray(snap.data().emails)) ? snap.data().emails : [];
-      return emails.map((e) => String(e).toLowerCase()).includes(String(email).toLowerCase());
+      const d = snap.exists() ? snap.data() : {};
+      const emails = Array.isArray(d.emails) ? d.emails : [];
+      const em = String(email).toLowerCase();
+      if (!emails.map((e) => String(e).toLowerCase()).includes(em)) return null;
+      const lv = d.levels && d.levels[em];
+      return lv === "editor" || lv === "viewer" ? lv : "owner";
     } catch (e) {
-      return false; // permission denied = not on the list
+      return null; // permission denied = not on the list
     }
+  }
+
+  function applyRole() {
+    document.body.classList.toggle("role-viewer", role === "viewer");
+    document.body.classList.toggle("role-editor", role === "editor");
+    const ok = ROLE_VIEWS[role];
+    const sb = document.getElementById("sidebar");
+    if (sb) {
+      sb.querySelectorAll(".nav-item[data-view]").forEach((b) => b.classList.toggle("role-hide", !!ok && !ok.includes(b.getAttribute("data-view"))));
+      let group = null, any = false;
+      const fin = () => { if (group) group.classList.toggle("role-hide", !!ok && !any); };
+      sb.querySelectorAll(".nav-group, .nav-item[data-view]").forEach((el) => {
+        if (el.classList.contains("nav-group")) { fin(); group = el; any = false; }
+        else if (!el.classList.contains("role-hide")) any = true;
+      });
+      fin();
+    }
+    const who = document.getElementById("roleBadge");
+    if (who) { who.textContent = role === "viewer" ? "View only" : role === "editor" ? "Editor" : ""; who.classList.toggle("hidden", role === "owner"); }
   }
 
   onAuthStateChanged(auth, async (user) => {
@@ -1015,10 +1070,10 @@
       return;
     }
     isOwner = ADMIN_EMAILS.includes(user.email);
-    if (!isOwner && !(await isListedAdmin(user.email))) {
-      showOnly(notAllowedEl);
-      return;
-    }
+    let lv = null;
+    if (!isOwner) { lv = await listedLevel(user.email); if (!lv) { showOnly(notAllowedEl); return; } }
+    role = isOwner ? "owner" : lv;
+    applyRole();
     showOnly(appEl);
     loadSettings();
     startProductListener();
@@ -1037,7 +1092,7 @@
   const viewStack = [];     // pages visited before this one (for the Back button)
   let alertsReady = false; // set once the alert code below has loaded
   function showView(name, opts = {}) {
-    if (!VIEWS.includes(name)) name = "dashboard";
+    if (!VIEWS.includes(name) || (ROLE_VIEWS[role] && !ROLE_VIEWS[role].includes(name))) name = "dashboard";
     if (!opts.initial && !opts.fromBack && !opts.fromPop && name !== currentView) {
       viewStack.push(currentView);
       if (viewStack.length > 40) viewStack.shift();
@@ -1818,6 +1873,7 @@
   // ---- admin list (config/admins) ----
   const adminsRef = doc(db, "config", "admins");
   let extraAdmins = [];
+  let adminLevels = {};
   let adminUnsub = null;
 
   function startAdminListListener() {
@@ -1826,6 +1882,7 @@
       adminsRef,
       (snap) => {
         extraAdmins = (snap.exists() && Array.isArray(snap.data().emails)) ? snap.data().emails : [];
+        adminLevels = (snap.exists() && snap.data().levels && typeof snap.data().levels === "object") ? snap.data().levels : {};
         renderAdmins();
       },
       (err) => {
@@ -1838,21 +1895,30 @@
 
   function renderAdmins() {
     const owners = ADMIN_EMAILS.map((e) => `<div class="admin-row"><span>${escapeHtml(e)}</span><span class="owner">Owner</span></div>`);
-    const others = extraAdmins.map((e) => `<div class="admin-row"><span>${escapeHtml(e)}</span>${isOwner ? `<button type="button" data-admin-remove="${escapeHtml(e)}">Remove</button>` : ""}</div>`);
+    const lvOf = (e) => { const v = adminLevels[String(e).toLowerCase()]; return v === "editor" || v === "viewer" ? v : "owner"; };
+    const others = extraAdmins.map((e) => `<div class="admin-row"><span>${escapeHtml(e)}</span>${isOwner ? `<select data-admin-level="${escapeHtml(e)}" title="What this person can do"><option value="owner"${lvOf(e) === "owner" ? " selected" : ""}>Owner (everything)</option><option value="editor"${lvOf(e) === "editor" ? " selected" : ""}>Editor (products, orders, reviews)</option><option value="viewer"${lvOf(e) === "viewer" ? " selected" : ""}>Viewer (look only)</option></select><button type="button" data-admin-remove="${escapeHtml(e)}">Remove</button>` : `<span class="owner">${lvOf(e) === "owner" ? "Owner" : lvOf(e) === "editor" ? "Editor" : "Viewer"}</span>`}</div>`);
     $("adminList").innerHTML = owners.concat(others).join("");
     $("adminAddRow").classList.toggle("hidden", !isOwner);
+    $("adminList").querySelectorAll("[data-admin-level]").forEach((sel) =>
+      sel.addEventListener("change", () => {
+        const email = sel.getAttribute("data-admin-level").toLowerCase();
+        const levels = { ...adminLevels };
+        if (sel.value === "owner") delete levels[email]; else levels[email] = sel.value;
+        saveAdmins(extraAdmins, levels);
+      })
+    );
     $("adminList").querySelectorAll("[data-admin-remove]").forEach((btn) =>
       btn.addEventListener("click", () => {
         const email = btn.getAttribute("data-admin-remove");
         if (!confirm("Remove " + email + " as an admin?")) return;
-        saveAdmins(extraAdmins.filter((e) => e !== email));
+        saveAdmins(extraAdmins.filter((e) => e !== email), (() => { const l = { ...adminLevels }; delete l[String(email).toLowerCase()]; return l; })());
       })
     );
   }
 
-  async function saveAdmins(emails) {
+  async function saveAdmins(emails, levels) {
     try {
-      await setDoc(adminsRef, { emails });
+      await setDoc(adminsRef, { emails, levels: levels || adminLevels || {} });
       $("adminMsg").className = "msg success";
       $("adminMsg").textContent = "Admin list saved.";
     } catch (e) {
@@ -2081,7 +2147,7 @@
       const div = document.createElement("div");
       div.className = "thumb-item" + (i === 0 ? " is-main" : "");
       div.innerHTML = `
-        <img src="${src}" alt="" />
+        <img src="${escapeHtml(src)}" alt="" />
         <button type="button" class="star-btn" title="Make main photo">${i === 0 ? "★" : "☆"}</button>
         <button type="button" class="remove-btn" title="Remove">×</button>
         <div class="item-label${i === 0 ? " main" : ""}">${i === 0 ? "Main" : ""}</div>
@@ -2142,7 +2208,7 @@
       const div = document.createElement("div");
       div.className = "thumb-item";
       div.innerHTML = `
-        <img src="${src}" alt="" />
+        <img src="${escapeHtml(src)}" alt="" />
         <button type="button" class="remove-btn" title="Remove">×</button>
         <div class="item-label">${escapeHtml(item.name)}</div>
       `;
@@ -2432,7 +2498,7 @@
     ["maintenance.on", "Maintenance page", "shopinfo"], ["announcements.on", "Announcement bars", "announce"],
     ["carousel.on", "Homepage carousel", "carousel"], ["ads.on", "Ads", "ads"],
     ["heroReveal.on", "Heading reveal", "hero"], ["rotator.on", "Word rotator", "hero"],
-    ["reviewsShuffle.on", "Reviews shuffle", "homesections"], ["reviewsAdd.on", "Write a review button", "homesections"], ["reviewsMore.on", "Reviews: Explore more", "homesections"], ["categoryTiles.on", "Category tiles", "homesections"],
+    ["reviewsShuffle.on", "Reviews shuffle", "homesections"], ["reviewsAdd.on", "Write a review button", "homesections"], ["reviewsMore.on", "Reviews: Explore more", "homesections"], ["categoryTiles.on", "Category tiles", "homesections"], ["categoryTiles.compact", "Smaller category tiles on phones", "homesections"],
     ["bento.on", "Stats boxes", "homesections"], ["visit.on", "Visit-store", "homesections"], ["games.on", "Get Fun games", "games"], ["sections.on", "Custom section order", "homesections"], ["look.tight", "Tighter spacing", "look"], ["access.contrast", "Easier-to-read text", "speed"], ["access.touch", "Bigger dot tap area", "speed"],
     ["cardLayout.on", "Card design", "cards"], ["priceFilter.on", "Price filter", "cards"], ["wishlist.on", "Wishlist", "cards"],
     ["recent.on", "Recently viewed", "cards"], ["exploreMore.on", "Explore more", "cards"],
@@ -2441,7 +2507,7 @@
     ["look.on", "Custom spacing & corners", "look"], ["motion.sections.on", "Scroll reveal", "look"], ["motion.cards.on", "Card motion", "look"], ["motion.overlays.on", "Cart & pop-up motion", "look"],
     ["brand.on", "Look & brand", "brand"], ["footer.on", "Sorted footer", "footer"], ["footerLinks.on", "Footer links", "footer"], ["designedBy.on", "Designed-by credit", "footer"], ["i18n.on", "Urdu / English", "i18n"],
     ["freeDelivery.on", "Free-delivery bar", "shopinfo"], ["timings.on", "Shop timings", "shopinfo"],
-    ["checkout.betterForm", "Better order form", "orderflow"], ["checkout.whatsappAuto", "WhatsApp after order", "orderflow"], ["tracking.on", "Order tracking", "orderflow"], ["orders.numeric", "Numeric order numbers", "orderflow"], ["myOrders.on", "My orders", "orderflow"], ["search.suggest", "Search suggestions", "cards"], ["productPage.full", "Full product page", "productpage"], ["speed.srcset", "Smaller photos", "speed"], ["speed.apiShop", "Fast shop data", "speed"], ["speed.sw", "Offline mode", "speed"],
+    ["checkout.betterForm", "Better order form", "orderflow"], ["checkout.strict", "Strict order checks", "orderflow"], ["checkout.whatsappAuto", "WhatsApp after order", "orderflow"], ["tracking.on", "Order tracking", "orderflow"], ["orders.numeric", "Numeric order numbers", "orderflow"], ["myOrders.on", "My orders", "orderflow"], ["search.suggest", "Search suggestions", "cards"], ["productPage.full", "Full product page", "productpage"], ["speed.srcset", "Smaller photos", "speed"], ["speed.apiShop", "Fast shop data", "speed"], ["speed.sw", "Offline mode", "speed"],
     ["pwa.install", "Install button", "speed"], ["pwa.safeArea", "Notch padding", "speed"],
     ["speed.lcp", "First photo first", "speed"], ["speed.boot", "Quick loading screen", "speed"], ["speed.noLive", "Load shop data once", "speed"], ["speed.cv", "Skip drawing footer", "speed"],
     ["speed.lightMotion", "Lighter motion on phones", "speed"], ["speed.resizeUploads", "Shrink uploads", "speed"], ["orders.slipWA", "Approve & send slip", "orderflow"],
@@ -2685,7 +2751,7 @@
       tf("reviewsShuffle.every", "Reshuffle every (seconds)", { type: "num", min: 3 }) +
       sw("reviewsShuffle.button", "Show a “Shuffle reviews” button"));
     G.tiles = group("tiles", "Category tiles", "Picture tiles on the home page, one per category. Tapping a tile opens that category's page.",
-      sw("categoryTiles.on", "Show category tiles") + tf("categoryTiles.title", "Heading"));
+      sw("categoryTiles.on", "Show category tiles") + sw("categoryTiles.compact", "Smaller tiles on phones (3 in a row, smaller heading)") + tf("categoryTiles.title", "Heading"));
     const bentoRows = (v("bento.items") || []).map((it, i) => `
       <div class="srow" style="grid-template-columns: 90px 64px 1fr auto;">
         <input type="number" data-list="bento.items" data-idx="${i}" data-prop="value" data-type="num" value="${esc(it.value)}" aria-label="Number" />
@@ -2839,6 +2905,7 @@
       `<button type="button" class="btn secondary" data-act="add-xtra" style="margin-top:6px">+ Add text</button> <button type="button" class="btn secondary" data-act="scan-xtra" style="margin-top:6px">🔍 Scan shop for missing text</button><p class="hint" id="scanNote"></p>`);
     G.checkoutf = group("checkoutf", "Order form & WhatsApp", "Make the order form stricter and send the customer to WhatsApp after the thank-you screen.",
       sw("checkout.betterForm", "Better order form (first + last name, full address, city, postal code, email, “save for next time”)", "An order is only placed when the details are correct, so you get fewer wrong orders.") +
+      sw("checkout.strict", "Strict checks (needs “Better order form” ON): real mobile prefix only, a city picked from a searchable list, a proper name and a full address with a house number", "Fake numbers like 03000000000 or 0312 3456789, one-word names, made-up addresses and cities that are not on the list cannot be ordered. If a customer's city is missing they can choose “My city is not listed”.") +
       sw("checkout.whatsappAuto", "After “Order placed”, open WhatsApp by itself with the order already written") +
       tf("checkout.whatsappDelay", "Seconds before WhatsApp opens", { type: "num", min: 1 }) +
       sw("checkout.giftNote", "Gift note box in the order form (printed in the order notes)"));
@@ -3335,7 +3402,7 @@
       ${(() => {
         const old = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled" && tsMs(o.createdAt) && Date.now() - tsMs(o.createdAt) > 3 * 864e5).length;
         const noTrack = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled" && !(o.tracking && o.tracking.stage)).length;
-        const items = [[fresh, "new orders to confirm", "orders"], [noTrack, "open orders without a tracking step", "orders"], [old, "orders open for more than 3 days", "orders"], [pending, "reviews waiting for approval", "reviews"]].filter((x) => x[0] > 0);
+        const items = [[fresh, "new orders to confirm", "orders"], [noTrack, "open orders without a tracking step", "orders"], [old, "orders open for more than 3 days", "orders"], [pending, "reviews waiting for approval", "reviews"], [lowStockList().length, "products running low on stock (Prices & tags → Stock)", "prices"]].filter((x) => x[0] > 0);
         return `<div class="card"><h2>Today's work</h2>${items.length ? items.map(([n, l, v]) => `<button type="button" class="pill" data-act="goto" data-view="${v}" style="margin:0 8px 8px 0"><b>${n}</b> ${l} →</button>`).join("") : '<p class="hint" style="margin:0">All caught up ✓ Nothing is waiting for you.</p>'}</div>`;
       })()}
       <div class="card"><h2>Switched on in the shop</h2>
@@ -3439,7 +3506,7 @@
     let out = "", group = "", n = 0, open = false;
     document.querySelectorAll("#sidebar .nav-group, #sidebar .nav-item[data-view]").forEach((el) => {
       if (el.classList.contains("nav-group")) { if (open) out += "</div>"; group = el.textContent.trim(); out += `<div class="app-tiles-h">${esc(group)}</div><div class="app-tiles">`; open = true; return; }
-      const view = el.getAttribute("data-view"); if (view === "dashboard") return;
+      const view = el.getAttribute("data-view"); if (view === "dashboard" || el.classList.contains("role-hide")) return;
       const label = (el.querySelector(".nav-label") || {}).textContent || view;
       const ic = el.querySelector(".nav-ic"); const bd = el.querySelector(".nav-badge");
       const count = bd && !bd.classList.contains("hidden") && bd.textContent.trim() && bd.textContent.trim() !== "0" ? bd.textContent.trim() : "";
@@ -3721,7 +3788,7 @@ var slip=document.getElementById("slip");
 document.querySelectorAll("[data-sz]").forEach(function(b){b.onclick=function(){document.querySelectorAll("[data-sz]").forEach(function(x){x.classList.remove("on")});b.classList.add("on");slip.className="slip "+b.dataset.sz+(slip.classList.contains("nophotos")?" nophotos":"")+(slip.classList.contains("noprices")?" noprices":"")}});
 document.getElementById("cp").onchange=function(){slip.classList.toggle("nophotos",!this.checked)};
 document.getElementById("cr").onchange=function(){slip.classList.toggle("noprices",!this.checked)};
-document.getElementById("cc").onclick=function(){var t=${JSON.stringify([c.name, c.phone, addr].filter(Boolean).join("\n"))};var b=this;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent="Copied ✓"}).catch(function(){b.textContent="Copy not allowed"})};
+document.getElementById("cc").onclick=function(){var t=${JSON.stringify([c.name, c.phone, addr].filter(Boolean).join("\n")).replace(/</g, "\\u003c")};var b=this;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent="Copied ✓"}).catch(function(){b.textContent="Copy not allowed"})};
 document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick");r.title="Tap to tick off while packing";r.onclick=function(){r.classList.toggle("done")}});
 <\/script></body></html>`;
     const w = window.open("", "_blank"); if (!w) { alert("Please allow pop-ups to print."); return; }
@@ -3915,6 +3982,19 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     const chips = [["today", "Today"], ["week", "This week"], ["7d", "Last 7 days"], ["month", "This month"], ["30d", "Last 30 days"], ["year", "This year"], ["all", "All time"], ["custom", "Pick dates"]];
     const label = (chips.find((c) => c[0] === salesRange) || [])[1].toLowerCase();
     const maxCh = Math.max(1, ...Object.values(byCh));
+    // Compare with the period of the same length just before this one (not for "All time").
+    let cmpHtml = "";
+    if (from > 0) {
+      const end = Math.min(upto === Infinity ? Date.now() : upto, Date.now());
+      const len = Math.max(864e5, end - from);
+      const pFrom = from - len, pTo = from - 1;
+      const prevDone = currentOrders.filter((o) => { const t = tsMs(o.doneAt) || tsMs(o.createdAt); return o.status === "done" && t >= pFrom && t <= pTo; });
+      const prevTotal = prevDone.reduce((n, o) => n + (Number(o.total) || 0), 0);
+      const diff = total - prevTotal;
+      const pct = prevTotal > 0 ? Math.round((diff / prevTotal) * 100) : null;
+      const col = diff > 0 ? "#2E7D32" : diff < 0 ? "#B3261E" : "#7A6E64";
+      cmpHtml = `<p class="hint" style="margin:10px 0 0"><b style="color:${col}">${diff > 0 ? "▲" : diff < 0 ? "▼" : "="} ${pct === null ? (total > 0 ? "new" : "–") : Math.abs(pct) + "%"}</b> compared with the same-length period before (${prevDone.length} done order${prevDone.length === 1 ? "" : "s"}, ${fmt(prevTotal)}).</p>`;
+    }
     const rpCosts = exps.filter((e) => !repOff.has(e.type));
     const rpSalesList = repSales ? addedSales : [];
     const rpDone = repOrders ? done : [];
@@ -3930,6 +4010,7 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     pane.innerHTML = `<div class="card"><h2>Sales</h2>
       <p class="hint">Only orders you moved to <b>Done</b> are counted here. New and open orders, cancelled orders and your own test orders are never added. <b>Test order?</b> Cancel it instead of moving it to Done.</p>
       <div class="chips">${chips.map(([k, l]) => `<button type="button" class="chip ${k === salesRange ? "active" : ""}" data-sales="${k}">${l}</button>`).join("")}</div>
+      ${cmpHtml}
       ${salesRange === "custom" ? `<div class="row2" style="margin-top:10px"><div><label>From</label><input type="date" id="sales_from" value="${esc(salesFrom)}" /></div><div><label>To</label><input type="date" id="sales_to" value="${esc(salesTo)}" /></div></div>` : ""}
       <div class="sales-grid">
         <div class="sale-tile"><span>Total sales</span><b>${fmt(total)}</b><small>${label}</small></div>
@@ -4030,7 +4111,7 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
   function downloadFile(name, text, type) {
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: type || "text/csv;charset=utf-8" })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
-  const csvCell = (v) => { const t = String(v === undefined || v === null ? "" : v).replace(/"/g, '""'); return /[",\n]/.test(t) ? `"${t}"` : t; };
+  const csvCell = (v) => { let t = String(v === undefined || v === null ? "" : v); if (/^[=+\-@\t\r]/.test(t) && !/^[+-]?\d[\d.,]*$/.test(t)) t = "'" + t; t = t.replace(/"/g, '""'); return /[",\n]/.test(t) ? `"${t}"` : t; };
   function customersList() {
     const m = {};
     currentOrders.filter((o) => o.status !== "cancelled").forEach((o) => {
@@ -4194,23 +4275,29 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
     const box = $("priceTable"); if (!box) return;
     const q = $("priceFilter").value.trim().toLowerCase();
     const rows = currentProducts.filter((p) => !q || ((p.name || "") + " " + (p.category || "")).toLowerCase().includes(q));
-    box.innerHTML = '<div class="prow head"><span>Product</span><span>Price (Rs.)</span><span>Tag</span></div>' + (rows.length ? rows.map((p) => {
+    box.innerHTML = '<div class="prow head"><span>Product</span><span>Price (Rs.)</span><span>Tag</span><span>Stock</span></div>' + (rows.length ? rows.map((p) => {
       const e = priceEdits[p.id] || {};
       const price = e.price !== undefined ? e.price : (p.price ?? "");
       const tag = e.tag !== undefined ? e.tag : (p.tag || "");
       const opts = TAG_OPTS.includes(tag) ? TAG_OPTS : TAG_OPTS.concat([tag]);
+      const stock = e.stock !== undefined ? e.stock : (p.stock ?? "");
+      const isLow = stock !== "" && Number(stock) <= lowLevel();
       return `<div class="prow ${priceDirty(p) ? "changed" : ""}" data-id="${esc(p.id)}">
         <div class="pn"><img src="${esc(heroPhotoOf(p))}" alt="" /><div style="min-width:0"><b>${esc(p.name)}</b><span>${esc(p.category)}</span></div></div>
         <input type="number" min="0" data-pf="price" value="${esc(price)}" aria-label="Price of ${esc(p.name)}" />
         <select data-pf="tag" aria-label="Tag of ${esc(p.name)}">${opts.map((o) => `<option value="${esc(o)}" ${o === tag ? "selected" : ""}>${o || "None"}</option>`).join("")}</select>
+        <input type="number" min="0" data-pf="stock" class="${isLow ? "low" : ""}" placeholder="–" title="Pieces in stock (leave empty if you don't count it)" value="${esc(stock)}" aria-label="Stock of ${esc(p.name)}" />
       </div>`;
     }).join("") : '<p class="hint" style="padding:12px 14px">No product matches.</p>');
     $("priceSave").disabled = !Object.keys(priceEdits).some((id) => { const p = currentProducts.find((x) => x.id === id); return p && priceDirty(p); });
   }
   function priceDirty(p) {
     const e = priceEdits[p.id]; if (!e) return false;
-    return (e.price !== undefined && Number(e.price) !== Number(p.price)) || (e.tag !== undefined && e.tag !== (p.tag || ""));
+    return (e.price !== undefined && Number(e.price) !== Number(p.price)) || (e.tag !== undefined && e.tag !== (p.tag || "")) || (e.stock !== undefined && String(e.stock) !== String(p.stock ?? ""));
   }
+  // Low-stock warning: products with a stock number at or under this level show on the dashboard (Today's work).
+  function lowLevel() { try { const n = Number(localStorage.getItem("ttcLowStock")); return Number.isFinite(n) && n >= 0 && localStorage.getItem("ttcLowStock") !== null ? n : 3; } catch (e) { return 3; } }
+  function lowStockList() { return currentProducts.filter((p) => p.stock !== undefined && p.stock !== null && p.stock !== "" && Number(p.stock) <= lowLevel()); }
   $("priceTable").addEventListener("input", (ev) => {
     const el = ev.target; const row = el.closest(".prow[data-id]"); if (!row) return;
     const id = row.dataset.id; (priceEdits[id] = priceEdits[id] || {})[el.dataset.pf] = el.value;
@@ -4219,6 +4306,8 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
     $("priceSave").disabled = !Object.keys(priceEdits).some((k) => { const q = currentProducts.find((x) => x.id === k); return q && priceDirty(q); });
   });
   $("priceFilter").addEventListener("input", renderPriceTable);
+  $("lowLevel").value = lowLevel();
+  $("lowLevel").addEventListener("change", (ev) => { try { localStorage.setItem("ttcLowStock", String(Math.max(0, Math.floor(Number(ev.target.value) || 0)))); } catch (e) {} renderPriceTable(); if (currentView === "dashboard") renderDashboard(); });
   $("priceSave").addEventListener("click", async () => {
     const msg = $("priceMsg"); const changed = currentProducts.filter(priceDirty);
     for (const p of changed) { const v = priceEdits[p.id].price; if (v !== undefined && (v === "" || Number(v) < 0)) { msg.textContent = "“" + p.name + "” needs a valid price."; return; } }
@@ -4228,6 +4317,7 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
         const e = priceEdits[p.id]; const data = {};
         if (e.price !== undefined) data.price = Number(e.price);
         if (e.tag !== undefined) data.tag = e.tag;
+        if (e.stock !== undefined) data.stock = e.stock === "" ? null : Math.max(0, Math.floor(Number(e.stock)));
         return updateDoc(doc(db, "products", p.id), data);
       }));
       changed.forEach((p) => delete priceEdits[p.id]);

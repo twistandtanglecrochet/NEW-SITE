@@ -1,1 +1,1 @@
-{"files":["public/admin.html"]}
+{"files": ["src/App.jsx", "src/lib/pkCities.js", "src/data/siteSettings.js", "public/admin.html", "public/site-settings-defaults.json"]}

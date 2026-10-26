@@ -57,7 +57,8 @@
     },
     "categoryTiles": {
       "on": false,
-      "title": "Shop by category"
+      "title": "Shop by category",
+      "compact": false
     },
     "visit": {
       "on": false,
@@ -179,6 +180,7 @@
     "checkout": {
       "giftNote": false,
       "betterForm": false,
+      "strict": false,
       "whatsappAuto": false,
       "whatsappDelay": 2
     },

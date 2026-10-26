@@ -30,7 +30,7 @@ export const DEFAULT_SETTINGS = {
     ],
   },
   reviewsShuffle: { on: false, limit: 6, fx: "rise", auto: false, every: 8, button: false, layout: "grid" }, reviewsAdd: { on: false, title: "Write a review", button: "Write a review", general: "Custom order", aboveFooter: false, footerText: "Bought from us? Tell us how it went" }, // fx: none | rise | fade | flip | pop
-  categoryTiles: { on: false, title: "Shop by category" },
+  categoryTiles: { on: false, title: "Shop by category", compact: false },
   visit: { on: false, title: "Visit our store", address: "", mapUrl: "", buttonLabel: "Open in Maps" },
   // Section order / visibility. While `on` is false the home page keeps its
   // original order (hero → shop → reviews).
@@ -66,7 +66,7 @@ export const DEFAULT_SETTINGS = {
   ads: { on: false, popupDelay: 3, items: [] },
 
   // Orders
-  checkout: { giftNote: false, betterForm: false, whatsappAuto: false, whatsappDelay: 2 }, // betterForm = city/email/postal + strict checks; whatsappAuto = open WhatsApp after the thank-you screen
+  checkout: { giftNote: false, betterForm: false, strict: false, whatsappAuto: false, whatsappDelay: 2 }, // betterForm = city/email/postal + strict checks; whatsappAuto = open WhatsApp after the thank-you screen
   tracking: { on: false },
   faq: { on: false, footer: true, title: "Questions & returns", items: [
     { q: "How do I order?", a: "Choose a product, press Add to Cart or Buy Now, write your name, mobile number and full address, then press Place order. We confirm every order on WhatsApp or by call." },

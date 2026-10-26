@@ -24,6 +24,7 @@ import { SpeedContext, Img } from "./lib/cloudinary.jsx";
 import { useSiteSettings, useI18n, useIdList, useExtraTranslations } from "./hooks/useSiteSettings.js";
 import { SECTION_IDS, SETTINGS_CACHE_KEY, normalizedOrder, readCachedSettings } from "./data/siteSettings.js";
 import { applyManifest, applySafeArea, applyServiceWorker } from "./lib/pwa.js";
+import { PK_CITIES, findCity, strictPhone, strictName, strictAddress } from "./lib/pkCities.js";
 
 // "Look & brand" (Admin → Website): colours and logo are changed in place while the switch is on.
 const ORIG_COLORS = { ...COLORS };
@@ -343,6 +344,7 @@ function ReviewsSection({ productId, productName, reviews }) {
           </div>
           <input
             placeholder="Your name"
+            maxLength={80}
             value={name}
             onChange={(e) => setName(e.target.value)}
             style={{
@@ -661,6 +663,8 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState({ name: "", phone: "", address: "", notes: "", payment: PAYMENT_METHODS[0], apt: "", city: "", postal: "", email: "" });
   const [touched, setTouched] = useState({});
+  const [cityOpen, setCityOpen] = useState(false); // strict checkout: city list open?
+  const [cityFree, setCityFree] = useState(false);   // strict checkout: "my city is not listed"
   const [guideOpen, setGuideOpen] = useState(false);
   const [myOrdersOpen, setMyOrdersOpen] = useState(false);
   const [reviewWriteOpen, setReviewWriteOpen] = useState(false);
@@ -1244,7 +1248,7 @@ export default function App() {
     setPlacedOrder(null);
     setPlaceError(null);
     setPhoneTouched(false);
-    setTouched({});
+    setTouched({}); setCityFree(false); setCityOpen(false);
     setWaCountdown(null);
   }
   useEffect(() => {
@@ -1466,15 +1470,16 @@ export default function App() {
     }
   }
 
-  const phoneValid = isValidPkMobile(form.phone);
   const betterOn = !!settings.checkout.betterForm;
+  const strictOn = betterOn && !!settings.checkout.strict; // Admin → Order & checkout → "Strict checks"
+  const phoneValid = isValidPkMobile(form.phone) && (!strictOn || strictPhone(form.phone));
   const nameWords = form.name.trim().split(/\s+/).filter(Boolean);
   const betterErrors = betterOn ? {
-    name: nameWords.length < 2 ? "Please enter your first and last name." : "",
-    address: !(form.address.trim().length >= 10 && /\d/.test(form.address) && form.address.trim().split(/\s+/).length >= 3) ? "Please write the complete address: house or plot number, street and area." : "",
-    city: form.city.trim().length < 2 ? "Please enter your city." : "",
+    name: nameWords.length < 2 || (strictOn && !strictName(form.name)) ? "Please enter your real first and last name (letters only)." : "",
+    address: !(form.address.trim().length >= 10 && /\d/.test(form.address) && form.address.trim().split(/\s+/).length >= 3) || (strictOn && !strictAddress(form.address)) ? "Please write the complete address: house or plot number, street and area." : "",
+    city: strictOn ? (cityFree ? (/^[A-Za-z .\-]{3,}$/.test(form.city.trim()) ? "" : "Please type your city name (letters only).") : (findCity(form.city) ? "" : "Please choose your city from the list.")) : form.city.trim().length < 2 ? "Please enter your city." : "",
     email: form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim()) ? "That email address doesn't look right." : "",
-    postal: form.postal.trim() && !/^\d{4,6}$/.test(form.postal.trim()) ? "The postal code is 4 to 6 digits, e.g. 54000." : "",
+    postal: form.postal.trim() && !(strictOn ? /^\d{5}$/ : /^\d{4,6}$/).test(form.postal.trim()) ? (strictOn ? "The postal code is 5 digits, e.g. 54000." : "The postal code is 4 to 6 digits, e.g. 54000.") : "",
   } : {};
   const betterOk = Object.values(betterErrors).every((v) => !v);
   const canSubmit = !!(form.name.trim() && phoneValid && form.address.trim() && checkoutItems.length > 0 && betterOk);
@@ -1882,7 +1887,7 @@ export default function App() {
       tiles: withAds(settings.categoryTiles.on ? lazyBox(
         <CategoryTiles
           categories={categories} products={products} title={t("tiles.title") === "Shop by category" ? settings.categoryTiles.title : t("tiles.title")}
-          urlFor={urlForCategory} t={t}
+          urlFor={urlForCategory} t={t} compact={!!settings.categoryTiles.compact}
           onSelect={(cat) => { selectCategory(cat); setTimeout(() => { const el = document.getElementById("shop"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); }}
         />
       ) : null, "underTiles"),
@@ -2917,6 +2922,7 @@ export default function App() {
                     id={`co_${field}`}
                     placeholder={field === "name" ? "Ali Raza" : field === "phone" ? "0300 1234567" : "House 14, Street 2, Gulberg"}
                     value={form[field]}
+                    maxLength={field === "name" ? 80 : field === "phone" ? 20 : 300}
                     onChange={(e) => setForm({ ...form, [field]: e.target.value })}
                     onBlur={field === "phone" ? () => setPhoneTouched(true) : undefined}
                     type={field === "phone" ? "tel" : "text"}
@@ -2931,7 +2937,7 @@ export default function App() {
                   />
                   {phoneError && (
                     <div style={{ fontSize: 11.5, color: "#C0392B", marginTop: 4 }}>
-                      Please enter a Pakistani mobile number, e.g. 0300 1234567 or +92 300 1234567.
+                      {strictOn ? "This doesn't look like a real Pakistani mobile number. Example: 0300 1234567 or +92 300 1234567." : "Please enter a Pakistani mobile number, e.g. 0300 1234567 or +92 300 1234567."}
                     </div>
                   )}
                 </div>
@@ -2954,7 +2960,33 @@ export default function App() {
                   <div style={{ fontSize: 11.5, color: "#8A6A99", margin: "-4px 0 10px", lineHeight: 1.45 }}>Complete address with plot / office / house number, street and area name. Example: House 01, Block 01, Street 01, Bahria Town.</div>
                   {box("apt", "Apartment, floor, landmark (optional)", { autoComplete: "address-line2" })}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                    {box("city", "City", { autoComplete: "address-level2" })}
+                    {strictOn && !cityFree ? (() => {
+                      const q = form.city.trim().toLowerCase();
+                      const shown = (q ? PK_CITIES.filter((c) => c.toLowerCase().includes(q)) : PK_CITIES).slice(0, 40);
+                      const pick = (c) => { setForm((f) => ({ ...f, city: c })); setCityOpen(false); setTouched((x) => ({ ...x, city: true })); };
+                      return (
+                        <div style={{ marginBottom: 10, position: "relative" }}>
+                          <label htmlFor="co_city" style={{ display: "block", fontSize: 12, color: "#5A5048", marginBottom: 4 }}>City</label>
+                          <input id="co_city" value={form.city} role="combobox" aria-expanded={cityOpen} aria-controls="co_city_list" aria-autocomplete="list" autoComplete="off" placeholder="Search your city"
+                            onChange={(e) => { setForm({ ...form, city: e.target.value }); setCityOpen(true); }}
+                            onFocus={() => setCityOpen(true)}
+                            onBlur={() => setTimeout(() => { setCityOpen(false); setTouched((x) => ({ ...x, city: true })); }, 150)}
+                            onKeyDown={(e) => { if (e.key === "Enter" && cityOpen && shown.length) { e.preventDefault(); pick(shown[0]); } else if (e.key === "Escape") setCityOpen(false); }}
+                            aria-invalid={err("city") ? "true" : undefined}
+                            style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: `1px solid ${err("city") ? "#C0392B" : COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg }} />
+                          {cityOpen && (
+                            <ul id="co_city_list" role="listbox" style={{ position: "absolute", left: 0, right: 0, top: "100%", zIndex: 30, margin: "2px 0 0", padding: 4, listStyle: "none", maxHeight: 220, overflowY: "auto", background: "#fff", border: `1px solid ${COLORS.bgSoft}`, borderRadius: 10, boxShadow: "0 8px 20px rgba(0,0,0,.14)" }}>
+                              {shown.map((c) => (
+                                <li key={c} role="option" aria-selected={c === form.city} onMouseDown={(e) => { e.preventDefault(); pick(c); }} style={{ padding: "9px 10px", fontSize: 13, cursor: "pointer", borderRadius: 8 }}>{c}</li>
+                              ))}
+                              {!shown.length && <li style={{ padding: "9px 10px", fontSize: 12.5, color: "#7A6E64" }}>No city found.</li>}
+                              <li role="option" onMouseDown={(e) => { e.preventDefault(); setCityFree(true); setCityOpen(false); setForm((f) => ({ ...f, city: "" })); }} style={{ padding: "9px 10px", fontSize: 12.5, cursor: "pointer", color: COLORS.maroon, fontWeight: 700, borderTop: `1px solid ${COLORS.bgSoft}` }}>My city is not listed</li>
+                            </ul>
+                          )}
+                          {err("city") && <div style={{ fontSize: 11.5, color: "#C0392B", marginTop: 4 }}>{betterErrors.city}</div>}
+                        </div>
+                      );
+                    })() : box("city", strictOn ? "City (type it)" : "City", { autoComplete: "address-level2" })}
                     {box("postal", "Postal code (optional)", { inputMode: "numeric", autoComplete: "postal-code" })}
                   </div>
                   {box("email", "Email (optional)", { type: "email", inputMode: "email", autoComplete: "email" })}
