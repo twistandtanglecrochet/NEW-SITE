@@ -3065,7 +3065,7 @@
       tf("reviewsShuffle.limit", "How many to show", { type: "num", min: 1 }) +
       sel("reviewsShuffle.fx", "Animation", [["rise", "Rise"], ["fade", "Fade"], ["flip", "Flip"], ["pop", "Pop"], ["none", "None"]]) +
       sw("reviewsShuffle.auto", "Reshuffle by itself while the page is open") +
-      tf("reviewsShuffle.every", "Reshuffle every (seconds)", { type: "num", min: 3 }) +
+      tf("reviewsShuffle.every", "Reshuffle every (seconds)", { type: "num", min: 1 }) +
       sw("reviewsShuffle.button", "Show a “Shuffle reviews” button"));
     G.tiles = group("tiles", "Category tiles", "Picture tiles on the home page, one per category. Tapping a tile opens that category's page.",
       sw("categoryTiles.on", "Show category tiles") + sw("categoryTiles.compact", "Smaller tiles on phones (3 in a row, smaller heading)") + tf("categoryTiles.title", "Heading"));
@@ -3625,7 +3625,7 @@
     if (out.exploreMore.initial === "" || Number(out.exploreMore.initial) < 1) out.exploreMore.initial = SDEF.exploreMore.initial;
     if (out.recent.max === "" || Number(out.recent.max) < 1) out.recent.max = SDEF.recent.max;
     if (out.reviewsShuffle.limit === "" || Number(out.reviewsShuffle.limit) < 1) out.reviewsShuffle.limit = SDEF.reviewsShuffle.limit;
-    if (out.reviewsShuffle.every === "" || Number(out.reviewsShuffle.every) < 3) out.reviewsShuffle.every = SDEF.reviewsShuffle.every;
+    if (out.reviewsShuffle.every === "" || Number(out.reviewsShuffle.every) < 1) out.reviewsShuffle.every = SDEF.reviewsShuffle.every;
     if (out.freeDelivery.threshold === "") out.freeDelivery.threshold = 0;
     if (out.rotator.speed === "" || Number(out.rotator.speed) < 1200) out.rotator.speed = SDEF.rotator.speed;
     if (out.heroReveal.step === "" || Number(out.heroReveal.step) < 40) out.heroReveal.step = SDEF.heroReveal.step;
