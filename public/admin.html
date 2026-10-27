@@ -244,6 +244,25 @@
   .order-channel.instagram { background: #E3E8F5; color: #153A73; }
   .order-contact { font-size: 13px; margin-top: 8px; line-height: 1.55; color: #5A5048; }
   .order-contact a { color: var(--maroon); font-weight: 600; }
+  .ox-wrap { max-height: 420px; overflow: auto; border: 1px solid #EFE6DD; border-radius: 12px; margin-top: 8px; }
+  .ox-row { display: grid; grid-template-columns: 24px 1fr auto auto; gap: 10px; align-items: center; padding: 9px 12px; border-top: 1px solid #EFE6DD; cursor: pointer; font-size: 13px; }
+  .ox-row:first-child { border-top: none; } .ox-row.sel { background: #FFF6CC; } .ox-row input { width: 18px; height: 18px; }
+  .ox-row small { color: #7A6E64; } .ox-end { white-space: nowrap; }
+  @media (max-width: 760px) { .ox-row { grid-template-columns: 24px 1fr auto; } .ox-mid { grid-column: 2 / -1; } }
+  .ob { display: inline-block; margin: 3px 4px 0 0; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+  .ob-ok { background: #E2F4E5; color: #1E6B2E; } .ob-red { background: #FBE0DD; color: #A12418; } .ob-warn { background: #FFF1C2; color: #7A5A00; }
+  .os-main { min-width: 0; }
+  .order-help { margin-top: 10px; padding: 10px 12px; background: #F4F8FF; border: 1px solid #D5E2F7; border-radius: 12px; font-size: 13px; }
+  .order-help .oh-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .order-help .oh-sent { display: grid; grid-template-columns: auto 1fr 1fr auto; gap: 8px; align-items: center; margin-top: 10px; }
+  .order-help .oh-sent b { white-space: nowrap; }
+  .order-help .oh-tpl { margin-top: 10px; } .order-help .oh-tpl summary { cursor: pointer; font-weight: 700; }
+  @media (max-width: 760px) { .order-help .oh-sent { grid-template-columns: 1fr; } }
+  .order-private { margin-top: 10px; padding: 10px 12px; background: #FFF9E6; border: 1px dashed #E0C56E; border-radius: 12px; font-size: 13px; }
+  .order-private h4 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: #7A5A00; }
+  .order-private textarea, .order-private input[type=text] { width: 100%; box-sizing: border-box; }
+  .order-private .pn-row { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .order-private .pn-text { white-space: pre-wrap; color: #5A5048; }
   .order-items { margin: 10px 0 0; padding: 10px 0 0; border-top: 1px dashed var(--bg-soft); list-style: none; }
   .order-items li { display: flex; gap: 10px; align-items: center; font-size: 13px; padding: 3px 0; }
   .order-items img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
@@ -281,7 +300,7 @@
   @media (max-width: 760px) { body.nav-collapsed .nav-group { font-size: 12px; padding: 14px 0 6px 24px; margin: 8px 12px 0 0; width: auto; } }
   .subhead { font-size: 14px; color: var(--maroon-dark); margin: 22px 0 0; }
   .promo-list { display: flex; flex-direction: column; gap: 8px; }
-  .promo-row { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--bg-soft); border-radius: 10px; padding: 10px 12px; }
+  .promo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--bg-soft); border-radius: 10px; padding: 10px 12px; }
   .promo-row.off { opacity: 0.6; }
   .promo-code { font-weight: 700; font-size: 14px; letter-spacing: 0.5px; min-width: 110px; }
   .promo-what { flex: 1; font-size: 13px; color: #5A5048; }
@@ -399,7 +418,7 @@
   .settings-pane .card + .card { margin-top: 16px; }
   #productFilter, #priceFilter { width: 100%; box-sizing: border-box; margin-bottom: 4px; padding: 10px 14px; border-radius: 10px; border: 1px solid #E4D8CE; font: inherit; }
   .ptable { border: 1px solid #E8DDD3; border-radius: 14px; overflow: hidden; margin: 10px 0 14px; }
-  .prow { display: grid; grid-template-columns: 1fr 120px 160px 90px; gap: 10px; align-items: center; padding: 10px 14px; border-top: 1px solid #EFE6DD; }
+  .prow { display: grid; grid-template-columns: 1fr 120px 160px 90px 110px; gap: 10px; align-items: center; padding: 10px 14px; border-top: 1px solid #EFE6DD; }
   .prow.head { border-top: none; background: var(--bg-soft); font-size: 12px; font-weight: 700; color: #5A5048; }
   .prow.changed { background: #FFF6CC; }
   .prow img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; }
@@ -492,7 +511,7 @@
     main, .content { padding-bottom: 90px; }
   }
   .savebar { position: sticky; bottom: 8px; display: flex; gap: 12px; align-items: center; background: #fff; border-radius: 14px; padding: 10px 14px; box-shadow: 0 4px 18px rgba(63,18,32,.15); }
-  @media (max-width: 760px) { .prow { grid-template-columns: 1fr 96px 80px; } .prow select { grid-column: 1 / -1; } .prow.head span:nth-child(3) { display: none; } }
+  @media (max-width: 760px) { .prow { grid-template-columns: 1fr 96px 96px; } .prow select { grid-column: 1 / -1; } .prow.head span:nth-child(3) { display: none; } }
   .prow .low { outline: 2px solid #E0A100; background: #FFF6CC; }
   .rep-chips { display:flex; flex-wrap:wrap; gap:8px; }
   .rep-chip { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border:1.5px solid var(--line, #d9cfe6); border-radius:999px; font-size:13px; cursor:pointer; background:#fff; }
@@ -641,8 +660,10 @@
           <div>
             <label>Price (PKR)</label>
             <input type="number" id="f_price" required min="0" />
-            <label style="margin-top:8px">Old price (optional, shown crossed out in card design 11)</label>
+            <label style="margin-top:8px">Old price (optional: shown crossed out in card design 11, and used for the “Save 10%” badge)</label>
             <input type="number" id="f_old" min="0" placeholder="e.g. 3500" />
+            <label style="margin-top:8px">Ready in (optional, e.g. “2 days” or “Made to order: 5 days”)</label>
+            <input type="text" id="f_ready" maxlength="60" placeholder="e.g. Ready in 2 days" />
           </div>
           <div>
             <label>Category</label>
@@ -808,6 +829,7 @@
         <label class="switch"><input type="checkbox" id="alertsToggle" /> New order alerts</label>
         <button type="button" class="chip" id="notifyBtn">Allow notifications</button>
         <button type="button" class="chip" id="testSoundBtn">Test alert sound</button>
+        <button type="button" class="chip" id="todayListBtn">🖨 To send today (print)</button>
       </div>
       <p class="hint" id="notifyHint"></p>
       <p class="hint">Alerts (sound, banner and notification) only work while this admin page is open in a browser tab. Phones may pause it when the screen locks.</p>
@@ -819,6 +841,7 @@
         <button type="button" class="chip" data-order-filter="cancelled">Cancelled <span id="ordersCancelledCount">0</span></button>
       </div>
       <div class="msg error hidden" id="orderListError"></div>
+      <div class="msg hidden" id="ordersMoreBar" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="ordersMoreText"></span> <button type="button" class="btn" id="ordersMoreBtn">Load older orders</button> <button type="button" class="btn" id="ordersAllBtn">Load all</button></div>
       <div class="order-list" id="orderList"></div>
     </div>
     </section>
@@ -858,6 +881,9 @@
         </div>
         <div style="grid-column: span 2"><label>Categories</label><div id="promo_cats" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
       </div>
+      <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;font-size:13px">Don't apply this code on some products (optional)</summary>
+        <div id="promo_noids" style="max-height:200px;overflow:auto;margin-top:6px;display:grid;gap:4px"></div>
+      </details>
       <button type="button" class="btn" id="promoAddBtn" style="margin-top:10px">Add code</button>
       <div class="msg" id="promoMsg"></div>
     </div>
@@ -915,7 +941,8 @@
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, collection, addDoc as _addDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc, doc, getDoc, setDoc as _setDoc, runTransaction as _runTransaction,
-    onSnapshot, query, orderBy, serverTimestamp
+    onSnapshot, query, orderBy, serverTimestamp, getDocs, limit, startAfter,
+    initializeFirestore, persistentLocalCache, persistentMultipleTabManager, terminate, clearIndexedDbPersistence
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   // ---- access levels (Tools → Admin list) ----
@@ -993,7 +1020,6 @@
   // than one person in.
   const ADMIN_EMAILS = [
     "twistanddtanglecrochet@gmail.com",
-    "adhanaan1050@gmail.com",
   ];
 
   // Your site's live web address — used to build the links behind the QR codes below.
@@ -1003,7 +1029,22 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
-  const db = getFirestore(app);
+  // Admin → Speed → "Remember data on this device": the admin keeps what it already read in this browser, so opening it
+  // again within about 30 minutes only reads what changed. The choice is kept in this browser (read before anything loads).
+  let adminCacheOn = false;
+  try { adminCacheOn = localStorage.getItem("ttc_admin_cache") === "1"; } catch (e) {}
+  let db;
+  try { db = adminCacheOn ? initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }) : getFirestore(app); }
+  catch (e) { adminCacheOn = false; db = getFirestore(app); }
+  // Signing out wipes the saved copy from this device (it contains customer details).
+  async function signOutClean() {
+    let had = false; try { had = localStorage.getItem("ttc_admin_cache_used") === "1"; } catch (e) {}
+    await signOut(auth);
+    if (had) {
+      try { await terminate(db); await clearIndexedDbPersistence(db); localStorage.removeItem("ttc_admin_cache_used"); } catch (e) {}
+      location.reload();
+    }
+  }
 
   const $ = (id) => document.getElementById(id);
   const signedOutEl = $("signedOut");
@@ -1023,8 +1064,8 @@
       $("authMsg").textContent = e.message;
     }
   });
-  $("signOutBtn").addEventListener("click", () => signOut(auth));
-  $("signOutBtn2").addEventListener("click", () => signOut(auth));
+  $("signOutBtn").addEventListener("click", () => signOutClean());
+  $("signOutBtn2").addEventListener("click", () => signOutClean());
 
   // Owners (ADMIN_EMAILS above) always get in. Anyone else gets in only if an
   // owner has added them under Tools → Admin list (saved in config/admins;
@@ -1077,7 +1118,7 @@
     showOnly(appEl);
     loadSettings();
     startProductListener();
-    startReviewListener();
+    if (localStorage.getItem("ttc_admin_lazy") !== "1") startReviewListener();
     startOrderListener();
     startPromoListener();
     startAdminListListener();
@@ -1101,6 +1142,7 @@
       viewStack.pop();
     }
     currentView = name;
+    if (name === "reviews") startReviewListener();
     if (name === "orders" && alertsReady) markOrdersSeen(true);
     document.querySelectorAll("[data-view-panel]").forEach((panel) =>
       panel.classList.toggle("hidden", panel.getAttribute("data-view-panel") !== name)
@@ -1160,7 +1202,7 @@
       (snap) => {
         $("listError").classList.add("hidden");
         $("listError").textContent = "";
-        currentProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() })); refreshDash();
+        currentProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() })); refreshDash(); try { if (promoCodes) renderPromos(); renderPromoCats(); } catch (e) {}
         currentProducts.sort((a, b) => {
           const aHas = typeof a.order === "number";
           const bHas = typeof b.order === "number";
@@ -1383,6 +1425,7 @@
         </div>
         <div class="on">on ${escapeHtml(r.productName || "a product")}</div>
         <div class="comment">${escapeHtml(r.comment)}</div>
+        ${/^https:\/\/res\.cloudinary\.com\//.test(String(r.photo || "")) ? `<a href="${escapeHtml(r.photo)}" target="_blank" rel="noopener"><img src="${escapeHtml(r.photo)}" alt="Photo with this review" loading="lazy" style="max-width:140px;max-height:140px;border-radius:10px;margin-bottom:10px;display:block" /></a>` : ""}
         <div class="actions">
           ${r.approved
             ? `<button class="secondary" data-unapprove="${r.id}">Remove from site</button>`
@@ -1452,16 +1495,72 @@
   let currentOrders = [];
   let orderFilter = "new";
 
+  // Admin → Speed → "Admin: load only the newest orders". 0 = every order (the old behaviour). The number is kept in this
+  // browser so the very first read already uses it.
+  let ordersLimit = 0, ordersMore = false, ordersLoadingOlder = false;
+  const orderMs = (o) => (o && o.createdAt && typeof o.createdAt.toMillis === "function" ? o.createdAt.toMillis() : Infinity);
+  function wantedOrdersLimit() { try { const n = Math.floor(Number(localStorage.getItem("ttc_admin_orders_limit")) || 0); return n > 0 ? Math.max(50, n) : 0; } catch (e) { return 0; } }
+  function syncOrdersLimit() {
+    try {
+      const want = !!(S && S.speed && S.speed.adminCache);
+      localStorage.setItem("ttc_admin_cache", want ? "1" : "0");
+      localStorage.setItem("ttc_admin_lazy", S && S.speed && S.speed.adminLazy ? "1" : "0");
+      if (want) localStorage.setItem("ttc_admin_cache_used", "1");
+      if (want !== adminCacheOn && !window.__cacheNoted) { window.__cacheNoted = true; setTimeout(() => { const m = document.querySelector(".settingsMsg"); if (m) m.innerHTML = '<p class="msg success">Reload this page once for “Remember data on this device” to take effect.</p>'; }, 300); }
+    } catch (e) {}
+    const n = Math.floor(Number(S && S.speed && S.speed.adminOrdersLimit) || 0);
+    try { localStorage.setItem("ttc_admin_orders_limit", String(n > 0 ? Math.max(50, n) : 0)); } catch (e) {}
+    if (orderUnsub && wantedOrdersLimit() !== ordersLimit) { orderUnsub(); orderUnsub = null; startOrderListener(); }
+  }
+  function showOrdersMore() {
+    const bar = $("ordersMoreBar"); if (!bar) return;
+    bar.classList.toggle("hidden", !(ordersLimit > 0 && ordersMore));
+    $("ordersMoreText").textContent = "Showing the newest " + currentOrders.length + " orders. Sales totals and customer lists count only these.";
+  }
+  async function loadOlderOrders(all) {
+    if (ordersLoadingOlder || !ordersLimit) return;
+    ordersLoadingOlder = true;
+    try {
+      for (let guard = 0; guard < 200; guard++) {
+        const last = currentOrders[currentOrders.length - 1];
+        if (!last || !last.createdAt) { ordersMore = false; break; }
+        const got = await getDocs(query(collection(db, "orders"), orderBy("createdAt", "desc"), startAfter(last.createdAt), limit(ordersLimit)));
+        const have = new Set(currentOrders.map((o) => o.id));
+        currentOrders = currentOrders.concat(got.docs.filter((d) => !have.has(d.id)).map((d) => ({ id: d.id, ...d.data() })));
+        ordersMore = got.size >= ordersLimit;
+        if (!all || !ordersMore) break;
+      }
+    } catch (e) { $("orderListError").classList.remove("hidden"); $("orderListError").textContent = "Couldn't load older orders (" + (e.code || e.message) + ")."; }
+    ordersLoadingOlder = false;
+    refreshDash(); renderOrders(); showOrdersMore();
+    if (typeof currentView !== "undefined" && currentView === "customers" && typeof renderCustomers === "function") renderCustomers();
+  }
+  // Before a backup or an Excel download every order must be loaded, not only the newest ones.
+  async function ensureAllOrders() { if (ordersLimit > 0 && ordersMore) await loadOlderOrders(true); }
+
   function startOrderListener() {
     if (orderUnsub) return;
-    const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+    ordersLimit = wantedOrdersLimit();
+    const base = [collection(db, "orders"), orderBy("createdAt", "desc")];
+    const q = ordersLimit ? query(...base, limit(ordersLimit)) : query(...base);
     orderUnsub = onSnapshot(
       q,
       (snap) => {
         $("orderListError").classList.add("hidden");
-        currentOrders = snap.docs.map((d) => ({ id: d.id, ...d.data() })); refreshDash();
+        const fresh = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        if (ordersLimit) {
+          // Orders that slid out of the newest-N window (or were loaded with "Load older") stay in the list.
+          const ids = new Set(fresh.map((o) => o.id));
+          const edge = fresh.length ? orderMs(fresh[fresh.length - 1]) : Infinity;
+          const keep = currentOrders.filter((o) => !ids.has(o.id) && orderMs(o) <= edge);
+          ordersMore = ordersMore || snap.size >= ordersLimit;
+          currentOrders = fresh.concat(keep);
+        } else { currentOrders = fresh; ordersMore = false; }
+        refreshDash();
         detectNewOrders(currentOrders);
         renderOrders();
+        showOrdersMore();
+        if (typeof currentView !== "undefined" && currentView === "customers" && typeof renderCustomers === "function") renderCustomers();
       },
       (err) => {
         $("orderListError").classList.remove("hidden");
@@ -1470,6 +1569,7 @@
       }
     );
   }
+  document.addEventListener("click", (e) => { if (e.target && e.target.id === "ordersMoreBtn") loadOlderOrders(false); else if (e.target && e.target.id === "ordersAllBtn") loadOlderOrders(true); });
 
   document.querySelectorAll("[data-order-filter]").forEach((chip) =>
     chip.addEventListener("click", () => {
@@ -1677,7 +1777,7 @@
       card.innerHTML = `
         <button type="button" class="order-sum" data-order-open="${o.id}" aria-expanded="${open}">
           <span class="os-thumbs">${items.slice(0, 3).map((i) => i.photo ? `<img src="${escapeHtml(i.photo)}" alt="" />` : `<span class="os-ph">🧶</span>`).join("")}</span>
-          <span class="os-main"><b>${escapeHtml(c.name || "No name")}</b><small>${o.orderNo ? escapeHtml(o.orderNo) + " · " : ""}${qtyAll} item${qtyAll === 1 ? "" : "s"} · ${escapeHtml(channelLabel(o.channel))}</small></span>
+          <span class="os-main"><b>${escapeHtml(c.name || "No name")}</b><small>${o.orderNo ? escapeHtml(o.orderNo) + " · " : ""}${qtyAll} item${qtyAll === 1 ? "" : "s"} · ${escapeHtml(channelLabel(o.channel))}</small>${orderBadges(o)}</span>
           <span class="os-end"><b>Rs${Number(o.total) || 0}</b><small>${escapeHtml(formatOrderDate(o.createdAt))}${isDone ? " · Done" : ""}</small></span>
           <span class="os-caret" aria-hidden="true">${open ? "▲" : "▼"}</span>
         </button>
@@ -1709,6 +1809,8 @@
           ${o.promo ? `<span>Promo ${escapeHtml(o.promo)}: -Rs${Number(o.discount) || 0}</span>` : ""}
           <strong>Total Rs${Number(o.total) || 0}</strong>
         </div>
+        ${orderHelpers(o)}
+        ${privateBlock(o)}
         ${orderExtras(o)}
         <div class="order-actions">
           ${orderCardExtraActions(o)}
@@ -1730,6 +1832,33 @@
         if (nowOpen) ordOpen.add(id); else ordOpen.delete(id);
       })
     );
+    list.querySelectorAll("[data-adm-note]").forEach((ta) => ta.addEventListener("input", () => ordDraft.set("n" + ta.getAttribute("data-adm-note"), ta.value)));
+    list.querySelectorAll("[data-adm-addr]").forEach((inp) => inp.addEventListener("input", () => ordDraft.set("a" + inp.getAttribute("data-adm-addr"), inp.value)));
+    list.querySelectorAll("[data-adm-note-save]").forEach((btn) => btn.addEventListener("click", async () => {
+      if (role !== "owner") return;
+      const id = btn.getAttribute("data-adm-note-save"); const ta = list.querySelector(`[data-adm-note="${id}"]`);
+      const text = String(ta.value || "").trim().slice(0, 1000);
+      btn.disabled = true; btn.textContent = "Saving…";
+      await updateOrder(id, { adminNote: text, adminNoteAt: serverTimestamp() });
+      ordDraft.delete("n" + id); btn.disabled = false; btn.textContent = "Saved ✓"; setTimeout(() => { if (btn.isConnected) btn.textContent = "Save note"; }, 1500);
+    }));
+    list.querySelectorAll("[data-adm-addr-edit]").forEach((btn) => btn.addEventListener("click", () => {
+      if (role !== "owner") return;
+      const id = btn.getAttribute("data-adm-addr-edit"); const o = currentOrders.find((x) => x.id === id); if (!o) return;
+      ordDraft.set("a" + id, (o.customer || {}).address || ""); renderOrders();
+    }));
+    list.querySelectorAll("[data-adm-addr-cancel]").forEach((btn) => btn.addEventListener("click", () => { ordDraft.delete("a" + btn.getAttribute("data-adm-addr-cancel")); renderOrders(); }));
+    list.querySelectorAll("[data-adm-addr-save]").forEach((btn) => btn.addEventListener("click", async () => {
+      if (role !== "owner") return;
+      const id = btn.getAttribute("data-adm-addr-save"); const o = currentOrders.find((x) => x.id === id); if (!o) return;
+      const inp = list.querySelector(`[data-adm-addr="${id}"]`); const next = String(inp.value || "").trim().slice(0, 300);
+      if (next.length < 8) { alert("Please write the full address."); return; }
+      const before = (o.customer || {}).address || "";
+      if (next === before) { ordDraft.delete("a" + id); renderOrders(); return; }
+      btn.disabled = true;
+      await updateOrder(id, { "customer.address": next, addressEdited: { from: (o.addressEdited && o.addressEdited.from) || before, at: Date.now() } });
+      ordDraft.delete("a" + id); renderOrders();
+    }));
     list.querySelectorAll("[data-order-star]").forEach((btn) =>
       btn.addEventListener("click", () => {
         const o = currentOrders.find((x) => x.id === btn.getAttribute("data-order-star"));
@@ -1751,6 +1880,140 @@
     );
   }
 
+  // ---- Order helpers: one-tap confirm / courier, ready-made WhatsApp messages, payment tick, reorder, warnings ----
+  const DEF_TPLS = [
+    { label: "Order confirmed", text: "Assalam o Alaikum {name}! Aap ka order {order} confirm ho gaya hai. Total Rs{total}. Shukriya 🧶" },
+    { label: "Confirm your address", text: "Assalam o Alaikum {name}! Order {order} bhejne se pehle meharbani karke apna address confirm kar dein: {address}" },
+    { label: "Send payment", text: "{name}, order {order} ki payment (Rs{total}) Easypaisa/JazzCash par bhej dein aur screenshot yahan share kar dein. Shukriya!" },
+    { label: "Order sent", text: "{name}, aap ka order {order} bhej diya gaya hai. Tracking: {link}" },
+    { label: "Thanks + review", text: "{name}, umeed hai aap ko order {order} pasand aaya! Pasand aaye to hamari site par review zaroor likhein: {shop} 💛" },
+    { label: "Not reachable", text: "Assalam o Alaikum {name}! Order {order} ke silsile mein aap se rabta nahi ho saka. Meharbani karke is number par reply karein." },
+  ];
+  const tplList = () => { const l = ((S && S.adminTools && S.adminTools.templates) || []).filter((x) => x && String(x.text || "").trim() && String(x.label || "").trim()); return l.length ? l : DEF_TPLS; };
+  function fillTpl(text, o) {
+    const c = o.customer || {};
+    return String(text).replace(/\{(\w+)\}/g, (m, k) => ({ name: (c.name || "").split(" ")[0] || "", order: o.orderNo || "", total: Number(o.total) || 0, address: c.address || "", link: o.orderNo ? trackLink(o.orderNo) : "", shop: SITE_DOMAIN }[k] ?? m));
+  }
+  function orderBadges(o) {
+    const out = [];
+    if (o.paid) out.push('<span class="ob ob-ok">Paid</span>');
+    if (o.status !== "done" && o.status !== "cancelled" && tsMs(o.createdAt)) {
+      const days = Math.floor((Date.now() - tsMs(o.createdAt)) / 864e5);
+      if (days >= 3) out.push(`<span class="ob ob-red">${days} days open</span>`);
+    }
+    const k = phoneKey((o.customer || {}).phone);
+    if (k && o.status !== "cancelled" && tsMs(o.createdAt) && currentOrders.some((x) => x.id !== o.id && x.status !== "cancelled" && phoneKey((x.customer || {}).phone) === k && Math.abs(tsMs(x.createdAt) - tsMs(o.createdAt)) < 30 * 60000)) out.push('<span class="ob ob-warn">Same number twice</span>');
+    return out.join("");
+  }
+  function orderHelpers(o) {
+    if (role === "viewer") return "";
+    const t = o.tracking || {}; const wa = waNumber((o.customer || {}).phone); const closed = o.status === "done" || o.status === "cancelled";
+    return `<div class="order-help">
+      <div class="oh-row">
+        <button type="button" class="chip ${o.paid ? "active" : ""}" data-oh-paid="${o.id}">${o.paid ? "💰 Payment received ✓" : "💰 Payment received?"}</button>
+        ${wa && !closed ? `<button type="button" class="chip active" data-oh-confirm="${o.id}">✔ Confirm &amp; WhatsApp</button>` : ""}
+        <button type="button" class="chip" data-oh-again="${o.id}">↻ Order again</button>
+      </div>
+      ${!closed ? `<div class="oh-sent" data-oh-box="${o.id}"><b>🚚 Sent with a courier</b>
+        <select data-oh-courier>${COURIERS.filter((c) => c !== "Not sent yet").map((c) => `<option ${(t.courier || "") === c ? "selected" : ""}>${c}</option>`).join("")}</select>
+        <input type="text" data-oh-number placeholder="Tracking number" value="${esc(t.number || "")}" />
+        <button type="button" class="chip active" data-oh-sent="${o.id}">Mark as sent${wa ? " &amp; WhatsApp" : ""}</button></div>` : ""}
+      ${wa ? `<details class="oh-tpl"><summary>Quick replies (WhatsApp)</summary><div class="oh-row">${tplList().map((x, i) => `<button type="button" class="chip" data-oh-tpl="${o.id}|${i}">${esc(x.label)}</button>`).join("")}</div></details>` : ""}
+    </div>`;
+  }
+  function installOrderHelpers() { pageRoot.addEventListener("click", async (e) => {
+    const g = (a) => e.target.closest("[" + a + "]");
+    const bPaid = g("data-oh-paid"), bConf = g("data-oh-confirm"), bSent = g("data-oh-sent"), bAgain = g("data-oh-again"), bTpl = g("data-oh-tpl");
+    if (!(bPaid || bConf || bSent || bAgain || bTpl)) return;
+    if (role === "viewer") return;
+    const id = (bPaid || bConf || bSent || bAgain || bTpl).dataset[bPaid ? "ohPaid" : bConf ? "ohConfirm" : bSent ? "ohSent" : bAgain ? "ohAgain" : "ohTpl"].split("|")[0];
+    const o = currentOrders.find((x) => x.id === id); if (!o) return;
+    const num = waNumber((o.customer || {}).phone);
+    const openWA = (text) => { if (num.length >= 11) window.open("https://wa.me/" + num + "?text=" + encodeURIComponent(text), "_blank", "noopener"); };
+    if (bTpl) { const x = tplList()[Number(bTpl.dataset.ohTpl.split("|")[1])]; if (x) openWA(fillTpl(x.text, o)); return; }
+    if (bPaid) { updateOrder(id, o.paid ? { paid: false, paidAt: null } : { paid: true, paidAt: serverTimestamp() }); return; }
+    if (bAgain) {
+      const c = o.customer || {};
+      manualItems = (o.items || []).map((i) => ({ name: i.name || "", price: i.price ?? "", qty: i.qty || 1, photo: i.photo || "", variant: i.variant || "" }));
+      if (!manualItems.length) manualItems = [{ name: "", price: "", qty: 1, photo: "", variant: "" }];
+      showView("neworder"); renderManual();
+      const set = (k, v) => { const el = $(k); if (el) el.value = v || ""; };
+      set("mo_name", c.name); set("mo_phone", c.phone); set("mo_address", c.address); set("mo_city", c.city);
+      return;
+    }
+    if (bConf) {
+      openWA(slipMessage(o)); // open WhatsApp first (a popup is allowed only straight after the tap)
+      try {
+        const orderNo = o.orderNo || makeOrderNoAdmin();
+        await updateDoc(doc(db, "orders", id), { orderNo, tracking: { ...(o.tracking || {}), stage: "confirmed" }, slipSentAt: serverTimestamp(), slipApproved: true });
+        await setDoc(doc(db, "tracking", orderNo), { stage: "confirmed", updatedAt: serverTimestamp() }, { merge: true });
+      } catch (err) { alert("WhatsApp opened, but couldn't save the step: " + (err.code || err.message)); }
+      return;
+    }
+    if (bSent) {
+      const box = bSent.closest("[data-oh-box]"); const courier = box.querySelector("[data-oh-courier]").value; const number = box.querySelector("[data-oh-number]").value.trim();
+      if (!number && !confirm("No tracking number written. Mark as sent anyway?")) return;
+      const orderNo = o.orderNo || makeOrderNoAdmin(); const tr = { ...(o.tracking || {}), stage: "onway", courier, number };
+      openWA(trackMessage({ ...o, orderNo, tracking: tr }));
+      try {
+        await updateDoc(doc(db, "orders", id), { orderNo, tracking: tr });
+        await setDoc(doc(db, "tracking", orderNo), { stage: "onway", courier, number, note: tr.note || "", updatedAt: serverTimestamp() });
+      } catch (err) { alert("WhatsApp opened, but couldn't save the courier: " + (err.code || err.message)); }
+    }
+  }); }
+  // Print what has to be sent today (open orders), with the cash to collect.
+  function printTodayList() {
+    const rows = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled" && !["onway", "delivered"].includes((o.tracking || {}).stage));
+    if (!rows.length) { alert("Nothing waiting to be sent."); return; }
+    const w = window.open("", "_blank"); if (!w) { alert("Please allow pop-ups to print."); return; }
+    const cod = (o) => (/cash/i.test(o.paymentMethod || "") && !o.paid ? Number(o.total) || 0 : 0);
+    const totalCod = rows.reduce((n, o) => n + cod(o), 0);
+    w.document.write(`<!doctype html><title>To send today</title><style>body{font-family:system-ui,sans-serif;margin:14px;font-size:13px}table{border-collapse:collapse;width:100%}th{background:#6E1E36;color:#fff;text-align:left}th,td{border:1px solid #ccc;padding:6px 8px;vertical-align:top}.r{text-align:right}.bar{margin-bottom:10px}@media print{.bar{display:none}}</style><div class="bar"><button onclick="print()">Print</button></div><h3>To send today · ${esc(new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }))} · ${rows.length} order${rows.length === 1 ? "" : "s"} · cash to collect Rs. ${totalCod.toLocaleString("en-PK")}</h3><table><tr><th>#</th><th>Name / phone</th><th>Address</th><th>Items</th><th>Pay</th><th>Collect</th></tr>${rows.map((o, i) => { const c = o.customer || {}; return `<tr><td>${i + 1}</td><td><b>${esc(c.name || "")}</b><br>${esc(c.phone || "")}</td><td>${esc(c.address || "")}</td><td>${esc(itemsText(o))}<br><small>${esc(o.orderNo || "")}</small></td><td>${esc(o.paid ? "Paid" : (o.paymentMethod || ""))}</td><td class="r">${cod(o) ? "Rs. " + cod(o).toLocaleString("en-PK") : "–"}</td></tr>`; }).join("")}</table>`);
+    w.document.close();
+  }
+  // Courier summary (switch in Admin → Order & checkout → Admin helpers).
+  function courierBookHtml() {
+    if (!(S && S.adminTools && S.adminTools.courierBook)) return "";
+    const open = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled");
+    const by = {};
+    open.forEach((o) => { const k = ((o.tracking || {}).courier && (o.tracking || {}).courier !== "Not sent yet") ? o.tracking.courier : "Not sent yet"; const r = by[k] || (by[k] = { n: 0, cod: 0, total: 0 }); r.n++; r.total += Number(o.total) || 0; if (/cash/i.test(o.paymentMethod || "") && !o.paid) r.cod += Number(o.total) || 0; });
+    const rows = Object.entries(by).sort((a, b) => b[1].n - a[1].n);
+    const fmt = (n) => "Rs. " + Number(n).toLocaleString("en-PK");
+    return `<div class="card"><h2>Courier &amp; cash to collect</h2><p class="hint">Orders that are not done yet. “Cash to collect” counts Cash on Delivery orders that you have not ticked as “Payment received”.</p>
+      ${rows.map(([k, r]) => `<div class="bar-row"><span><b>${esc(k)}</b></span><span class="hint" style="margin:0">${r.n} parcel${r.n === 1 ? "" : "s"}</span><b>${fmt(r.cod)}</b></div>`).join("") || '<p class="empty">No open orders.</p>'}
+      ${rows.length ? `<p class="hint" style="margin-top:8px">All together: <b>${open.length}</b> parcels · cash to collect <b>${fmt(rows.reduce((n, [, r]) => n + r.cod, 0))}</b></p>` : ""}</div>`;
+  }
+  // Weekly orders backup reminder (this browser remembers the last Excel backup).
+  const ordersBackupAt = () => { try { return Number(localStorage.getItem("ttcOrdersBackupAt")) || 0; } catch (e) { return 0; } };
+  const ordersBackupDue = () => role === "owner" && currentOrders.length > 0 && Date.now() - ordersBackupAt() > 7 * 864e5;
+  function backupOrdersExcel() {
+    const keepN = ox.notes; ox.notes = true;
+    oxDownload("xls", oxAllRows().filter((r) => r.kind === "order"), "TTC-orders-backup-");
+    ox.notes = keepN;
+    try { localStorage.setItem("ttcOrdersBackupAt", String(Date.now())); } catch (e) {}
+  }
+  // Private admin notes + address correction on an order. Stored on the order itself (never in the public
+  // "tracking" document), never sent to the customer and never printed on the slip or put in WhatsApp messages.
+  const ordDraft = new Map(); // unsaved text typed in an order card, kept when the list refreshes
+  function privateBlock(o) {
+    const isOwnerRole = role === "owner";
+    const noteVal = ordDraft.has("n" + o.id) ? ordDraft.get("n" + o.id) : (o.adminNote || "");
+    const addrVal = ordDraft.has("a" + o.id) ? ordDraft.get("a" + o.id) : null;
+    const editedLine = o.addressEdited && o.addressEdited.from ? `<div class="hint" style="margin:6px 0 0">Address was changed by an owner. Before: ${escapeHtml(o.addressEdited.from)}</div>` : "";
+    if (!isOwnerRole) {
+      return `<div class="order-private"><h4>Private notes · only admins see this</h4>${o.adminNote ? `<div class="pn-text">${escapeHtml(o.adminNote)}</div>` : `<div class="hint" style="margin:0">No note.</div>`}${editedLine}</div>`;
+    }
+    return `<div class="order-private">
+      <h4>Private notes · only admins see this</h4>
+      <textarea rows="2" maxlength="1000" placeholder="Write a note for yourself and other admins (the customer never sees it)" data-adm-note="${o.id}">${escapeHtml(noteVal)}</textarea>
+      <div class="pn-row"><button type="button" class="secondary" data-adm-note-save="${o.id}">Save note</button>
+        ${addrVal === null ? `<button type="button" class="secondary" data-adm-addr-edit="${o.id}">Change address</button>` : ""}</div>
+      ${addrVal !== null ? `<label style="display:block;margin-top:8px;font-size:12px;font-weight:700">Delivery address</label>
+        <input type="text" maxlength="300" data-adm-addr="${o.id}" value="${escapeHtml(addrVal)}" />
+        <div class="pn-row"><button type="button" data-adm-addr-save="${o.id}">Save address</button><button type="button" class="secondary" data-adm-addr-cancel="${o.id}">Cancel</button></div>` : ""}
+      ${editedLine}
+    </div>`;
+  }
   async function updateOrder(id, data) {
     try {
       await updateDoc(doc(db, "orders", id), data);
@@ -1766,6 +2029,31 @@
     WELCOME50: { type: "flat", value: 50, active: true },
   };
   const promoRef = doc(db, "config", "promoCodes");
+  // Customers never read config/promoCodes. They get config/promoPublic: the same codes, scrambled, so nobody can list them.
+  const promoPubRef = doc(db, "config", "promoPublic");
+  async function promoHash(code) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", enc.encode(String(code || "").trim().toUpperCase()), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: enc.encode("ttc-promo-v1"), iterations: 20000 }, key, 128);
+    return Array.from(new Uint8Array(bits)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  async function buildPromoPublic(codes) {
+    const out = {};
+    for (const [c, p] of Object.entries(codes || {})) {
+      if (!p || p.active === false || !(Number(p.value) > 0)) continue;
+      out[await promoHash(c)] = { type: p.type, value: Number(p.value), active: true, ...(p.mode === "only" || p.mode === "except" ? { mode: p.mode, cats: Array.isArray(p.cats) ? p.cats : [] } : {}), ...(Array.isArray(p.noIds) && p.noIds.length ? { noIds: p.noIds.map(String).slice(0, 200) } : {}) };
+    }
+    return out;
+  }
+  // Writes the scrambled list only when it differs from what this browser last wrote (so opening the admin costs nothing).
+  async function publishPromos(codes, force) {
+    const pub = await buildPromoPublic(codes);
+    const sig = JSON.stringify(pub);
+    let last = null; try { last = localStorage.getItem("ttc_promo_pub_sig"); } catch (e) {}
+    if (!force && last === sig) return;
+    await setDoc(promoPubRef, { codes: pub });
+    try { localStorage.setItem("ttc_promo_pub_sig", sig); } catch (e) {}
+  }
   let promoCodes = null;
   let promoUnsub = null;
 
@@ -1782,6 +2070,7 @@
         }
         promoCodes = (snap.data() && snap.data().codes) || {};
         renderPromos();
+        if (role === "owner" || role === "editor") publishPromos(promoCodes).catch(() => {});
       },
       (err) => showPromoError(err)
     );
@@ -1795,11 +2084,19 @@
   function describePromo(p) {
     const base = p.type === "percent" ? p.value + "% off" : "Rs " + p.value + " off";
     const cats = Array.isArray(p.cats) ? p.cats.filter(Boolean) : [];
-    if (p.mode === "only" && cats.length) return base + " · only " + cats.join(", ");
-    if (p.mode === "except" && cats.length) return base + " · not on " + cats.join(", ");
-    return base;
+    const nn = Array.isArray(p.noIds) ? p.noIds.length : 0;
+    const tail = nn ? " · skips " + nn + " product" + (nn > 1 ? "s" : "") : "";
+    if (p.mode === "only" && cats.length) return base + " · only " + cats.join(", ") + tail;
+    if (p.mode === "except" && cats.length) return base + " · not on " + cats.join(", ") + tail;
+    return base + tail;
+  }
+  function noIdBoxes(sel, attr, checked) {
+    const set = new Set((checked || []).map(String));
+    return (currentProducts || []).map((p) => `<label class="sw" style="margin:0;font-size:13px"><input type="checkbox" ${attr} value="${escapeHtml(String(p.id))}" ${set.has(String(p.id)) ? "checked" : ""} /> ${escapeHtml(p.name || p.id)}</label>`).join("") || '<p class="hint">Products appear here once loaded.</p>';
   }
   function renderPromoCats() {
+    const nb = $("promo_noids");
+    if (nb) { const keepN = [...nb.querySelectorAll("input:checked")].map((i) => i.value); nb.innerHTML = noIdBoxes(null, 'data-noid="new"', keepN); }
     const box = $("promo_cats"); if (!box) return;
     const keep = [...box.querySelectorAll("input:checked")].map((i) => i.value);
     const cats = Array.from(new Set([...KNOWN_CATEGORIES, ...currentProducts.map((p) => p.category).filter(Boolean)])).sort();
@@ -1822,12 +2119,25 @@
         <span class="promo-what">${escapeHtml(describePromo(p))}</span>
         <label class="switch"><input type="checkbox" data-promo-toggle="${escapeHtml(code)}" ${on ? "checked" : ""} aria-label="${escapeHtml(code)} active" />${on ? "On" : "Off"}</label>
         <button type="button" class="del-link" data-promo-delete="${escapeHtml(code)}">Delete</button>
+        <details style="flex-basis:100%;margin-top:6px"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Products this code skips</summary>
+          <div style="max-height:180px;overflow:auto;margin-top:6px;display:grid;gap:4px">${noIdBoxes(null, 'data-noid-for="' + escapeHtml(code) + '"', p.noIds)}</div>
+          <button type="button" class="btn secondary" data-noid-save="${escapeHtml(code)}" style="margin-top:6px">Save skipped products</button>
+        </details>
       </div>`;
     }).join("");
     list.querySelectorAll("[data-promo-toggle]").forEach((box) =>
       box.addEventListener("change", () => {
         const code = box.getAttribute("data-promo-toggle");
         savePromos({ ...promoCodes, [code]: { ...promoCodes[code], active: box.checked } });
+      })
+    );
+    list.querySelectorAll("[data-noid-save]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const code = btn.getAttribute("data-noid-save");
+        const ids = [...list.querySelectorAll("input[data-noid-for]")].filter((i) => i.getAttribute("data-noid-for") === code && i.checked).map((i) => i.value).slice(0, 200);
+        const cur = { ...promoCodes[code] };
+        if (ids.length) cur.noIds = ids; else delete cur.noIds;
+        savePromos({ ...promoCodes, [code]: cur });
       })
     );
     list.querySelectorAll("[data-promo-delete]").forEach((btn) =>
@@ -1844,6 +2154,7 @@
   async function savePromos(next) {
     try {
       await setDoc(promoRef, { codes: next });
+      await publishPromos(next, true);
     } catch (e) {
       alert("Couldn't save promo codes: " + e.message);
     }
@@ -1862,7 +2173,9 @@
     const mode = $("promo_scope").value; renderPromoCats();
     const cats = [...$("promo_cats").querySelectorAll("input:checked")].map((i) => i.value);
     if (mode !== "all" && !cats.length) { msg.textContent = "Tick at least one category, or choose “Everything”."; return; }
-    await savePromos({ ...(promoCodes || {}), [code]: { type, value, active: true, ...(mode !== "all" ? { mode, cats } : {}) } });
+    const noIds = [...($("promo_noids") || document.createElement("div")).querySelectorAll("input:checked")].map((i) => i.value).slice(0, 200);
+    await savePromos({ ...(promoCodes || {}), [code]: { type, value, active: true, ...(mode !== "all" ? { mode, cats } : {}), ...(noIds.length ? { noIds } : {}) } });
+    if ($("promo_noids")) $("promo_noids").querySelectorAll("input").forEach((i) => { i.checked = false; });
     $("promo_scope").value = "all"; $("promo_cats").querySelectorAll("input").forEach((i) => { i.checked = false; });
     $("promo_code").value = "";
     $("promo_value").value = "";
@@ -2289,6 +2602,7 @@
     $("f_name").value = p.name || "";
     $("f_price").value = p.price || "";
     $("f_old").value = p.oldPrice || "";
+    $("f_ready").value = p.readyIn || "";
     $("f_tag").value = p.tag || "";
     $("f_desc").value = p.desc || "";
     $("f_short").value = p.shortLine || "";
@@ -2406,6 +2720,7 @@
         name: $("f_name").value.trim(),
         price: Number($("f_price").value),
         oldPrice: Number($("f_old").value) > Number($("f_price").value) ? Number($("f_old").value) : null,
+        readyIn: $("f_ready").value.trim().slice(0, 60) || null,
         category,
         tag: $("f_tag").value.trim() || null,
         desc: $("f_desc").value.trim(),
@@ -2482,16 +2797,16 @@
     hero: { title: "Heading & effects", intro: "The big heading at the top of the home page.", groups: ["hero"] },
     homesections: { title: "Home sections", intro: "Parts of the home page: reviews, tiles, stats, visit-store and their order.", groups: ["shuffle", "reviewsmore", "reviewsadd", "tiles", "bento", "visit", "sections"] },
     games: { title: "Get Fun games", intro: "Small games for your customers: Yarn match, Photo puzzle and Spin the wheel. Everything is OFF until you switch it on.", groups: ["gamesmain", "gmatch", "gpuzzle", "gwheel", "gdisc"] },
-    cards: { title: "Product cards & filters", intro: "How products look and how customers find them.", groups: ["cards", "searchf", "price", "wish", "recent", "explore"] },
-    offers: { title: "Offers, FAQ & Instagram", intro: "Combo offers, cart extras, the FAQ & returns page and an Instagram strip. Each part has its own switch.", groups: ["bundlesf", "cartplusf", "faqf", "instaf"] },
-    productpage: { title: "Product page", intro: "What customers see when they open a product. Fill the details of each product in Add / edit product.", groups: ["ppage"] },
+    cards: { title: "Product cards & filters", intro: "How products look and how customers find them.", groups: ["cards", "savef", "badgesf", "searchf", "price", "wish", "recent", "explore"] },
+    offers: { title: "Offers, FAQ & Instagram", intro: "Combo offers, cart extras, the FAQ & returns page and an Instagram strip. Each part has its own switch.", groups: ["bundlesf", "cartplusf", "timerf", "faqf", "policyf", "instaf"] },
+    productpage: { title: "Product page", intro: "What customers see when they open a product. Fill the details of each product in Add / edit product.", groups: ["ppage", "sizef", "revphotof"] },
     guide: { title: "Order guide", intro: "A “Complete order guide” bar under the top banner of the home page. Add, edit and re-order the steps.", groups: ["guidef", "guidesteps"] },
     look: { title: "Look & motion", intro: "Spacing, corners and the little animations. Colors and fonts are not touched.", groups: ["look", "motion"] },
     footer: { title: "Footer", intro: "A sorted footer with link columns, track-your-order, local time and social icons, plus links and the credit line.", groups: ["footerpro", "flinks", "designed"] },
     brand: { title: "Look & brand", intro: "Shop name, logo, address, colours, fonts, website text and shop photos.", groups: ["brandid", "brandcolors", "brandtext", "brandphotos"] },
     i18n: { title: "Translations", intro: "English / اردو for the whole shop.", groups: ["i18n", "i18nextra"] },
     shopinfo: { title: "Shop info & delivery", intro: "Maintenance page, free-delivery bar and shop timings.", groups: ["maint", "delivery", "timings"] },
-    orderflow: { title: "Order & checkout", intro: "How customers place and follow their orders.", groups: ["checkoutf", "ordnof", "trackingf"] },
+    orderflow: { title: "Order & checkout", intro: "How customers place and follow their orders.", groups: ["checkoutf", "ordnof", "trackingf", "cartf", "adsf", "admintools"] },
     speed: { title: "Speed & app", intro: "Faster loading and the phone-app options.", groups: ["speed", "pwa", "accessf"] },
   };
   const FEATURES = [
@@ -2503,13 +2818,13 @@
     ["cardLayout.on", "Card design", "cards"], ["priceFilter.on", "Price filter", "cards"], ["wishlist.on", "Wishlist", "cards"],
     ["recent.on", "Recently viewed", "cards"], ["exploreMore.on", "Explore more", "cards"],
     ["productPage.tabs", "Description / Details tabs", "productpage"], ["productPage.sizes", "Sizes available", "productpage"], ["productPage.colours", "Colours available", "productpage"], ["productPage.includes", "Price includes", "productpage"], ["guide.on", "Order guide", "guide"],
-    ["bundles.on", "Combo offers", "offers"], ["cartPlus.suggest", "Cart suggestions", "offers"], ["cartPlus.giftOn", "Free gift over Rs X", "offers"], ["faq.on", "FAQ & returns", "offers"], ["insta.on", "Instagram strip", "offers"],
+    ["bundles.on", "Combo offers", "offers"], ["cartPlus.suggest", "Cart suggestions", "offers"], ["cartPlus.giftOn", "Free gift over Rs X", "offers"], ["faq.on", "FAQ & returns", "offers"], ["policies.on", "Return / delivery / privacy pages", "offers"], ["saveBadge.on", "“Save 10%” badge on cards", "cards"], ["cardBadges.lowOn", "“Only N left” badge", "cards"], ["cardBadges.newOn", "Automatic “New” badge", "cards"], ["cardBadges.comboOn", "“In a combo offer” badge", "cards"], ["cardBadges.readyOn", "“Ready in …” label", "cards"], ["saleTimer.on", "Sale countdown bar", "offers"], ["sizeGuide.on", "Size guide", "productpage"], ["reviewPhotos.on", "Photo in customer reviews", "productpage"], ["cartReminder.on", "Unfinished-cart reminders", "orderflow"], ["promoRules.oneAtATime", "“Promo already applied” message", "offers"], ["metaPixel.events", "Meta Pixel shop events", "orderflow"], ["orderAlert.telegram", "Telegram new-order alert", "orderflow"], ["insta.on", "Instagram strip", "offers"],
     ["look.on", "Custom spacing & corners", "look"], ["motion.sections.on", "Scroll reveal", "look"], ["motion.cards.on", "Card motion", "look"], ["motion.overlays.on", "Cart & pop-up motion", "look"],
     ["brand.on", "Look & brand", "brand"], ["footer.on", "Sorted footer", "footer"], ["footerLinks.on", "Footer links", "footer"], ["designedBy.on", "Designed-by credit", "footer"], ["i18n.on", "Urdu / English", "i18n"],
     ["freeDelivery.on", "Free-delivery bar", "shopinfo"], ["timings.on", "Shop timings", "shopinfo"],
-    ["checkout.betterForm", "Better order form", "orderflow"], ["checkout.strict", "Strict order checks", "orderflow"], ["checkout.whatsappAuto", "WhatsApp after order", "orderflow"], ["tracking.on", "Order tracking", "orderflow"], ["orders.numeric", "Numeric order numbers", "orderflow"], ["myOrders.on", "My orders", "orderflow"], ["search.suggest", "Search suggestions", "cards"], ["productPage.full", "Full product page", "productpage"], ["speed.srcset", "Smaller photos", "speed"], ["speed.apiShop", "Fast shop data", "speed"], ["speed.sw", "Offline mode", "speed"],
+    ["checkout.betterForm", "Better order form", "orderflow"], ["adminTools.courierBook", "Courier & COD summary", "orderflow"], ["checkout.strict", "Strict order checks", "orderflow"], ["checkout.whatsappAuto", "WhatsApp after order", "orderflow"], ["tracking.on", "Order tracking", "orderflow"], ["orders.numeric", "Numeric order numbers", "orderflow"], ["myOrders.on", "My orders", "orderflow"], ["search.suggest", "Search suggestions", "cards"], ["productPage.full", "Full product page", "productpage"], ["speed.srcset", "Smaller photos", "speed"], ["speed.apiShop", "Fast shop data", "speed"], ["speed.sw", "Offline mode", "speed"],
     ["pwa.install", "Install button", "speed"], ["pwa.safeArea", "Notch padding", "speed"],
-    ["speed.lcp", "First photo first", "speed"], ["speed.boot", "Quick loading screen", "speed"], ["speed.noLive", "Load shop data once", "speed"], ["speed.cv", "Skip drawing footer", "speed"],
+    ["speed.apiOnly", "Fewer database reads", "speed"], ["speed.adminOrdersLimit", "Admin: newest orders only", "speed"], ["speed.adminCache", "Admin: remember data", "speed"], ["speed.adminLazy", "Admin: reviews on demand", "speed"], ["speed.lcp", "First photo first", "speed"], ["speed.boot", "Quick loading screen", "speed"], ["speed.noLive", "Load shop data once", "speed"], ["speed.cv", "Skip drawing footer", "speed"],
     ["speed.lightMotion", "Lighter motion on phones", "speed"], ["speed.resizeUploads", "Shrink uploads", "speed"], ["orders.slipWA", "Approve & send slip", "orderflow"],
     ["wishlist.reminders", "Wishlist reminders", "cards"], ["checkout.giftNote", "Gift note", "orderflow"], ["footer.officialIcons", "Official social colours", "footer"], ["headerSocial.official", "Header icons in own colours", "footer"], ["footer.floatRight", "Floating buttons on right", "footer"],
   ];
@@ -2560,6 +2875,7 @@
       settingsStatus = "error:Couldn't read the saved settings (" + (e.code || e.message) + "). The pages show the starting values. If this says permission-denied, add the rule shown at the bottom of Shop info & delivery.";
     }
     S = mergeDefaults(SDEF, remote);
+    try { syncOrdersLimit(); } catch (e) {}
     renderSettings();
     refreshDash();
     renderList && currentProducts.length && renderList();
@@ -2719,6 +3035,7 @@
       tf("games.puzzle.code", "Prize code when solved (optional)", { ph: "e.g. PUZZLE5", hint: "Create the same code in Promo codes. One prize per customer per day." }) +
       tf("games.puzzle.prizeText", "Prize message", { ph: "5% off your next order" }));
     G.gdisc = group("gdisc", "Discounts: one at a time", "A customer can always use only ONE promo code in an order (a prize code from a game is a promo code too, so two codes never work together). Choose what happens when a promo code and a combo offer are both in the cart.",
+      sw("promoRules.oneAtATime", "Show a clear “already applied” message if a customer tries a second promo code") +
       sel("promoRules.mode", "Promo code + combo price", [["both", "Add up both discounts (as before)"], ["best", "Only the bigger discount counts"]]));
     G.gwheel = group("gwheel", "Spin the wheel", "Add 2 to 10 prizes. Give a prize a code to make it a discount; leave the code empty for “Try again” type segments. Create each code in Promo codes too.",
       sw("games.wheel.on", "Use this game") +
@@ -2893,6 +3210,11 @@
         <label>Question</label>${listIn("faq.items", i, "q", x.q, "text")}<label>Answer</label><textarea data-list="faq.items" data-idx="${i}" data-prop="a" rows="2">${esc(x.a || "")}</textarea></div>`).join("") +
       `<button type="button" class="btn secondary" data-act="add-faq" style="margin-top:6px">+ Add a question</button>` +
       tf("faq.returnsTitle", "Returns box heading") + tf("faq.returns", "Returns & exchange rules (your own words)", { area: true, rows: 4 }));
+    G.policyf = group("policyf", "Return, delivery & privacy pages", "Three short pages customers open from the footer (also at /returns, /delivery, /privacy). Meta ads usually want a privacy page. Edit the words to match how YOU work. A page with empty text is hidden.",
+      sw("policies.on", "Use these pages") + sw("policies.footer", "Show links in the footer") +
+      tf("policies.returnsTitle", "Returns page heading") + tf("policies.returns", "Returns & refund text", { area: true, rows: 6 }) +
+      tf("policies.deliveryTitle", "Delivery page heading") + tf("policies.delivery", "Delivery text (time, charges, courier)", { area: true, rows: 6 }) +
+      tf("policies.privacyTitle", "Privacy page heading") + tf("policies.privacy", "Privacy text", { area: true, rows: 8 }));
     const iposts = v("insta.posts") || [];
     G.instaf = group("instaf", "Instagram strip", "Show up to 6 of your Instagram pictures under the reviews. Paste each picture's address and the post link.",
       sw("insta.on", "Show the Instagram strip") + tf("insta.title", "Heading") + tf("insta.link", "Your Instagram page address", { ph: "https://www.instagram.com/twisttanglecrochet/" }) +
@@ -2912,6 +3234,7 @@
     G.ordnof = group("ordnof", "Order numbers & “My orders”", "Short numeric order numbers and a “My orders” list for customers.",
       sw("orders.numeric", "Order numbers like 2000, 2001, 2002… (4 digits) instead of TTC-K7F3Q", "Needs a small Firestore rule once (see below). If it can't be reached the old style number is used.") +
       tf("orders.start", "First order number", { type: "num", min: 1 }) +
+      tf("orders.slipNote", "Extra line in the slip message (for example how to send the delivery charges in advance)", { area: true, rows: 3, ph: "Delivery charges Rs ___ please send in advance to JazzCash 03XX-XXXXXXX, then send a screenshot." }) +
       sw("orders.slipWA", "“Approve & send slip” button on each order", "You check the order, tap the button, and WhatsApp opens with the order slip ready to send to the customer. Nothing is ever sent automatically.") +
       sw("myOrders.on", "“My orders” button for customers (orders placed on their own phone, with the latest step)") +
       `<p class="hint" style="margin-top:12px">Rule for the counter (add inside the same rules, next to config/siteSettings):</p><pre style="background:var(--bg);padding:12px;border-radius:8px;font-size:12px;overflow:auto">match /config/orderCounter {
@@ -2925,6 +3248,37 @@
   allow read: if true;
   allow write: if &lt;the same admin check as config/promoCodes&gt;;
 }</pre>`);
+    G.savef = group("savef", "“Save” badge on product cards", "A small badge on the photo, like “Save 10%” or “Save Rs200”. It uses the old price you type in Add / edit product (Old price). Products without an old price show nothing.",
+      sw("saveBadge.on", "Show the badge") +
+      sel("saveBadge.style", "What it says", [["percent", "Save 10%"], ["amount", "Save Rs200"], ["both", "Save 10% (Rs200)"]]) +
+      tf("saveBadge.min", "Hide it when the saving is under this percent", { type: "num", min: 0 }));
+    G.badgesf = group("badgesf", "More card badges", "Small badges on the product photo. Each one has its own switch (all off).",
+      sw("cardBadges.lowOn", "“Only 3 left” when the stock number (Prices & tags → Stock) is low") + tf("cardBadges.lowAt", "Show it when stock is this number or less", { type: "num", min: 1 }) +
+      sw("cardBadges.newOn", "“New” badge for products you added recently (goes away by itself)") + tf("cardBadges.newDays", "How many days a product stays “New”", { type: "num", min: 1 }) +
+      sw("cardBadges.comboOn", "“In a combo offer” badge on products that are part of a combo (needs Combo offers ON)") +
+      sw("cardBadges.readyOn", "“Ready in 2 days” label from the “Ready in” box of each product (Add / edit product)"));
+    G.timerf = group("timerf", "Sale countdown", "A bar at the top of the shop counting down to the end of your sale. It disappears by itself when the time is over.",
+      sw("saleTimer.on", "Show the countdown") + tf("saleTimer.text", "Text before the numbers") + tf("saleTimer.endsAt", "Sale ends at (year-month-day hour:minute, 24-hour, Pakistan time)", { ph: "2026-11-05 23:59" }));
+    G.sizef = group("sizef", "Size guide", "A “Size guide” link in the product pop-up that opens a size chart. Good for frocks and wearables.",
+      sw("sizeGuide.on", "Use the size guide") + tf("sizeGuide.label", "Link text") + tf("sizeGuide.categories", "Only for these categories (comma separated, empty = every product)", { ph: "Frocks, Clothes" }) +
+      tf("sizeGuide.table", "Size chart: one row per line, cells separated by commas. The first line is the heading.", { area: true, rows: 7, ph: "Size, Age, Chest (in), Length (in)\nS, 1-2 years, 20, 18\nM, 3-4 years, 22, 21" }) +
+      tf("sizeGuide.note", "Note under the chart", { area: true, rows: 2, ph: "Measure your child and pick the nearest size. Custom sizes on request." }));
+    G.revphotof = group("revphotof", "Photos in customer reviews", "Customers can add one photo to their review. The review still waits for your approval. Needs the updated Firestore rules (reviews with a photo).",
+      sw("reviewPhotos.on", "Let customers add a photo to a review"));
+    G.cartf = group("cartf", "Unfinished-cart reminders", "When a customer types a valid phone number at checkout but does not order, the cart is saved (one small write). Customers → Unfinished carts shows them and lets you remind them on WhatsApp. Needs the updated Firestore rules (carts).",
+      sw("cartReminder.on", "Save unfinished carts"));
+    G.adsf = group("adsf", "Meta ads & new-order alert", "For when you run Facebook / Instagram ads. Both switches are OFF until you turn them on.",
+      sw("metaPixel.events", "Send shop events to Meta Pixel (ViewContent, Add to cart, Checkout, Purchase in Rs)") +
+      `<p class="hint">Your Pixel already counts page visits. With this ON, Meta also learns who looked at a product, added it, started checkout and bought, so ads can find buyers. Check it in Meta Events Manager → Test events.</p>` +
+      sw("orderAlert.telegram", "Telegram message for every website order") +
+      `<p class="hint">Needs a one-time setup: make a bot with @BotFather in Telegram, then in Vercel → Settings → Environment Variables add <b>TELEGRAM_BOT_TOKEN</b> and <b>TELEGRAM_CHAT_ID</b> and redeploy. Without them nothing is sent. The message has only order number, total, city and item count (no name, phone or address).</p>` +
+      `<p class="hint" style="margin-top:12px"><b>Before ads:</b> keep Speed → “Fast shop data” and “Load shop data once” ON so extra visitors don't use up Firebase's free 50,000 reads a day, and set a Budget alert in Google Cloud → Billing. Send ads to a product or category link (copy it from the shop address bar), not only the home page.</p>`);
+    const atpl = (S.adminTools && S.adminTools.templates) || [];
+    G.admintools = group("admintools", "Admin helpers (only you see these)", "Ready-made WhatsApp messages on every order, and a courier summary. Nothing here is shown to customers.",
+      sw("adminTools.courierBook", "Courier & COD summary on the Customers page (how many parcels with each courier and how much cash to collect)") +
+      `<p class="hint" style="margin-top:12px"><b>Ready-made messages.</b> They appear as buttons under “Quick replies” on each order and open WhatsApp with the text filled in. Use <code>{name}</code> <code>{order}</code> <code>{total}</code> <code>{address}</code> <code>{link}</code> (tracking link) and <code>{shop}</code> (shop link). ${atpl.length ? "" : "Right now the 6 built-in messages are used. Press the button to copy them here and change them."}</p>` +
+      atpl.map((x, i) => `<div class="srow" style="grid-template-columns:1fr 2fr auto auto auto">${listIn("adminTools.templates", i, "label", x.label, "text", 'placeholder="Button name"')}${listIn("adminTools.templates", i, "text", x.text, "text", 'placeholder="Message"')}${moveBtns("tpl", i, atpl.length)}</div>`).join("") +
+      (atpl.length ? `<button type="button" class="btn secondary" data-act="add-tpl" style="margin-top:6px">+ Add a message</button>` : `<button type="button" class="btn secondary" data-act="seed-tpl" style="margin-top:6px">Copy the built-in messages here to edit them</button>`));
     // ---- Look & brand ----
     const bt = (v.brand && v.brand.texts) || {};
     const btf = (key, label) => `<label>${label}</label><input type="text" data-btext="${key}" value="${esc(bt[key] || "")}" placeholder="${esc(IDEF.en[key] || "")}" />`;
@@ -2964,6 +3318,12 @@
     G.speed = group("speed", "Speed", "Safe to try: each one can be switched off again at any time.",
       sw("speed.srcset", "Smaller photos on phones (Cloudinary sizes)", "Photos load at the size the screen needs: less data, faster pages.") +
       sw("speed.apiShop", "Fast shop data", "Products load from a quick saved copy first, and the last good copy is shown if Firebase isn't reachable.") +
+      sw("speed.apiOnly", "Fewer database reads (use the quick copy only)", "Needs “Fast shop data”. Visitors get products, settings, approved reviews and promo codes from ONE shared copy instead of each reading Firebase themselves. Use this when you run ads: it keeps you inside Firebase's free 50,000 reads a day. Your changes then reach customers after the refresh time below.") +
+      tf("speed.apiCacheMin", "Quick copy refresh time (minutes, 1 to 60). Try 5 when you run ads.", { type: "num", min: 1 }) +
+      sw("speed.adminLazy", "Admin: read reviews only when I open Reviews", "The reviews list is not read when you sign in, only when you open the Reviews page. The Home page then shows “–” for reviews waiting, and the search box does not find reviews until you have opened that page once. Takes effect from the next sign-in or reload.") +
+      sw("speed.adminCache", "Admin: remember data on this device", "The admin keeps what it already read in this browser, so reopening or refreshing it within about 30 minutes reads only what changed (far fewer reads). Reload the page once after turning it on. Use it only on your own phone or computer: it stores your orders on that device, and signing out wipes it.") +
+      tf("speed.adminOrdersLimit", "Admin: load only the newest orders (0 = all, otherwise 50 or more, e.g. 200)", { type: "num", min: 0 }) +
+      '<p class="hint">Opening this admin panel normally reads every order you have ever received, so the reads grow with your orders. With a number here only the newest ones are read; the Orders page shows a “Load older orders” button. Sales totals and the customer list then count only the loaded orders. Backups and Excel downloads load everything first.</p>' +
       sw("speed.lightMotion", "Lighter motion on phones", "Switches off slides, fades and other animations on small screens: smoother on cheap phones.") +
       sw("speed.lcp", "Show the first big photo first", "The top photo of the home page is fetched with priority and remembered, so it starts loading before the page code. Helps the mobile loading score most.") +
       sw("speed.boot", "Quick loading screen", "A simple logo + bar shows while the shop opens, instead of a blank page. Seen from the second visit.") +
@@ -3161,8 +3521,8 @@
     if (act === "theme") { adminThemeKey = btn.dataset.key; applyTheme(); refreshDash(); return; }
     if (act === "go-shop") { goShop(); return; }
     if (!S) return;
-    const L = { bento: S.bento.items, link: S.footerLinks.links, bar: S.announcements.bars, ad: S.ads.items, slide: S.carousel.slides, gstep: S.guide.steps, bun: S.bundles.items, faq: S.faq.items, ipost: S.insta.posts, gprize: S.games.wheel.prizes };
-    const m = /^(up|down|rm)-(bento|link|bar|ad|slide|gstep|bun|faq|ipost|gprize)$/.exec(act);
+    const L = { bento: S.bento.items, link: S.footerLinks.links, bar: S.announcements.bars, ad: S.ads.items, slide: S.carousel.slides, gstep: S.guide.steps, bun: S.bundles.items, faq: S.faq.items, ipost: S.insta.posts, gprize: S.games.wheel.prizes, tpl: S.adminTools.templates };
+    const m = /^(up|down|rm)-(bento|link|bar|ad|slide|gstep|bun|faq|ipost|gprize|tpl)$/.exec(act);
     if (m) {
       const list = L[m[2]];
       if (m[1] === "rm") list.splice(i, 1); else swap(list, i, m[1] === "up" ? i - 1 : i + 1);
@@ -3173,6 +3533,8 @@
     else if (act === "add-faq") { S.faq.items.push({ q: "", a: "" }); renderSettings(); }
     else if (act === "add-ipost") { if (S.insta.posts.length < 6) S.insta.posts.push({ image: "", link: "" }); renderSettings(); }
     else if (act === "add-gprize") { if (S.games.wheel.prizes.length < 10) S.games.wheel.prizes.push({ label: "", code: "", chance: "" }); renderSettings(); }
+    else if (act === "seed-tpl") { S.adminTools.templates = DEF_TPLS.map((x) => ({ ...x })); renderSettings(); }
+    else if (act === "add-tpl") { if (S.adminTools.templates.length < 12) S.adminTools.templates.push({ label: "", text: "" }); renderSettings(); }
     else if (act === "add-xtra") { S.i18n.extra.push({ en: "", ur: "" }); renderSettings(); }
     else if (act === "rm-xtra") { S.i18n.extra.splice(i, 1); renderSettings(); }
     else if (act === "scan-xtra") { scanShopText(btn || e.target); }
@@ -3278,6 +3640,7 @@
       } catch (e) {}
       await setDoc(SETTINGS_REF, out);
       S = mergeDefaults(SDEF, out);
+      try { syncOrdersLimit(); } catch (e) {}
       settingsStatus = "ok:Saved. The shop now uses these settings (customers may need to refresh once).";
     } catch (err) {
       settingsStatus = "error:Couldn't save (" + (err.code || err.message) + "). " + (err.code === "permission-denied" ? "Add the Firestore rule shown at the bottom of Shop info & delivery." : "");
@@ -3382,7 +3745,7 @@
     if (!pane) return;
     const open = currentOrders.filter((o) => o.status !== "done").length;
     const fresh = currentOrders.filter((o) => o.status === "new").length;
-    const pending = currentReviews.filter((r) => !r.approved).length;
+    const pending = reviewUnsub ? currentReviews.filter((r) => !r.approved).length : 0;
     const on = S ? FEATURES.filter((f) => getPath(S, f[0])) : [];
     const tile = (n, label, view, tone) => `<button type="button" class="dash-tile ${tone}" data-act="goto" data-view="${view}"><span class="dash-n">${n}</span><span>${label}</span></button>`;
     const skin = document.body.classList.contains("skin-new") ? "new" : "classic";
@@ -3392,7 +3755,7 @@
         <div class="dash-grid">
           ${tile(fresh, "new orders", "orders", "t-red")}
           ${tile(open, "orders not done", "orders", "t-amber")}
-          ${tile(pending, "reviews to approve", "reviews", "t-purple")}
+          ${tile(reviewUnsub ? pending : "–", "reviews to approve", "reviews", "t-purple")}
           ${tile(currentProducts.length, "products", "products", "t-green")}
           ${tile(S ? (S.carousel.slides || []).length : "–", "carousel photos", "carousel", "t-blue")}
         </div>
@@ -3402,7 +3765,7 @@
       ${(() => {
         const old = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled" && tsMs(o.createdAt) && Date.now() - tsMs(o.createdAt) > 3 * 864e5).length;
         const noTrack = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled" && !(o.tracking && o.tracking.stage)).length;
-        const items = [[fresh, "new orders to confirm", "orders"], [noTrack, "open orders without a tracking step", "orders"], [old, "orders open for more than 3 days", "orders"], [pending, "reviews waiting for approval", "reviews"], [lowStockList().length, "products running low on stock (Prices & tags → Stock)", "prices"]].filter((x) => x[0] > 0);
+        const items = [[fresh, "new orders to confirm", "orders"], [noTrack, "open orders without a tracking step", "orders"], [old, "orders open for more than 3 days", "orders"], [pending, "reviews waiting for approval", "reviews"], [lowStockList().length, "products running low on stock (Prices & tags → Stock)", "prices"], [ordersBackupDue() ? 1 : 0, "weekly orders backup is due (Backup page → Orders Excel)", "backup"]].filter((x) => x[0] > 0);
         return `<div class="card"><h2>Today's work</h2>${items.length ? items.map(([n, l, v]) => `<button type="button" class="pill" data-act="goto" data-view="${v}" style="margin:0 8px 8px 0"><b>${n}</b> ${l} →</button>`).join("") : '<p class="hint" style="margin:0">All caught up ✓ Nothing is waiting for you.</p>'}</div>`;
       })()}
       <div class="card"><h2>Switched on in the shop</h2>
@@ -3662,7 +4025,7 @@
     return `Assalam o Alaikum ${(c.name || "").split(" ")[0] || ""}! Your order is confirmed ✅\n\nOrder no: ${o.orderNo || ""}\n${lines.join("\n")}` +
       (disc ? `\nDiscount: -Rs${disc}` : "") + (dc > 0 ? `\nDelivery: Rs${dc}` : "") +
       `\n*Total: Rs${Number(o.total) || 0}*${dc > 0 ? "" : " (delivery charged separately)"}` + (c.address ? `\n\nDeliver to: ${c.address}` : "") +
-      (o.orderNo ? `\n\nTrack your order: ${trackLink(o.orderNo)}` : "") + `\n\nThank you for shopping with ${shop} 🧶`;
+      (S && S.orders && String(S.orders.slipNote || "").trim() ? `\n\n${String(S.orders.slipNote).trim()}` : "") + (o.orderNo ? `\n\nTrack your order: ${trackLink(o.orderNo)}` : "") + `\n\nThank you for shopping with ${shop} 🧶`;
   }
   pageRoot.addEventListener("click", async (e) => {
     const b = e.target.closest("[data-slip-send]"); if (!b) return;
@@ -3940,7 +4303,7 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
   const entryLabel = (e) => e.kind === "sale" ? ((SALE_TYPES.find((t) => t[0] === e.type) || [0, "Other"])[1]) : expLabel(e.type);
   function startExpenses() {
     if (expUnsub) return;
-    expUnsub = onSnapshot(query(collection(db, "expenses"), orderBy("date", "desc")), (snap) => { expenses = snap.docs.map((d) => ({ id: d.id, ...d.data() })); expErr = ""; renderSales(); },
+    expUnsub = onSnapshot(query(collection(db, "expenses"), orderBy("date", "desc")), (snap) => { expenses = snap.docs.map((d) => ({ id: d.id, ...d.data() })); expErr = ""; renderSales(); if (currentView === "customers") renderCustomers(); },
       (err) => { expErr = err.code === "permission-denied" ? "Add the Firestore rule for “expenses” (see firestore.rules) to save costs." : "Couldn't load costs (" + err.message + ")."; renderSales(); });
   }
   function salesUpper() { return salesRange === "custom" && salesTo ? new Date(salesTo + "T23:59:59").getTime() : Infinity; }
@@ -3977,6 +4340,10 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
     const top = {}; done.forEach((o) => (o.items || []).forEach((i) => { const r = top[i.name] || (top[i.name] = { q: 0, rs: 0 }); r.q += Number(i.qty) || 1; r.rs += (Number(i.price) || 0) * (Number(i.qty) || 1); }));
     const topRows = Object.entries(top).sort((a, b) => b[1].rs - a[1].rs).slice(0, 8);
     const fmt = (n) => "Rs. " + Number(n).toLocaleString("en-PK");
+    if (costMap === null && role !== "") loadCosts();
+    const hasCosts = !!costMap && Object.keys(costMap).length > 0;
+    let goodsProfit = 0, noCostQty = 0;
+    if (hasCosts) done.forEach((o) => { goodsProfit -= Number(o.discount) || 0; (o.items || []).forEach((i) => { const c = costMap[String(i.productId || "")]; const q = Number(i.qty) || 1; if (c === undefined || c === null) noCostQty += q; else goodsProfit += ((Number(i.price) || 0) - Number(c)) * q; }); });
     const net = total + addedTotal - expTotal;
     const margin = total + addedTotal > 0 ? Math.round((net / (total + addedTotal)) * 100) : 0;
     const chips = [["today", "Today"], ["week", "This week"], ["7d", "Last 7 days"], ["month", "This month"], ["30d", "Last 30 days"], ["year", "This year"], ["all", "All time"], ["custom", "Pick dates"]];
@@ -4016,6 +4383,7 @@ document.querySelectorAll("tbody tr").forEach(function(r){r.classList.add("tick"
         <div class="sale-tile"><span>Total sales</span><b>${fmt(total)}</b><small>${label}</small></div>
         <div class="sale-tile"><span>Done orders</span><b>${done.length}</b><small>${itemsSold} items sold</small></div>
         <div class="sale-tile"><span>Average order</span><b>${fmt(avg)}</b><small>per done order</small></div>
+        ${hasCosts ? `<div class="sale-tile"><span>Profit on products</span><b>${fmt(goodsProfit)}</b><small>sale price minus your cost price${noCostQty ? " · " + noCostQty + " item" + (noCostQty === 1 ? "" : "s") + " have no cost yet" : ""}</small></div>` : ""}
         <button type="button" class="sale-tile warn" data-act="goto" data-view="orders"><span>Not counted</span><b>${other.length}</b><small>new, open or cancelled →</small></button>
       </div>
       ${done.length === 0 ? `<p class="empty">No done orders ${label}. When you deliver an order, open Orders and press <b>Move to done</b>.</p>` : ""}
@@ -4120,7 +4488,163 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
     });
     return Object.values(m).sort((a, b) => b.orders - a.orders || b.last - a.last);
   }
+  // ---- Orders export (select, filter, download) ----
+  const ox = { q: "", status: "all", channel: "all", range: "all", from: "", to: "", sales: true, notes: false, sel: new Set() };
+  const OX_RANGES = [["all", "All time"], ["today", "Today"], ["week", "This week"], ["month", "This month"], ["30d", "Last 30 days"], ["custom", "Pick dates"]];
+  const OX_STATUS = [["all", "All"], ["new", "New"], ["open", "Not done"], ["done", "Done"], ["cancelled", "Cancelled"]];
+  function oxStart() {
+    const now = new Date(), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (ox.range === "today") return d0.getTime();
+    if (ox.range === "week") { const d = new Date(d0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.getTime(); }
+    if (ox.range === "month") return new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    if (ox.range === "30d") return Date.now() - 30 * 864e5;
+    if (ox.range === "custom") return ox.from ? new Date(ox.from + "T00:00:00").getTime() : 0;
+    return 0;
+  }
+  function oxEnd() { return ox.range === "custom" && ox.to ? new Date(ox.to + "T23:59:59").getTime() : Infinity; }
+  const itemsText = (o) => (o.items || []).map((i) => (i.qty || 1) + "x " + i.name + (i.variant ? " (" + i.variant + ")" : "")).join("; ");
+  function oxAllRows() {
+    const rows = currentOrders.map((o) => {
+      const c = o.customer || {}; const items = Array.isArray(o.items) ? o.items : [];
+      return { key: "o:" + o.id, kind: "order", t: tsMs(o.createdAt), orderNo: o.orderNo || "", status: o.status === "done" ? "done" : o.status === "cancelled" ? "cancelled" : "new", channel: o.channel || "whatsapp",
+        name: c.name || "", phone: c.phone || "", address: c.address || "", city: c.city || "", items: itemsText(o), qty: items.reduce((n, i) => n + (Number(i.qty) || 1), 0),
+        itemsTotal: items.reduce((n, i) => n + (Number(i.price) || 0) * (Number(i.qty) || 1), 0), delivery: Number(o.deliveryCharge) || 0, discount: Number(o.discount) || 0, total: Number(o.total) || 0,
+        paid: o.paid ? "Yes" : "", payment: o.paymentMethod || "", note: c.notes || "", adminNote: o.adminNote || "", order: o };
+    });
+    if (ox.sales) {
+      expenses.filter((e) => e.kind === "sale").forEach((e) => {
+        rows.push({ key: "s:" + e.id, kind: "sale", t: new Date(String(e.date) + "T12:00:00").getTime() || 0, orderNo: "", status: "done", channel: "added by hand", name: "", phone: "", address: "", city: "",
+          items: entryLabel(e) + (e.note ? " · " + e.note : ""), qty: 0, itemsTotal: Number(e.amount) || 0, delivery: 0, discount: 0, total: Number(e.amount) || 0, payment: "", note: "", adminNote: "", order: null });
+      });
+    }
+    return rows.sort((a, b) => b.t - a.t);
+  }
+  function oxRows() {
+    const q = ox.q.trim().toLowerCase(), from = oxStart(), to = oxEnd();
+    return oxAllRows().filter((r) => {
+      if (ox.status === "open" ? r.status === "done" || r.status === "cancelled" : ox.status !== "all" && r.status !== ox.status) return false;
+      if (ox.channel !== "all" && r.channel !== ox.channel) return false;
+      if (r.t < from || r.t > to) return false;
+      if (q && !(r.orderNo + " " + r.name + " " + r.phone + " " + r.city + " " + r.address + " " + r.items).toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }
+  function oxControls() {
+    const chip = (grp, k, l, cur) => `<button type="button" class="chip ${k === cur ? "active" : ""}" data-ox-${grp}="${k}">${l}</button>`;
+    const chans = ["all"].concat([...new Set(currentOrders.map((o) => o.channel || "whatsapp"))]);
+    return `<input type="search" id="ox_q" placeholder="Search order no, name, phone, city, item…" value="${esc(ox.q)}" />
+      <div class="chips" style="margin-top:8px">${OX_STATUS.map(([k, l]) => chip("status", k, l, ox.status)).join("")}</div>
+      <div class="chips" style="margin-top:8px">${OX_RANGES.map(([k, l]) => chip("range", k, l, ox.range)).join("")}</div>
+      ${ox.range === "custom" ? `<div class="row2" style="margin-top:8px"><div><label>From</label><input type="date" id="ox_from" value="${esc(ox.from)}" /></div><div><label>To</label><input type="date" id="ox_to" value="${esc(ox.to)}" /></div></div>` : ""}
+      <div style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <label style="font-size:13px">Where from <select id="ox_channel">${chans.map((c) => `<option value="${esc(c)}" ${c === ox.channel ? "selected" : ""}>${c === "all" ? "All" : esc(channelLabel(c) || c)}</option>`).join("")}</select></label>
+        <label class="rep-chip"><input type="checkbox" id="ox_sales" ${ox.sales ? "checked" : ""} /> Include sales I added by hand</label>
+        <label class="rep-chip"><input type="checkbox" id="ox_notes" ${ox.notes ? "checked" : ""} /> Include my private notes in the file</label>
+      </div>`;
+  }
+  function renderOxList() {
+    const box = $("oxList"); if (!box) return;
+    const oldWrap = box.querySelector(".ox-wrap"); const keepScroll = oldWrap ? oldWrap.scrollTop : 0;
+    const rows = oxRows(); const shownKeys = new Set(rows.map((r) => r.key));
+    [...ox.sel].forEach((k) => { if (!shownKeys.has(k)) ox.sel.delete(k); }); // only what is shown can be selected
+    const chosen = rows.filter((r) => ox.sel.has(r.key));
+    const use = chosen.length ? chosen : rows;
+    const sum = use.reduce((n, r) => n + (r.status === "cancelled" ? 0 : r.total), 0);
+    const stLabel = { new: "New", done: "Done", cancelled: "Cancelled" };
+    box.innerHTML = `<div class="bulk-bar" style="margin-top:10px">
+        <label><input type="checkbox" id="ox_all" ${rows.length && chosen.length === rows.length ? "checked" : ""} /> Select all shown</label>
+        <span class="hint" style="margin:0"><b>${chosen.length}</b> ticked · ${rows.length} shown · using <b>${use.length}</b> · total <b>Rs. ${sum.toLocaleString("en-PK")}</b> (cancelled not counted)</span>
+      </div>
+      <div class="ox-wrap">${rows.slice(0, 300).map((r) => `<label class="ox-row ${ox.sel.has(r.key) ? "sel" : ""}"><input type="checkbox" data-ox-pick="${esc(r.key)}" ${ox.sel.has(r.key) ? "checked" : ""} />
+        <span class="ox-main"><b>${esc(r.kind === "sale" ? "Sale added by hand" : (r.name || "No name"))}</b> <small>${esc(r.orderNo)}</small><br><small>${esc(r.kind === "sale" ? r.items : [r.phone, r.city].filter(Boolean).join(" · "))}</small></span>
+        <span class="ox-mid"><small>${r.t ? esc(new Date(r.t).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })) : ""}<br>${esc(stLabel[r.status] || r.status)} · ${esc(r.kind === "sale" ? "Added by hand" : (channelLabel(r.channel) || r.channel))}</small></span>
+        <b class="ox-end">Rs. ${r.total.toLocaleString("en-PK")}</b></label>`).join("") || '<p class="empty">No orders match.</p>'}${rows.length > 300 ? `<p class="hint">Showing the newest 300. Narrow the list with the filters above. Downloads still include everything shown.</p>` : ""}</div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn" data-ox-go="xls">Download Excel file</button>
+        <button type="button" class="btn secondary" data-ox-go="csv">Download CSV</button>
+        <button type="button" class="btn secondary" data-ox-go="labels">Print courier labels</button>
+        <button type="button" class="btn secondary" data-ox-go="list">Print list</button>
+      </div>`;
+    const nw = box.querySelector(".ox-wrap"); if (nw && keepScroll) nw.scrollTop = keepScroll;
+  }
+  function oxCols() {
+    const base = [["Order no", "orderNo"], ["Date", "date"], ["Status", "statusL"], ["Where from", "channelL"], ["Name", "name"], ["Phone", "phone", "text"], ["Address", "address"], ["City", "city"], ["Items", "items"], ["Qty", "qty", "num"], ["Items total", "itemsTotal", "num"], ["Delivery", "delivery", "num"], ["Discount", "discount", "num"], ["Total", "total", "num"], ["Payment", "payment"], ["Paid?", "paid"], ["Customer note", "note"]];
+    if (ox.notes) base.push(["My private note", "adminNote"]);
+    return base;
+  }
+  function oxValue(r, k) {
+    if (k === "date") return r.t ? new Date(r.t).toISOString().slice(0, 10) : "";
+    if (k === "statusL") return r.status === "done" ? "Done" : r.status === "cancelled" ? "Cancelled" : "New";
+    if (k === "channelL") return r.kind === "sale" ? "Added by hand" : (channelLabel(r.channel) || r.channel);
+    return r[k];
+  }
+  function oxDownload(kind, override, prefix) {
+    const rows = override || oxRows(); const chosen = override ? [] : rows.filter((r) => ox.sel.has(r.key)); const use = chosen.length ? chosen : rows;
+    if (!use.length) { alert("There is nothing to download. Change the filters first."); return; }
+    const day = new Date().toISOString().slice(0, 10); const cols = oxCols();
+    if (kind === "csv") {
+      downloadFile("TTC-orders-" + day + ".csv", "﻿" + [cols.map((c) => csvCell(c[0])).join(",")].concat(use.map((r) => cols.map((c) => csvCell(oxValue(r, c[1]))).join(","))).join("\n"));
+    } else if (kind === "xls") {
+      const sumCols = ["qty", "itemsTotal", "delivery", "discount", "total"];
+      const td = (r, c) => { const v = oxValue(r, c[1]); const st = c[2] === "num" ? 'style="mso-number-format:\\#\\,\\#\\#0;text-align:right"' : c[2] === "text" ? 'style="mso-number-format:\\@"' : 'style="mso-number-format:\\@"'; return `<td ${st}>${esc(v === undefined || v === null ? "" : v)}</td>`; };
+      const live = use.filter((r) => r.status !== "cancelled");
+      const totalRow = "<tr>" + cols.map((c, i) => i === 0 ? '<td style="font-weight:bold;background:#F3E9D2">TOTAL (cancelled not counted)</td>' : sumCols.includes(c[1]) ? `<td style="font-weight:bold;background:#F3E9D2;text-align:right;mso-number-format:\\#\\,\\#\\#0">${live.reduce((n, r) => n + (Number(r[c[1]]) || 0), 0)}</td>` : '<td style="background:#F3E9D2"></td>').join("") + "</tr>";
+      const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Orders</x:Name><x:WorksheetOptions><x:FreezePanes/><x:SplitHorizontal>1</x:SplitHorizontal><x:TopRowBottomPane>1</x:TopRowBottomPane></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>table{border-collapse:collapse;font-family:Calibri,Arial,sans-serif;font-size:11pt}th{background:#6E1E36;color:#fff;border:1px solid #bbb;padding:6px 8px;text-align:left}td{border:1px solid #ccc;padding:5px 8px;vertical-align:top}tr.c td{color:#999;text-decoration:line-through}</style></head><body><table><tr>${cols.map((c) => `<th>${esc(c[0])}</th>`).join("")}</tr>${use.map((r) => `<tr class="${r.status === "cancelled" ? "c" : ""}">${cols.map((c) => td(r, c)).join("")}</tr>`).join("")}${totalRow}</table></body></html>`;
+      downloadFile((prefix || "TTC-orders-") + day + ".xls", html, "application/vnd.ms-excel;charset=utf-8");
+    } else if (kind === "labels") {
+      const lab = use.filter((r) => r.kind === "order" && r.status !== "cancelled");
+      if (!lab.length) { alert("There are no orders to print labels for."); return; }
+      const w = window.open("", "_blank"); if (!w) { alert("Please allow pop-ups to print."); return; }
+      const html = lab.map((r) => { const cod = /cash/i.test(r.payment || "") ? `<div class="cod">Collect Rs${r.total}</div>` : "";
+        return `<div class="l"><b>${esc(r.name)}</b><div>${esc(r.phone)}</div><div>${esc(r.address)}${r.city ? ", " + esc(r.city) : ""}</div><div class="s">Order ${esc(r.orderNo)} · ${esc(r.items)}</div>${cod}</div>`; }).join("");
+      w.document.write(`<!doctype html><title>Labels</title><style>body{font-family:system-ui,sans-serif;margin:10px}.bar{margin-bottom:10px}.g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.l{border:1.5px dashed #6E1E36;border-radius:8px;padding:10px;font-size:14px;break-inside:avoid}.l .s{font-size:12px;color:#555;margin-top:4px}.cod{margin-top:6px;font-weight:800;color:#B3261E}@media print{.bar{display:none}}</style><div class="bar"><button onclick="print()">Print</button> ${lab.length} label${lab.length === 1 ? "" : "s"}</div><div class="g">${html}</div>`);
+      w.document.close();
+    } else if (kind === "list") {
+      const w = window.open("", "_blank"); if (!w) { alert("Please allow pop-ups to print."); return; }
+      const live = use.filter((r) => r.status !== "cancelled");
+      w.document.write(`<!doctype html><title>Orders</title><style>body{font-family:system-ui,sans-serif;margin:14px;font-size:13px}table{border-collapse:collapse;width:100%}th{background:#6E1E36;color:#fff;text-align:left}th,td{border:1px solid #ccc;padding:5px 7px;vertical-align:top}.r{text-align:right}.c td{color:#999;text-decoration:line-through}@media print{.bar{display:none}}</style><div class="bar"><button onclick="print()">Print</button></div><h3>Orders (${use.length}) · Total Rs. ${live.reduce((n, r) => n + r.total, 0).toLocaleString("en-PK")}</h3><table><tr><th>Date</th><th>Order</th><th>Name / phone</th><th>Items</th><th>Status</th><th>Total</th></tr>${use.map((r) => `<tr class="${r.status === "cancelled" ? "c" : ""}"><td>${esc(oxValue(r, "date"))}</td><td>${esc(r.orderNo)}</td><td>${esc(r.name)}<br>${esc(r.phone)}</td><td>${esc(r.items)}</td><td>${esc(oxValue(r, "statusL"))}</td><td class="r">${r.total}</td></tr>`).join("")}</table>`);
+      w.document.close();
+    }
+  }
   let custQuery = "";
+  // ---- Unfinished carts (switch: Admin → Order & checkout → Cart reminders). Loaded only when you press the button. ----
+  let cartRows = null, cartErr = "";
+  function cartsCardHtml() {
+    if (!(S && S.cartReminder && S.cartReminder.on) || role === "viewer") return "";
+    const wa = (c) => { const n = waNumber(c.phone); return n.length >= 11 ? "https://wa.me/" + n + "?text=" + encodeURIComponent(cartMessage(c)) : ""; };
+    let body;
+    if (cartErr) body = `<div class="msg error">${esc(cartErr)}</div>`;
+    else if (cartRows === null) body = `<p class="hint">Customers who typed their phone at checkout but did not order. Nothing is read from the database until you press the button.</p>`;
+    else if (!cartRows.length) body = `<p class="empty">No unfinished carts right now.</p>`;
+    else body = cartRows.map((c) => `<div class="bar-row" style="align-items:flex-start;flex-wrap:wrap"><span style="min-width:0;flex:1 1 220px"><b>${esc(c.name || "—")}</b> · ${esc(c.phone)}<br><span class="hint" style="margin:0">${esc((c.items || []).map((i) => (i.n || "") + " ×" + (i.q || 1)).join(", "))} · Rs. ${Number(c.total || 0).toLocaleString("en-PK")} · ${esc(c.ago)}</span></span>
+      ${wa(c) ? `<a class="btn wa" target="_blank" rel="noopener" href="${esc(wa(c))}">Remind on WhatsApp</a>` : ""}
+      <button type="button" class="del-link" data-cart-del="${esc(c.id)}">Remove</button></div>`).join("");
+    return `<div class="card" id="cartsCard"><h2>Unfinished carts</h2>${body}<button type="button" class="btn secondary" data-cart-load style="margin-top:10px">${cartRows === null ? "Load unfinished carts" : "Reload"}</button></div>`;
+  }
+  function cartMessage(c) {
+    const name = (c.name || "").split(" ")[0] || "there";
+    return `Assalam o Alaikum ${name}! Aap ne Twist & Tangle Crochet par ${(c.items || []).map((i) => i.n).filter(Boolean).slice(0, 3).join(", ") || "kuch cheezein"} cart mein rakhi thin, magar order poora nahi hua. Koi sawal ho ya madad chahiye to bata dein. Order yahan complete kar sakte hain: ${SITE_DOMAIN}`;
+  }
+  async function loadCarts() {
+    cartErr = "";
+    try {
+      const snap = await getDocs(query(collection(db, "carts"), orderBy("at", "desc"), limit(50)));
+      const orderedPhones = new Map(); // phone digits -> latest order time
+      currentOrders.forEach((o) => { const n = waNumber((o.customer || {}).phone); const t = tsMs(o.createdAt); if (n && t > (orderedPhones.get(n) || 0)) orderedPhones.set(n, t); });
+      const now = Date.now();
+      cartRows = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((c) => {
+        const t = tsMs(c.at); const n = waNumber(c.phone);
+        return !(n && (orderedPhones.get(n) || 0) >= t - 60000); // already ordered after this cart
+      }).map((c) => { const m = Math.max(0, Math.round((now - tsMs(c.at)) / 60000)); return { ...c, ago: m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago" }; });
+    } catch (e) { cartRows = null; cartErr = e.code === "permission-denied" ? "Publish the new Firestore rules (carts) first. See the rules file." : "Couldn't load carts: " + (e.message || e); }
+    if (currentView === "customers") renderCustomers();
+  }
+  function installCartHandlers() { pageRoot.addEventListener("click", async (e) => {
+    if (e.target.closest("[data-cart-load]")) { loadCarts(); return; }
+    const d = e.target.closest("[data-cart-del]"); if (!d || role === "viewer") return;
+    try { await deleteDoc(doc(db, "carts", d.getAttribute("data-cart-del"))); cartRows = (cartRows || []).filter((c) => c.id !== d.getAttribute("data-cart-del")); } catch (err) { alert("Couldn't remove: " + (err.code || err.message)); }
+    if (currentView === "customers") renderCustomers();
+  }); }
   function renderCustomers() {
     const pane = $("custRoot"); if (!pane) return;
     const all = customersList(); const q = custQuery.trim().toLowerCase();
@@ -4132,39 +4656,51 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
       <div style="margin-top:10px">${list.slice(0, 200).map((c) => `<div class="bar-row"><span><b>${esc(c.name || "—")}</b> ${c.orders > 1 ? '<span class="pill" style="padding:1px 8px;font-size:11px">Repeat ×' + c.orders + "</span>" : ""}<br><small class="hint" style="margin:0">${esc(c.phone)}${c.city ? " · " + esc(c.city) : ""}</small></span><span class="hint" style="margin:0">${c.orders} order${c.orders === 1 ? "" : "s"}</span><b>Rs. ${c.spent.toLocaleString("en-PK")}</b></div>`).join("") || '<p class="empty">No customers found.</p>'}</div>
       <button type="button" class="btn secondary" id="cust_csv" style="margin-top:10px">Download customers (Excel / CSV)</button>
     </div>
-    <div class="card"><h2>Orders &amp; courier labels</h2>
-      <p class="hint">Download all orders as a file you can open in Excel, or print address labels for the open orders (for the courier).</p>
-      <button type="button" class="btn secondary" id="ord_csv">Download orders (Excel / CSV)</button>
-      <button type="button" class="btn secondary" id="ord_labels">Print courier labels (open orders)</button>
+    ${courierBookHtml()}
+    ${cartsCardHtml()}
+    <div class="card" id="oxCard"><h2>Orders &amp; courier labels</h2>
+      <p class="hint">Tick the orders you want, then download them as an Excel file, a CSV, or print courier labels. If you tick nothing, the buttons use every order shown in the list. Orders you placed yourself (Place an order) and sales you added by hand are included.</p>
+      ${oxControls()}
+      <div id="oxList"></div>
     </div>`;
+    renderOxList(); startExpenses();
   }
   pageRoot.addEventListener("input", (e) => { if (e.target.id === "cust_q") { custQuery = e.target.value; const pos = e.target.selectionStart; renderCustomers(); const el = $("cust_q"); if (el) { el.focus(); el.setSelectionRange(pos, pos); } } });
   pageRoot.addEventListener("click", (e) => {
     const id = e.target.id;
     if (id === "cust_csv") downloadFile("customers.csv", "\ufeff" + ["Name,Phone,City,Orders,Spent (done)"].concat(customersList().map((c) => [c.name, c.phone, c.city, c.orders, c.spent].map(csvCell).join(","))).join("\n"));
-    else if (id === "ord_csv") {
-      const head = "Order no,Date,Status,Channel,Name,Phone,Address,City,Items,Total,Payment,Notes";
-      const rows = currentOrders.map((o) => { const c = o.customer || {}; const d = tsMs(o.createdAt) ? new Date(tsMs(o.createdAt)).toISOString().slice(0, 10) : "";
-        return [o.orderNo, d, o.status, o.channel, c.name, c.phone, c.address, c.city, (o.items || []).map((i) => (i.qty || 1) + "x " + i.name + (i.variant ? " (" + i.variant + ")" : "")).join("; "), o.total, o.paymentMethod, c.notes].map(csvCell).join(","); });
-      downloadFile("orders.csv", "\ufeff" + [head].concat(rows).join("\n"));
-    } else if (id === "ord_labels") {
-      const open = currentOrders.filter((o) => o.status !== "done" && o.status !== "cancelled");
-      if (!open.length) { alert("No open orders to print."); return; }
-      const w = window.open("", "_blank"); if (!w) { alert("Please allow pop-ups to print."); return; }
-      const lab = open.map((o) => { const c = o.customer || {}; const cod = /cash/i.test(o.paymentMethod || "") ? `<div class="cod">Collect Rs${Number(o.total) || 0}</div>` : "";
-        return `<div class="l"><b>${esc(c.name || "")}</b><div>${esc(c.phone || "")}</div><div>${esc(c.address || "")}</div><div class="s">Order ${esc(o.orderNo || "")} · ${(o.items || []).map((i) => (i.qty || 1) + "x " + esc(i.name)).join(", ")}</div>${cod}</div>`; }).join("");
-      w.document.write(`<!doctype html><title>Labels</title><style>body{font-family:system-ui,sans-serif;margin:10px}.bar{margin-bottom:10px}.g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.l{border:1.5px dashed #6E1E36;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.45;break-inside:avoid}.s{font-size:11.5px;color:#555;margin-top:4px}.cod{margin-top:4px;font-weight:800;color:#6E1E36}@media print{.bar{display:none}}</style><div class="bar"><button onclick="window.print()">Print</button></div><div class="g">${lab}</div>`);
-      w.document.close();
-    }
   });
+  pageRoot.addEventListener("click", (e) => { if (e.target.closest("#todayListBtn")) printTodayList(); });
+  // Orders export: filters, ticking and the download buttons.
+  pageRoot.addEventListener("input", (e) => { if (e.target.id === "ox_q") { ox.q = e.target.value; renderOxList(); } });
+  pageRoot.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.id === "ox_from") { ox.from = t.value; renderOxList(); }
+    else if (t.id === "ox_to") { ox.to = t.value; renderOxList(); }
+    else if (t.id === "ox_channel") { ox.channel = t.value; renderOxList(); }
+    else if (t.id === "ox_sales") { ox.sales = t.checked; renderOxList(); }
+    else if (t.id === "ox_notes") { ox.notes = t.checked; }
+    else if (t.id === "ox_all") { const rows = oxRows(); if (t.checked) rows.forEach((r) => ox.sel.add(r.key)); else ox.sel.clear(); renderOxList(); }
+    else if (t.dataset && t.dataset.oxPick !== undefined) { t.checked ? ox.sel.add(t.dataset.oxPick) : ox.sel.delete(t.dataset.oxPick); renderOxList(); }
+  });
+  pageRoot.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ox-status],[data-ox-range],[data-ox-go]"); if (!b || !$("oxCard") || !$("oxCard").contains(b)) return;
+    if (b.dataset.oxStatus) { ox.status = b.dataset.oxStatus; renderCustomers(); }
+    else if (b.dataset.oxRange) { ox.range = b.dataset.oxRange; renderCustomers(); }
+    else if (b.dataset.oxGo) oxDownload(b.dataset.oxGo);
+  });
+
 
   // ---- backup & restore ----
   let backupMsg = "";
   function renderBackup() {
     const pane = $("backupRoot"); if (!pane) return;
     pane.innerHTML = `<div class="card"><h2>Backup</h2>
-      <p class="hint">Saves your <b>settings, promo codes, products and costs</b> in one file on this computer (it goes to your Downloads folder). Keep it on Google Drive or your phone too. Orders are not inside: use “Customers &amp; export” for them.</p>
+      <p class="hint">Saves your <b>settings, promo codes, products, costs and orders</b> in one file on this computer (it goes to your Downloads folder). Keep it on Google Drive or your phone too. All your <b>orders</b> (with private notes) are inside this file too. For an Excel copy of the orders use the card below.</p>
       <button type="button" class="btn" id="bk_make">Download backup</button></div>
+    <div class="card"><h2>Orders backup (Excel)</h2>
+      <p class="hint">Every order in one Excel file, with your private notes. Do this once a week. ${ordersBackupAt() ? "Last done on this browser: <b>" + esc(new Date(ordersBackupAt()).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })) + "</b>." : "Not done yet on this browser."} The big backup above also keeps all orders inside it.</p>
+      <button type="button" class="btn" id="bk_orders">Download orders (Excel)</button></div>
     <div class="card"><h2>Restore</h2>
       <p class="hint">Choose a backup file. Everything in the file is put back (products and settings with the same names are replaced). Do a fresh backup first if you are not sure.</p>
       <input type="file" id="bk_file" accept=".json,application/json" />
@@ -4172,13 +4708,15 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
   }
   const plainForBackup = (v) => JSON.parse(JSON.stringify(v));
   const reviveStamps = (v) => { if (Array.isArray(v)) return v.map(reviveStamps); if (v && typeof v === "object") { if (typeof v.seconds === "number" && typeof v.nanoseconds === "number") return new Date(v.seconds * 1000); const o = {}; Object.keys(v).forEach((k) => { o[k] = reviveStamps(v[k]); }); return o; } return v; };
+  pageRoot.addEventListener("click", (e) => { if (e.target.id === "bk_orders") { ensureAllOrders().then(() => { backupOrdersExcel(); renderBackup(); }); } });
   pageRoot.addEventListener("click", async (e) => {
     if (e.target.id !== "bk_make") return;
     e.target.disabled = true;
     try {
+      await ensureAllOrders();
       const st = await getDoc(SETTINGS_REF); const pr = await getDoc(doc(db, "config", "promoCodes"));
       let ex = []; try { ex = expenses.map((x) => plainForBackup(x)); } catch (err) {}
-      const data = { app: "ttc-backup", version: 1, createdAt: new Date().toISOString(), settings: st.exists() ? plainForBackup(st.data()) : null, promoCodes: pr.exists() ? plainForBackup(pr.data()) : null, products: currentProducts.map((p) => plainForBackup(p)), expenses: ex };
+      const data = { app: "ttc-backup", version: 1, createdAt: new Date().toISOString(), settings: st.exists() ? plainForBackup(st.data()) : null, promoCodes: pr.exists() ? plainForBackup(pr.data()) : null, products: currentProducts.map((p) => plainForBackup(p)), expenses: ex, orders: currentOrders.map((o) => plainForBackup(o)) };
       downloadFile("ttc-backup-" + new Date().toISOString().slice(0, 10) + ".json", JSON.stringify(data), "application/json");
       backupMsg = "Backup saved: " + data.products.length + " products."; 
     } catch (err) { backupMsg = "Couldn't make the backup (" + (err.code || err.message) + ")."; }
@@ -4189,13 +4727,14 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
     const m = $("bk_msg"); m.className = "msg error";
     let data; try { data = JSON.parse(await e.target.files[0].text()); } catch (err) { m.textContent = "This file can't be read. Choose a backup made here."; return; }
     if (!data || data.app !== "ttc-backup" || !Array.isArray(data.products)) { m.textContent = "This is not a backup file from this admin."; return; }
-    if (!confirm("Restore " + data.products.length + " products" + (data.settings ? ", the settings" : "") + (data.promoCodes ? ", the promo codes" : "") + " from " + (data.createdAt || "this file") + "?")) return;
+    if (!confirm("Restore " + data.products.length + " products" + (Array.isArray(data.orders) && data.orders.length ? ", " + data.orders.length + " orders" : "") + (data.settings ? ", the settings" : "") + (data.promoCodes ? ", the promo codes" : "") + " from " + (data.createdAt || "this file") + "?")) return;
     m.className = "msg"; m.textContent = "Restoring… please wait.";
     try {
       if (data.settings) await setDoc(SETTINGS_REF, reviveStamps(data.settings));
-      if (data.promoCodes) await setDoc(doc(db, "config", "promoCodes"), reviveStamps(data.promoCodes));
+      if (data.promoCodes) { await setDoc(doc(db, "config", "promoCodes"), reviveStamps(data.promoCodes)); try { await publishPromos((data.promoCodes && data.promoCodes.codes) || {}, true); } catch (e2) {} }
       for (const p of data.products) { const { id, ...rest } = p; if (id) await setDoc(doc(db, "products", id), reviveStamps(rest)); }
       for (const x of (data.expenses || [])) { const { id, ...rest } = x; if (id) await setDoc(doc(db, "expenses", id), rest); }
+      for (const x of (data.orders || [])) { const { id, ...rest } = x; if (id) await setDoc(doc(db, "orders", id), reviveStamps(rest)); }
       backupMsg = "Done. " + data.products.length + " products restored. Refresh this page to see everything."; m.className = "msg success"; m.textContent = backupMsg;
     } catch (err) { m.className = "msg error"; m.textContent = "Couldn't restore (" + (err.code || err.message) + "). Nothing more was changed after this point."; }
   });
@@ -4270,12 +4809,23 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
 
   // ---- Prices & tags (bulk table) ----
   const priceEdits = {};  // id -> { price, tag } typed but not saved yet
+  // Private cost prices live in config/costs (admins only), never on the public product.
+  let costMap = null, costLoading = false;
+  async function loadCosts() {
+    if (costLoading || costMap !== null) return; costLoading = true;
+    try { const sn = await getDoc(doc(db, "config", "costs")); costMap = (sn.exists() && sn.data().costs) || {}; }
+    catch (e) { costMap = {}; }
+    costLoading = false;
+    renderPriceTable(); if (currentView === "sales") renderSales();
+  }
+  const costOfProd = (id) => (costMap && costMap[id] !== undefined && costMap[id] !== null && costMap[id] !== "" ? Number(costMap[id]) : "");
   const TAG_OPTS = ["", "New", "Bestseller", "Limited Stock", "Sold Out"];
   function renderPriceTable() {
     const box = $("priceTable"); if (!box) return;
     const q = $("priceFilter").value.trim().toLowerCase();
     const rows = currentProducts.filter((p) => !q || ((p.name || "") + " " + (p.category || "")).toLowerCase().includes(q));
-    box.innerHTML = '<div class="prow head"><span>Product</span><span>Price (Rs.)</span><span>Tag</span><span>Stock</span></div>' + (rows.length ? rows.map((p) => {
+    if (costMap === null) loadCosts();
+    box.innerHTML = '<div class="prow head"><span>Product</span><span>Price (Rs.)</span><span>Tag</span><span>Stock</span><span>Cost (private)</span></div>' + (rows.length ? rows.map((p) => {
       const e = priceEdits[p.id] || {};
       const price = e.price !== undefined ? e.price : (p.price ?? "");
       const tag = e.tag !== undefined ? e.tag : (p.tag || "");
@@ -4287,13 +4837,14 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
         <input type="number" min="0" data-pf="price" value="${esc(price)}" aria-label="Price of ${esc(p.name)}" />
         <select data-pf="tag" aria-label="Tag of ${esc(p.name)}">${opts.map((o) => `<option value="${esc(o)}" ${o === tag ? "selected" : ""}>${o || "None"}</option>`).join("")}</select>
         <input type="number" min="0" data-pf="stock" class="${isLow ? "low" : ""}" placeholder="–" title="Pieces in stock (leave empty if you don't count it)" value="${esc(stock)}" aria-label="Stock of ${esc(p.name)}" />
+        <input type="number" min="0" data-pf="cost" placeholder="–" title="What the piece costs you to make (only you see this)" value="${esc(e.cost !== undefined ? e.cost : costOfProd(p.id))}" aria-label="Cost price of ${esc(p.name)}" />
       </div>`;
     }).join("") : '<p class="hint" style="padding:12px 14px">No product matches.</p>');
     $("priceSave").disabled = !Object.keys(priceEdits).some((id) => { const p = currentProducts.find((x) => x.id === id); return p && priceDirty(p); });
   }
   function priceDirty(p) {
     const e = priceEdits[p.id]; if (!e) return false;
-    return (e.price !== undefined && Number(e.price) !== Number(p.price)) || (e.tag !== undefined && e.tag !== (p.tag || "")) || (e.stock !== undefined && String(e.stock) !== String(p.stock ?? ""));
+    return (e.price !== undefined && Number(e.price) !== Number(p.price)) || (e.tag !== undefined && e.tag !== (p.tag || "")) || (e.stock !== undefined && String(e.stock) !== String(p.stock ?? "")) || (e.cost !== undefined && String(e.cost) !== String(costOfProd(p.id)));
   }
   // Low-stock warning: products with a stock number at or under this level show on the dashboard (Today's work).
   function lowLevel() { try { const n = Number(localStorage.getItem("ttcLowStock")); return Number.isFinite(n) && n >= 0 && localStorage.getItem("ttcLowStock") !== null ? n : 3; } catch (e) { return 3; } }
@@ -4313,11 +4864,19 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
     for (const p of changed) { const v = priceEdits[p.id].price; if (v !== undefined && (v === "" || Number(v) < 0)) { msg.textContent = "“" + p.name + "” needs a valid price."; return; } }
     $("priceSave").disabled = true; msg.textContent = "Saving…";
     try {
+      const costChanged = changed.filter((p) => priceEdits[p.id].cost !== undefined);
+      if (costChanged.length) {
+        const next = { ...(costMap || {}) };
+        costChanged.forEach((p) => { const v = priceEdits[p.id].cost; if (v === "" || !(Number(v) >= 0)) delete next[p.id]; else next[p.id] = Number(v); });
+        await setDoc(doc(db, "config", "costs"), { costs: next }); costMap = next;
+      }
       await Promise.all(changed.map((p) => {
         const e = priceEdits[p.id]; const data = {};
+        if (!Object.keys(e).some((k) => k !== "cost")) return Promise.resolve();
         if (e.price !== undefined) data.price = Number(e.price);
         if (e.tag !== undefined) data.tag = e.tag;
         if (e.stock !== undefined) data.stock = e.stock === "" ? null : Math.max(0, Math.floor(Number(e.stock)));
+        if (!Object.keys(data).length) return Promise.resolve();
         return updateDoc(doc(db, "products", p.id), data);
       }));
       changed.forEach((p) => delete priceEdits[p.id]);
@@ -4328,6 +4887,8 @@ document.getElementById("bars").onclick=function(ev){var b=ev.target.closest(".b
   const _renderList = renderList;
   renderList = function () { _renderList(); renderPriceTable(); };
 
+  installOrderHelpers();
+  installCartHandlers();
   appStarted = true;
   if (currentView === "dashboard") renderDashboard();
 

@@ -143,10 +143,15 @@
       }
     },
     "promoRules": {
-      "mode": "both"
+      "mode": "both",
+      "oneAtATime": false
     },
     "headerSocial": {
       "official": false
+    },
+    "adminTools": {
+      "courierBook": false,
+      "templates": []
     },
     "reviewsMore": {
       "on": false,
@@ -186,6 +191,53 @@
     },
     "tracking": {
       "on": false
+    },
+    "metaPixel": {
+      "events": false
+    },
+    "cardBadges": {
+      "newOn": false,
+      "newDays": 14,
+      "lowOn": false,
+      "lowAt": 3,
+      "comboOn": false,
+      "readyOn": false
+    },
+    "saleTimer": {
+      "on": false,
+      "text": "Sale ends in",
+      "endsAt": ""
+    },
+    "saveBadge": {
+      "on": false,
+      "style": "percent",
+      "min": 0
+    },
+    "sizeGuide": {
+      "on": false,
+      "label": "Size guide",
+      "categories": "",
+      "table": "",
+      "note": ""
+    },
+    "reviewPhotos": {
+      "on": false
+    },
+    "cartReminder": {
+      "on": false
+    },
+    "orderAlert": {
+      "telegram": false
+    },
+    "policies": {
+      "on": false,
+      "footer": true,
+      "returnsTitle": "Return & refund policy",
+      "returns": "Every piece is crocheted by hand, so tiny differences are normal.\n\nIf your parcel arrives damaged or you receive the wrong item, message us on WhatsApp as soon as you receive it, with a photo, and we will arrange an exchange or refund with you.\n\nMade-to-order and personalised pieces cannot be returned unless they arrive damaged.",
+      "deliveryTitle": "Delivery policy",
+      "delivery": "We deliver across Pakistan by courier.\n\nAfter you place an order we confirm it with you on WhatsApp or by call. Delivery time and charges are shared with you at that time.\n\nYou can follow your parcel any time with “Track your order” using your order number.",
+      "privacyTitle": "Privacy policy",
+      "privacy": "What we collect: the name, phone number, address and notes you type when you place an order.\n\nWhy: only to confirm, pack and deliver your order and to answer your questions. We do not sell your details.\n\nWe share your delivery details with the courier only so your parcel can reach you.\n\nThis website may use Google Analytics and the Meta (Facebook) Pixel to count visits and measure our ads. You can block them in your browser settings.\n\nTo see or remove your details, message us on WhatsApp."
     },
     "faq": {
       "on": false,
@@ -235,7 +287,8 @@
     "orders": {
       "numeric": false,
       "start": 2000,
-      "slipWA": false
+      "slipWA": false,
+      "slipNote": ""
     },
     "myOrders": {
       "on": false
@@ -499,6 +552,11 @@
     "speed": {
       "srcset": false,
       "apiShop": false,
+      "apiOnly": false,
+      "apiCacheMin": 1,
+      "adminOrdersLimit": 0,
+      "adminCache": false,
+      "adminLazy": false,
       "sw": false,
       "lightMotion": false,
       "resizeUploads": false,

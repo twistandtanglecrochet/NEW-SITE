@@ -49,10 +49,11 @@ export const DEFAULT_SETTINGS = {
   },
 
   // Discount rules. mode: "both" = a promo code and a combo price add up (as it always was) | "best" = only the bigger one counts
-  promoRules: { mode: "both" },
+  promoRules: { mode: "both", oneAtATime: false }, // oneAtATime: a second promo code is refused with "already applied"
 
   // Header social icons (Instagram / Facebook / WhatsApp) in their own brand colours
   headerSocial: { official: false },
+  adminTools: { courierBook: false, templates: [] }, // admin-only helpers (ready-made WhatsApp messages, courier & COD summary)
 
   // Home reviews: show the first few, then an "Explore more" button; "Show less" folds them back
   reviewsMore: { on: false, initial: 3, more: "Explore more", less: "Show less" },
@@ -68,6 +69,24 @@ export const DEFAULT_SETTINGS = {
   // Orders
   checkout: { giftNote: false, betterForm: false, strict: false, whatsappAuto: false, whatsappDelay: 2 }, // betterForm = city/email/postal + strict checks; whatsappAuto = open WhatsApp after the thank-you screen
   tracking: { on: false },
+  // Meta Pixel shop events for ads (ViewContent, AddToCart, InitiateCheckout, Purchase in PKR). OFF = only PageView, as before.
+  metaPixel: { events: false },
+  cardBadges: { newOn: false, newDays: 14, lowOn: false, lowAt: 3, comboOn: false, readyOn: false }, // extra badges on product cards
+  saleTimer: { on: false, text: "Sale ends in", endsAt: "" },   // endsAt like 2026-11-05 23:59
+  saveBadge: { on: false, style: "percent", min: 0 },   // "Save 10%" badge on product cards (needs an old price)
+  sizeGuide: { on: false, label: "Size guide", categories: "", table: "", note: "" },
+  reviewPhotos: { on: false },                          // customers may add one photo to a review
+  cartReminder: { on: false },                          // save unfinished carts (phone typed at checkout) for WhatsApp reminders
+  // Telegram message to the owner for every website order (needs TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID in Vercel). OFF by default.
+  orderAlert: { telegram: false },
+  // Return / delivery / privacy pages (footer links + /returns /delivery /privacy). Edit the words in Admin.
+  policies: { on: false, footer: true,
+    returnsTitle: "Return & refund policy",
+    returns: "Every piece is crocheted by hand, so tiny differences are normal.\n\nIf your parcel arrives damaged or you receive the wrong item, message us on WhatsApp as soon as you receive it, with a photo, and we will arrange an exchange or refund with you.\n\nMade-to-order and personalised pieces cannot be returned unless they arrive damaged.",
+    deliveryTitle: "Delivery policy",
+    delivery: "We deliver across Pakistan by courier.\n\nAfter you place an order we confirm it with you on WhatsApp or by call. Delivery time and charges are shared with you at that time.\n\nYou can follow your parcel any time with “Track your order” using your order number.",
+    privacyTitle: "Privacy policy",
+    privacy: "What we collect: the name, phone number, address and notes you type when you place an order.\n\nWhy: only to confirm, pack and deliver your order and to answer your questions. We do not sell your details.\n\nWe share your delivery details with the courier only so your parcel can reach you.\n\nThis website may use Google Analytics and the Meta (Facebook) Pixel to count visits and measure our ads. You can block them in your browser settings.\n\nTo see or remove your details, message us on WhatsApp." },
   faq: { on: false, footer: true, title: "Questions & returns", items: [
     { q: "How do I order?", a: "Choose a product, press Add to Cart or Buy Now, write your name, mobile number and full address, then press Place order. We confirm every order on WhatsApp or by call." },
     { q: "How can I pay?", a: "Payment is confirmed with you when we confirm your order on WhatsApp." },
@@ -78,7 +97,7 @@ export const DEFAULT_SETTINGS = {
   cartPlus: { suggest: false, giftOn: false, giftOver: 2000, giftText: "Free gift wrap" },
   insta: { on: false, title: "Follow us on Instagram", link: "", posts: [] }, // posts: [{ image, link }]
   search: { suggest: false },                    // suggestions list under the search box
-  orders: { numeric: false, start: 2000, slipWA: false },       // order numbers 2000, 2001, … instead of TTC-XXXXX
+  orders: { numeric: false, start: 2000, slipWA: false, slipNote: "" },       // order numbers 2000, 2001, … instead of TTC-XXXXX
   myOrders: { on: false },                       // "My orders" for the customer (orders placed on this phone)
 
   // Product page + order guide
@@ -141,7 +160,7 @@ export const DEFAULT_SETTINGS = {
   i18n: { on: false, defaultLang: "en", en: {}, ur: {}, extra: [{"en": "Description", "ur": ""}, {"en": "Details", "ur": ""}, {"en": "Sizes available", "ur": ""}, {"en": "Colours available", "ur": ""}, {"en": "Price includes:", "ur": ""}, {"en": "My orders", "ur": ""}, {"en": "Track this order", "ur": ""}, {"en": "You may also like", "ur": ""}, {"en": "Notify me when it's back", "ur": ""}, {"en": "Complete order guide", "ur": ""}, {"en": "Start shopping", "ur": ""}, {"en": "Ask on WhatsApp", "ur": ""}, {"en": "Good to know", "ur": ""}, {"en": "Goes well with your order", "ur": ""}, {"en": "Add combo to cart", "ur": ""}, {"en": "Follow us on Instagram", "ur": ""}, {"en": "Combo offers", "ur": ""}, {"en": "Questions & returns", "ur": ""}, {"en": "Home", "ur": ""}, {"en": "See all results", "ur": ""}, {"en": "Add to Cart", "ur": ""}, {"en": "Buy Now", "ur": ""}] }, // extra: any English text on the shop -> your Urdu
 
   // Speed
-  speed: { srcset: false, apiShop: false, sw: false, lightMotion: false, resizeUploads: false, uploadMax: 1600, lcp: false, boot: false, noLive: false, cv: false },
+  speed: { srcset: false, apiShop: false, apiOnly: false, apiCacheMin: 1, adminOrdersLimit: 0, adminCache: false, adminLazy: false, sw: false, lightMotion: false, resizeUploads: false, uploadMax: 1600, lcp: false, boot: false, noLive: false, cv: false },
 
   // PWA
   pwa: { install: false, safeArea: false },
