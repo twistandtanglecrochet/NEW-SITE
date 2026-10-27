@@ -73,7 +73,7 @@ export const DEFAULT_SETTINGS = {
   metaPixel: { events: false },
   cardBadges: { newOn: false, newDays: 14, lowOn: false, lowAt: 3, comboOn: false, readyOn: false }, // extra badges on product cards
   saleTimer: { on: false, text: "Sale ends in", endsAt: "" },   // endsAt like 2026-11-05 23:59
-  saveBadge: { on: false, style: "percent", min: 0 },   // "Save 10%" badge on product cards (needs an old price)
+  saveBadge: { on: false, style: "percent", min: 0, showOld: false },   // "Save 10%" badge on product cards (needs an old price)
   sizeGuide: { on: false, label: "Size guide", categories: "", table: "", note: "" },
   reviewPhotos: { on: false },                          // customers may add one photo to a review
   cartReminder: { on: false },                          // save unfinished carts (phone typed at checkout) for WhatsApp reminders

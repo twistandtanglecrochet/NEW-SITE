@@ -1,11 +1,14 @@
 import React, { useState, useMemo, useEffect, useRef, useContext, lazy, Suspense } from "react";
 import { ShoppingBag, Heart, Instagram, MessageCircle, Plus, Minus, X, Facebook, Search, ChevronDown, ChevronLeft, ChevronRight, Menu, Star, ArrowUp, CheckCircle2, Clock, Shuffle, Package } from "lucide-react";
-import { watch, loadOnce } from "./lib/live";
-import { collection, doc, query, orderBy, addDoc, serverTimestamp, runTransaction } from "firebase/firestore";
+import { watch, watchApi, loadOnce } from "./lib/live";
+import { collection, doc, query, orderBy, where, addDoc, setDoc, serverTimestamp, runTransaction } from "firebase/firestore";
 import { db } from "./firebase";
 import { COLORS } from "./data/colors.js";
 import { LOGO_SRC, BG_SRC } from "./data/siteImages.js";
 import { categorySlug } from "./data/slug.js";
+import { setMetaEvents, metaTrack } from "./lib/metaEvents.js";
+import { uploadReviewPhoto, PHOTO_MAX_MB } from "./lib/reviewPhoto.js";
+import { promoHash } from "./lib/promoHash.js";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SHOW_DIRECT_ORDER_LINKS, PAYMENT_METHODS, DELIVERY_LABEL } from "./data/siteConfig.js";
 import {
   SEED_PRODUCTS,
@@ -15,7 +18,7 @@ import {
   EARRING_EAR1_SRC,
 } from "./data/products.js";
 import { VariantPicker, ProductPhotoGallery, ProductSwatch, StarRating, RatingSummary } from "./components/shared.jsx";
-import ProductCard from "./components/ProductCard.jsx";
+import ProductCard, { saveText } from "./components/ProductCard.jsx";
 import { AnnouncementBars, AdBanners, AdPopup, safeLink, liveAds } from "./components/Marketing.jsx";
 import Reveal from "./components/Reveal.jsx";
 import HeroHeading from "./components/HeroHeading.jsx";
@@ -66,6 +69,9 @@ const ProductTabs = lazy(() => import("./components/ProductInfo.jsx").then((m) =
 const ProductMeta = lazy(() => import("./components/ProductInfo.jsx").then((m) => ({ default: m.ProductMeta })));
 const MyOrders = lazy(() => import("./components/MyOrders.jsx"));
 import { rememberOrder } from "./components/MyOrders.jsx";
+const SaleTimer = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.SaleTimer })));
+const SizeGuide = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.SizeGuide })));
+const PolicyPage = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.PolicyPage })));
 const FaqPage = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.FaqPage })));
 const ComboStrip = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.ComboStrip })));
 const InstaStrip = lazy(() => import("./components/Extras.jsx").then((m) => ({ default: m.InstaStrip })));
@@ -253,7 +259,7 @@ function Logo({ size = 72, scale = 2 }) {
 // new one. New reviews are NOT shown immediately — they're saved with
 // approved:false and only appear once approved from the admin portal, so a
 // spam or inappropriate submission never reaches other customers.
-function ReviewsSection({ productId, productName, reviews }) {
+function ReviewsSection({ productId, productName, reviews, photosOn }) {
   const [name, setName] = useState("");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -261,6 +267,14 @@ function ReviewsSection({ productId, productName, reviews }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
+
+  function pickPhoto(e) {
+    const f = e.target.files && e.target.files[0];
+    if (!f) { setPhotoFile(null); return; }
+    if (!/^image\//.test(f.type) || f.size > PHOTO_MAX_MB * 1024 * 1024) { setError("Please choose a photo (JPG or PNG) under " + PHOTO_MAX_MB + " MB."); e.target.value = ""; setPhotoFile(null); return; }
+    setError(""); setPhotoFile(f);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -271,12 +285,18 @@ function ReviewsSection({ productId, productName, reviews }) {
     setError("");
     setSubmitting(true);
     try {
+      let photo = "";
+      if (photosOn && photoFile) {
+        try { photo = await uploadReviewPhoto(photoFile); }
+        catch (pe) { setError("The photo couldn't be uploaded. Please try again, or remove the photo and submit without it."); setSubmitting(false); return; }
+      }
       await addDoc(collection(db, "reviews"), {
         productId,
         productName,
         name: name.trim(),
         rating,
         comment: comment.trim(),
+        ...(photo ? { photo } : {}),
         approved: false,
         createdAt: serverTimestamp(),
       });
@@ -354,6 +374,7 @@ function ReviewsSection({ productId, productName, reviews }) {
           />
           <textarea
             placeholder="What did you think?"
+            maxLength={1000}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={3}
@@ -363,6 +384,13 @@ function ReviewsSection({ productId, productName, reviews }) {
               resize: "vertical", fontFamily: "inherit",
             }}
           />
+          {photosOn && (
+            <label style={{ display: "block", fontSize: 12.5, color: COLORS.charcoal, marginBottom: 8 }}>
+              <span style={{ fontWeight: 700 }}>Add a photo of your piece (optional)</span>
+              <input type="file" accept="image/*" onChange={pickPhoto} style={{ display: "block", marginTop: 6, fontSize: 12.5, maxWidth: "100%" }} />
+              {photoFile && <span style={{ color: "#7A6E64" }}>Selected: {photoFile.name}</span>}
+            </label>
+          )}
           {error && <div style={{ fontSize: 12, color: "#C0392B", marginBottom: 8 }}>{error}</div>}
           <button
             type="submit"
@@ -670,6 +698,10 @@ export default function App() {
   const [reviewWriteOpen, setReviewWriteOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(null); // null | "" (menu) | "match" | "puzzle" | "wheel"
   const [faqOpen, setFaqOpen] = useState(false);
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
+  const [policyOpen, setPolicyOpen] = useState(""); // "returns" | "delivery" | "privacy" | ""
+  function openPolicy(k) { setPolicyOpen(k); try { if (window.location.pathname !== "/" + k) window.history.pushState({}, "", "/" + k); } catch (e) {} }
+  function closePolicy() { const k = policyOpen; setPolicyOpen(""); try { if (window.location.pathname === "/" + k) window.history.pushState({}, "", "/"); } catch (e) {} }
   function openFaq() { setFaqOpen(true); try { if (window.location.pathname !== "/faq") window.history.pushState({}, "", "/faq"); } catch (e) {} }
   function closeFaq() { setFaqOpen(false); try { if (window.location.pathname === "/faq") window.history.pushState({}, "", "/"); } catch (e) {} }
   const [giftNote, setGiftNote] = useState("");
@@ -694,6 +726,9 @@ export default function App() {
   const lastSavedOrderRef = React.useRef("");
   const [promoInput, setPromoInput] = useState("");
   const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoRules, setPromoRules] = useState(null);
+  const appliedPromoRef = useRef(null);
+  appliedPromoRef.current = appliedPromo;
   const [promoCodes, setPromoCodes] = useState(PROMO_CODES);
   const [promoError, setPromoError] = useState("");
   const [products, setProducts] = useState(() => readShopCache() || SEED_PRODUCTS);
@@ -808,6 +843,9 @@ export default function App() {
     } else if (path === "/guide" && settings.guide.on) {
       setGuideOpen(true);
       routeAppliedRef.current = true;
+    } else if (/^\/(returns|delivery|privacy)$/.test(path) && settings.policies && settings.policies.on) {
+      setPolicyOpen(path.slice(1));
+      routeAppliedRef.current = true;
     } else {
       routeAppliedRef.current = true;
     }
@@ -832,7 +870,10 @@ export default function App() {
         setFaqOpen(true);
       } else if (path === "/guide") {
         setGuideOpen(true);
+      } else if (/^\/(returns|delivery|privacy)$/.test(path)) {
+        setPolicyOpen(path.slice(1));
       } else {
+        setPolicyOpen("");
         setActiveCategory("All");
         setQuickViewId(null);
         setGuideOpen(false);
@@ -894,33 +935,57 @@ export default function App() {
     }
   }, [quickViewId, activeCategory, products]);
 
-  // Live promo codes from the admin panel. Only active codes are usable; if
-  // the admin hasn't saved the list yet, the built-in PROMO_CODES stay.
+  // Live promo codes from the admin panel. They arrive scrambled (config/promoPublic), so nobody can read the list;
+  // a code the customer types is scrambled the same way and looked up. If the admin hasn't saved the list yet,
+  // the built-in PROMO_CODES stay.
   useEffect(() => {
-    const unsub = watch(
-      doc(db, "config", "promoCodes"),
+    const applyPublic = (all) => {
+      const rules = {};
+      for (const [h, p] of Object.entries(all || {})) {
+        if (p && p.active !== false && (p.type === "percent" || p.type === "flat") && Number(p.value) > 0) {
+          rules[h] = { type: p.type, value: Number(p.value), mode: p.mode === "only" || p.mode === "except" ? p.mode : "all", cats: Array.isArray(p.cats) ? p.cats : [], noIds: Array.isArray(p.noIds) ? p.noIds.map(String).slice(0, 200) : [] };
+        }
+      }
+      setPromoRules(rules);
+    };
+    const unsub = watchApi(
+      (d) => (d.promoPublic === undefined || d.promoPublic === null ? undefined : ((d.promoPublic && d.promoPublic.codes) || {})),
+      applyPublic,
+      doc(db, "config", "promoPublic"),
       (snap) => {
         if (!snap.exists()) return;
-        const all = (snap.data() && snap.data().codes) || {};
-        const active = {};
-        for (const [code, p] of Object.entries(all)) {
-          if (p && p.active !== false && (p.type === "percent" || p.type === "flat") && Number(p.value) > 0) {
-            active[code.toUpperCase()] = { type: p.type, value: Number(p.value), mode: p.mode === "only" || p.mode === "except" ? p.mode : "all", cats: Array.isArray(p.cats) ? p.cats : [] };
-          }
-        }
-        setPromoCodes(active);
-        // A code the customer already applied that's since been switched off.
-        setAppliedPromo((current) => (current && !active[current] ? null : current));
+        applyPublic((snap.data() && snap.data().codes) || {});
       },
       () => {}, // keep the built-in codes if this can't be read
       loadOnce()
     );
     return () => unsub();
   }, []);
+  // When the list changes: forget the codes unlocked so far, and re-check the one the customer already applied.
+  useEffect(() => {
+    if (!promoRules) return undefined;
+    let dead = false;
+    const cur = appliedPromoRef.current;
+    if (!cur) { setPromoCodes({}); return undefined; }
+    promoHash(cur).then((h) => {
+      if (dead) return;
+      if (promoRules[h]) setPromoCodes({ [cur]: promoRules[h] });
+      else { setPromoCodes({}); setAppliedPromo(null); }
+    }).catch(() => {});
+    return () => { dead = true; };
+  }, [promoRules]);
 
   useEffect(() => {
     const q = query(collection(db, "products"));
-    const unsub = watch(
+    const unsub = watchApi(
+      (d) => (Array.isArray(d.products) ? d.products : undefined),
+      (arr) => {
+        const merged = mergeWithSeed(arr);
+        setProducts(merged);
+        liveProductsRef.current = true;
+        writeShopCache(merged);
+        setProductsLoaded(true);
+      },
       q,
       (snap) => {
         // Keep the built-in starter catalog, plus anything from the admin
@@ -969,10 +1034,15 @@ export default function App() {
   // field) needs a manually-created index, which would otherwise silently
   // break this the first time it ran in production.
   useEffect(() => {
-    const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-    const unsub = watch(
+    // Only approved reviews are asked for (pending ones stay private; the Firestore rules allow this query).
+    // One equality filter needs no index; the newest-first order is applied here.
+    const q = query(collection(db, "reviews"), where("approved", "==", true));
+    const ms = (r) => (r && r.createdAt && r.createdAt.toMillis ? r.createdAt.toMillis() : 0);
+    const unsub = watchApi(
+      (d) => (Array.isArray(d.reviews) ? d.reviews : undefined),
+      (arr) => setReviews(arr.map((r) => { const t = Date.parse(r.createdAt || ""); return { ...r, createdAt: { toMillis: () => (isNaN(t) ? 0 : t) } }; }).sort((a, b) => ms(b) - ms(a))),
       q,
-      (snap) => setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+      (snap) => setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => ms(b) - ms(a))),
       () => setReviews([]),
       loadOnce()
     );
@@ -1135,9 +1205,19 @@ export default function App() {
   const subtotal = cartItems.reduce((s, i) => s + i.qty * i.price, 0);
 
   // Promo codes can be limited to some categories (Admin → Promo codes).
+  // A code can also skip chosen products ("noIds", Admin → Promo codes).
   function promoBase(promo, items, fallback) {
-    if (!promo || !promo.mode || promo.mode === "all" || !Array.isArray(promo.cats) || !promo.cats.length || !items) return fallback;
-    return items.filter((i) => (promo.mode === "only") === promo.cats.includes(i.category)).reduce((n, i) => n + i.qty * i.price, 0);
+    if (!promo || !items) return fallback;
+    const byCat = !!promo.mode && promo.mode !== "all" && Array.isArray(promo.cats) && promo.cats.length > 0;
+    const skip = Array.isArray(promo.noIds) && promo.noIds.length > 0 ? promo.noIds.map(String) : null;
+    if (!byCat && !skip) return fallback;
+    return items.filter((i) => (!byCat || (promo.mode === "only") === promo.cats.includes(i.category)) && !(skip && skip.includes(String(i.id)))).reduce((n, i) => n + i.qty * i.price, 0);
+  }
+  function promoSkippedNames(code, items) {
+    const promo = promoCodes[code];
+    if (!promo || !Array.isArray(promo.noIds) || !promo.noIds.length || !items) return [];
+    const skip = promo.noIds.map(String);
+    return Array.from(new Set(items.filter((i) => skip.includes(String(i.id))).map((i) => i.name)));
   }
   // Combo offers: when every product of a combo is in the cart, the customer gets the combo price.
   function bundleDiscount(items) {
@@ -1192,22 +1272,77 @@ export default function App() {
   const checkoutSubtotal = checkoutItems.reduce((s, i) => s + i.qty * i.price, 0);
   const checkoutDiscount = useMemo(() => calcDiscount(checkoutSubtotal, checkoutItems), [appliedPromo, checkoutSubtotal, promoCodes, checkoutItems, settings.bundles]);
   const checkoutTotal = Math.max(0, checkoutSubtotal - checkoutDiscount);
+  // Meta Pixel shop events (Admin → Control centre → "Meta Pixel shop events", OFF by default).
+  // Size guide link: only when the switch is on, a chart is written and the product's category is listed (empty list = all products).
+  function sizeGuideFor(prod) {
+    const g = settings.sizeGuide;
+    if (!g || !g.on || !String(g.table || "").trim() || !prod) return false;
+    const cats = String(g.categories || "").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean);
+    return !cats.length || cats.includes(String(prod.category || "").trim().toLowerCase());
+  }
+  // Products that belong to a combo offer (for the "In a combo offer" badge).
+  const comboIds = useMemo(() => {
+    const set = new Set();
+    if (settings.bundles && settings.bundles.on && settings.cardBadges && settings.cardBadges.comboOn) (settings.bundles.items || []).forEach((b) => (b.productIds || []).forEach((id) => set.add(String(id))));
+    return set;
+  }, [settings.bundles, settings.cardBadges]);
+  const policyLinks = (settings.policies && settings.policies.on && settings.policies.footer)
+    ? [["returns", "returnsTitle"], ["delivery", "deliveryTitle"], ["privacy", "privacyTitle"]].filter(([k]) => String(settings.policies[k] || "").trim()).map(([k, t]) => ({ key: k, label: settings.policies[t] || k, open: () => openPolicy(k) }))
+    : [];
+  const metaOn = !!(settings.metaPixel && settings.metaPixel.events);
+  setMetaEvents(metaOn);
+  useEffect(() => {
+    if (!checkoutOpen) return;
+    metaTrack("InitiateCheckout", { ids: checkoutItems.map((i) => i.id), num: checkoutItems.reduce((n, i) => n + (Number(i.qty) || 0), 0), value: checkoutTotal });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkoutOpen]);
   const giftFree = !!(settings.cartPlus.giftOn && Number(settings.cartPlus.giftOver) > 0 && checkoutSubtotal >= Number(settings.cartPlus.giftOver));
   const notesAll = (form.notes.trim() + (giftFree ? (form.notes.trim() ? "\n" : "") + settings.cartPlus.giftText : "") + (settings.checkout.giftNote && giftNote.trim() ? (form.notes.trim() ? "\n" : "") + "Gift note: " + giftNote.trim() : "")).trim();
 
-  function applyPromo() {
+  async function applyPromo() {
     const code = promoInput.trim().toUpperCase();
     if (!code) return;
-    if (promoCodes[code] && promoBase(promoCodes[code], cartItems, 1) === 0) {
+    // Admin → Offers & rules: "Only one promo code at a time".
+    if (appliedPromo && settings.promoRules && settings.promoRules.oneAtATime) {
+      setPromoError(code === appliedPromo ? code + " is already applied." : appliedPromo + " is already applied. Remove it first to use a different code.");
+      return;
+    }
+    const items = checkoutOpen ? checkoutItems : cartItems;
+    let rule = promoCodes[code];
+    if (!rule && promoRules) { try { rule = promoRules[await promoHash(code)]; } catch (e) { rule = null; } }
+    if (rule && promoBase(rule, items, 1) === 0) {
       setAppliedPromo(null);
-      setPromoError(promoCodes[code].mode === "only" ? "This code only works on: " + promoCodes[code].cats.join(", ") : "This code doesn't work on the items in your cart");
-    } else if (promoCodes[code]) {
+      const skipped = Array.isArray(rule.noIds) && rule.noIds.length ? Array.from(new Set(items.filter((i) => rule.noIds.map(String).includes(String(i.id))).map((i) => i.name))) : [];
+      setPromoError(skipped.length ? "This code doesn't work on: " + skipped.join(", ") : rule.mode === "only" ? "This code only works on: " + rule.cats.join(", ") : "This code doesn't work on the items in your cart");
+    } else if (rule) {
+      setPromoCodes((cur) => ({ ...cur, [code]: rule }));
       setAppliedPromo(code);
       setPromoError("");
     } else {
       setAppliedPromo(null);
       setPromoError("Invalid promo code");
     }
+  }
+  // With "Only one promo code at a time" ON: a small box under the applied code, so a second code gets a clear message.
+  function promoMore() {
+    const items = checkoutOpen ? checkoutItems : cartItems;
+    const skipped = promoSkippedNames(appliedPromo, items);
+    const one = !!(settings.promoRules && settings.promoRules.oneAtATime);
+    if (!one && !skipped.length) return null;
+    return (
+      <div style={{ marginTop: 6 }}>
+        {skipped.length > 0 && <div style={{ fontSize: 11.5, color: "#7A6E64" }}>{appliedPromo} doesn't apply to: {skipped.join(", ")}</div>}
+        {one && (
+          <>
+            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+              <input value={promoInput} onChange={(e) => { setPromoInput(e.target.value); setPromoError(""); }} placeholder={t("cart.promo")} aria-label="Another promo code" style={{ flex: 1, minWidth: 0, padding: "8px 12px", borderRadius: 10, border: `1px solid ${COLORS.bgSoft}`, fontSize: 13, background: COLORS.bg }} />
+              <button onClick={applyPromo} style={{ background: COLORS.navy, color: COLORS.cream, border: "none", borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 700 }}>{t("cart.apply")}</button>
+            </div>
+            {promoError && <div style={{ fontSize: 11.5, color: "#C0392B", marginTop: 6 }}>{promoError}</div>}
+          </>
+        )}
+      </div>
+    );
   }
   function removePromo() {
     setAppliedPromo(null);
@@ -1220,6 +1355,7 @@ export default function App() {
   // same product are two separate lines, not merged into one.
   function addToCart(id, qty = 1, variant = null) {
     const key = variant ? `${id}::${variant}` : id;
+    { const pp = products.find((x) => x.id === id); if (pp) metaTrack("AddToCart", { ids: [id], name: pp.name, num: qty, value: (Number(pp.price) || 0) * qty }); }
     setCart((c) => {
       const existing = c[key];
       return { ...c, [key]: { id, variant, qty: (existing ? existing.qty : 0) + qty } };
@@ -1267,6 +1403,7 @@ export default function App() {
 
   function openQuickView(id, push = true) {
     const p = products.find((pr) => pr.id === id);
+    if (p) metaTrack("ViewContent", { ids: [id], name: p.name, value: Number(p.price) || 0 });
     setQuickViewId(id);
     if (settings.recent.on) recentApi.push(id);
     setQuickViewQty(1);
@@ -1333,6 +1470,7 @@ export default function App() {
     const signature = channel + "|" + buildOrderText();
     if (lastSavedOrderRef.current === signature) return;
     lastSavedOrderRef.current = signature;
+    metaTrack("Purchase", { ids: orderItemsForSave().map((x) => x.productId).filter(Boolean), num: orderItemsForSave().reduce((n, x) => n + (Number(x.qty) || 0), 0), value: checkoutTotal });
     addDoc(collection(db, "orders"), {
       items: orderItemsForSave(),
       subtotal: checkoutSubtotal,
@@ -1446,6 +1584,8 @@ export default function App() {
       );
       writeLastOrderAt(Date.now());
       rememberOrder(orderNo, checkoutTotal);
+      metaTrack("Purchase", { ids: orderItemsForSave().map((x) => x.productId).filter(Boolean), num: orderItemsForSave().reduce((n, x) => n + (Number(x.qty) || 0), 0), value: checkoutTotal }, orderNo);
+      if (settings.orderAlert && settings.orderAlert.telegram) { try { fetch("/api/notify", { method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true, body: JSON.stringify({ orderNo, total: checkoutTotal, city: form.city || "", items: orderItemsForSave().reduce((n, x) => n + (Number(x.qty) || 0), 0) }) }).catch(() => {}); } catch (e) {} }
       if (betterOn) { try { if (saveInfo) localStorage.setItem("ttc_checkout_info", JSON.stringify({ name: form.name, phone: form.phone, address: form.address, apt: form.apt, city: form.city, postal: form.postal, email: form.email })); else localStorage.removeItem("ttc_checkout_info"); } catch (e) {} }
       setPlacedOrder({ ...summary, orderNo, waText: placedText(orderNo) });
       if (!directBuyItem) setCart({});
@@ -1473,6 +1613,28 @@ export default function App() {
   const betterOn = !!settings.checkout.betterForm;
   const strictOn = betterOn && !!settings.checkout.strict; // Admin → Order & checkout → "Strict checks"
   const phoneValid = isValidPkMobile(form.phone) && (!strictOn || strictPhone(form.phone));
+  // Unfinished-cart reminders (Admin → Order & checkout, OFF by default): one small write per phone + cart total, after a valid phone is typed.
+  const cartSavedRef = useRef("");
+  useEffect(() => {
+    if (!(settings.cartReminder && settings.cartReminder.on) || !checkoutOpen || placedOrder || !phoneValid || !checkoutItems.length) return;
+    let digits = String(form.phone || "").replace(/\D/g, "");
+    if (digits.startsWith("0")) digits = "92" + digits.slice(1);
+    if (digits.length < 10 || digits.length > 15) return;
+    const key = digits + "|" + checkoutTotal + "|" + checkoutItems.length;
+    if (cartSavedRef.current === key) return;
+    const t = setTimeout(() => {
+      cartSavedRef.current = key;
+      setDoc(doc(db, "carts", digits), {
+        phone: digits,
+        name: String(form.name || "").trim().slice(0, 120),
+        items: checkoutItems.slice(0, 30).map((i) => ({ n: String(i.name || "").slice(0, 80), q: Number(i.qty) || 1, p: Number(i.price) || 0 })),
+        total: checkoutTotal,
+        at: serverTimestamp(),
+      }).catch(() => {});
+    }, 2500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkoutOpen, phoneValid, form.phone, checkoutTotal, checkoutItems.length, placedOrder]);
   const nameWords = form.name.trim().split(/\s+/).filter(Boolean);
   const betterErrors = betterOn ? {
     name: nameWords.length < 2 || (strictOn && !strictName(form.name)) ? "Please enter your real first and last name (letters only)." : "",
@@ -1585,6 +1747,7 @@ export default function App() {
     cardsMotion && mo.cards.enter !== "none" ? "ttc-m-enter" : "",
     mo.overlays.on ? "ttc-m-ov" : "",
   ].filter(Boolean).join(" ");
+  const saleTimerNode = settings.saleTimer && settings.saleTimer.on ? <Suspense fallback={null}><SaleTimer cfg={settings.saleTimer} /></Suspense> : null;
   const announceNode = settings.announcements.on ? <AnnouncementBars cfg={settings.announcements} lang={lang} t={t} /> : null;
 
   const heroNode = (
@@ -1731,6 +1894,9 @@ export default function App() {
                   href={urlForProduct(p.id)}
                   wish={wish}
                   t={t}
+                  saveBadge={settings.saveBadge}
+                  cardBadges={settings.cardBadges}
+                  comboIds={comboIds}
                 />
               );
               return cardsMotion ? (
@@ -2022,6 +2188,7 @@ export default function App() {
       `}</style>
 
       {announceNode}
+      {saleTimerNode}
 
       {/* Header */}
       <header
@@ -2300,7 +2467,7 @@ export default function App() {
           <SiteFooter
             cfg={settings.footer} shopName={brandShop} logo={CURRENT_LOGO} categories={categories.filter((c) => c !== "All")} whatsapp={WHATSAPP_NUMBER}
             designedBy={designedByName ? { label: t("footer.designedBy"), name: designedByName, url: designedByHref } : null}
-            footerLinks={footerLinks} guide={settings.guide.on && settings.guide.footer ? { label: settings.guide.buttonText, open: openGuide } : null} trackOn={!!settings.tracking.on} myOrders={settings.myOrders.on ? () => setMyOrdersOpen(true) : null} wishlist={settings.wishlist.on ? () => setWishOpen(true) : null} games={settings.games.on && settings.games.where !== "section" ? { label: settings.games.footerLabel || "Get Fun", open: () => setGamesOpen("") } : null} faq={settings.faq.on && settings.faq.footer ? { label: settings.faq.title, open: openFaq } : null} onTrack={(no) => setTrackOpen(no || true)}
+            footerLinks={footerLinks} guide={settings.guide.on && settings.guide.footer ? { label: settings.guide.buttonText, open: openGuide } : null} trackOn={!!settings.tracking.on} myOrders={settings.myOrders.on ? () => setMyOrdersOpen(true) : null} wishlist={settings.wishlist.on ? () => setWishOpen(true) : null} games={settings.games.on && settings.games.where !== "section" ? { label: settings.games.footerLabel || "Get Fun", open: () => setGamesOpen("") } : null} faq={settings.faq.on && settings.faq.footer ? { label: settings.faq.title, open: openFaq } : null} policies={policyLinks} onTrack={(no) => setTrackOpen(no || true)}
             onTop={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           />
         </Suspense>
@@ -2358,6 +2525,7 @@ export default function App() {
           <div style={{ fontSize: 12, color: "#7A6E64", marginBottom: 22 }}>{t("footer.location")}</div>
           {settings.guide.on && settings.guide.footer && <button type="button" onClick={openGuide} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>{settings.guide.buttonText}</button>}
           {settings.faq.on && settings.faq.footer && <button type="button" onClick={openFaq} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>{settings.faq.title}</button>}
+          {policyLinks.map((l) => <button key={l.key} type="button" onClick={() => openPolicy(l.key)} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>{l.label}</button>)}
           {settings.myOrders.on && <button type="button" onClick={() => setMyOrdersOpen(true)} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>My orders</button>}
           {settings.games.on && settings.games.where !== "section" && <button type="button" onClick={() => setGamesOpen("")} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>{settings.games.footerLabel || "Get Fun"}</button>}
           {settings.wishlist.on && <button type="button" onClick={() => setWishOpen(true)} style={{ background: "none", border: "none", color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", marginBottom: 22, marginRight: 14 }}>My wishlist</button>}
@@ -2547,6 +2715,7 @@ export default function App() {
               {cartItems.length > 0 && (
                 <div style={{ marginBottom: 14 }}>
                   {appliedPromo ? (
+                    <>
                     <div style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between",
                       background: COLORS.bgSoft, borderRadius: 10, padding: "8px 12px", fontSize: 13,
@@ -2558,6 +2727,8 @@ export default function App() {
                         <X size={14} />
                       </button>
                     </div>
+                  {promoMore()}
+                  </>
                   ) : (
                     <div>
                       <div style={{ display: "flex", gap: 8 }}>
@@ -2729,6 +2900,8 @@ export default function App() {
                   )}
                   <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 21, color: COLORS.maroon, marginBottom: 14 }}>
                     Rs{p.price}
+                    {settings.saveBadge && settings.saveBadge.showOld && Number(p.oldPrice) > Number(p.price) && <s style={{ fontSize: 15, fontWeight: 500, color: "#8A7E74", marginLeft: 10 }}>Rs{p.oldPrice}</s>}
+                    {saveText(p, settings.saveBadge) && <span style={{ fontFamily: "inherit", fontSize: 12, fontWeight: 700, background: COLORS.maroon, color: COLORS.cream, borderRadius: 999, padding: "3px 10px", marginLeft: 10, verticalAlign: "middle" }}>{saveText(p, settings.saveBadge)}</span>}
                   </div>
                   {settings.productPage.tabs && String(p.shortLine || "").trim() && (
                     <div style={{ fontSize: 13, color: "#7A6E64", margin: "-8px 0 12px" }}>{p.shortLine}</div>
@@ -2744,6 +2917,10 @@ export default function App() {
                     <Suspense fallback={null}><ProductMeta product={p} cfg={settings.productPage} /></Suspense>
                   )}
 
+                  {settings.cardBadges && settings.cardBadges.readyOn && p.readyIn && <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.maroonDark, marginBottom: 12 }}>⏱ {String(p.readyIn).slice(0, 60)}</div>}
+                  {sizeGuideFor(p) && (
+                    <button type="button" onClick={() => setSizeGuideOpen(true)} style={{ background: "none", border: "none", padding: 0, marginBottom: 14, color: COLORS.navy, fontWeight: 700, fontSize: 13, textDecoration: "underline", cursor: "pointer" }}>📏 {settings.sizeGuide.label || "Size guide"}</button>
+                  )}
                   {p.sizes && (
                     <div style={{ marginBottom: 20 }}>
                       <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.charcoal, marginBottom: 8 }}>
@@ -2819,7 +2996,7 @@ export default function App() {
               </div>
 
               <div style={{ padding: "0 24px 26px" }}>
-                <ReviewsSection productId={p.id} productName={p.name} reviews={reviewsByProduct[p.id] || []} />
+                <ReviewsSection productId={p.id} productName={p.name} reviews={reviewsByProduct[p.id] || []} photosOn={!!(settings.reviewPhotos && settings.reviewPhotos.on)} />
               </div>
               {settings.productPage.related && (() => {
                 const rel = products.filter((x) => x.id !== p.id && x.category === p.category && x.photos && x.photos[0]).slice(0, 4);
@@ -2846,6 +3023,8 @@ export default function App() {
 
       {/* Checkout modal */}
       {myOrdersOpen && settings.myOrders.on && <Suspense fallback={null}><MyOrders onClose={() => setMyOrdersOpen(false)} onTrack={(no) => { setMyOrdersOpen(false); setTrackOpen(no || true); }} /></Suspense>}
+      {sizeGuideOpen && settings.sizeGuide && settings.sizeGuide.on && <Suspense fallback={null}><SizeGuide cfg={settings.sizeGuide} onClose={() => setSizeGuideOpen(false)} /></Suspense>}
+      {policyOpen && settings.policies && settings.policies.on && <Suspense fallback={null}><PolicyPage kind={policyOpen} cfg={settings.policies} whatsapp={WHATSAPP_NUMBER} onClose={closePolicy} /></Suspense>}
       {faqOpen && settings.faq.on && <Suspense fallback={null}><FaqPage cfg={settings.faq} whatsapp={WHATSAPP_NUMBER} onClose={closeFaq} /></Suspense>}
       {guideOpen && settings.guide.on && <Suspense fallback={null}><GuidePage cfg={settings.guide} whatsapp={WHATSAPP_NUMBER} onClose={closeGuide} /></Suspense>}
       {trackOpen && <Suspense fallback={null}><TrackOrder initial={typeof trackOpen === "string" ? trackOpen : ""} whatsapp={WHATSAPP_NUMBER} onClose={() => { setTrackOpen(false); try { const u = new URL(window.location.href); if (u.searchParams.has("track")) { u.searchParams.delete("track"); window.history.replaceState({}, "", u.pathname + u.search); } } catch (e) {} }} /></Suspense>}
@@ -3062,6 +3241,7 @@ export default function App() {
 
             <div style={{ marginBottom: 14 }}>
               {appliedPromo ? (
+                <>
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
                   background: COLORS.bgSoft, borderRadius: 10, padding: "8px 12px", fontSize: 13,
@@ -3073,6 +3253,8 @@ export default function App() {
                     <X size={14} />
                   </button>
                 </div>
+              {promoMore()}
+              </>
               ) : (
                 <div>
                   <div style={{ display: "flex", gap: 8 }}>

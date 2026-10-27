@@ -37,6 +37,55 @@ function Media({ p, selectedIndex, onSelect, onOpen }) {
   );
 }
 
+// "Save 10%" / "Save Rs200" badge from the product's old price (Admin → Product cards → Save badge, OFF by default).
+export function saveText(p, cfg) {
+  if (!cfg || !cfg.on) return "";
+  const old = Number(p.oldPrice), now = Number(p.price);
+  if (!(old > now) || !(now >= 0)) return "";
+  const pct = Math.round(((old - now) / old) * 100), amt = Math.round(old - now);
+  if (pct < 1 || pct < (Number(cfg.min) || 0)) return "";
+  const money = "Rs" + amt.toLocaleString("en-PK");
+  return cfg.style === "amount" ? `Save ${money}` : cfg.style === "both" ? `Save ${pct}% (${money})` : `Save ${pct}%`;
+}
+export function createdMs(p) {
+  const c = p && p.createdAt;
+  if (!c) return 0;
+  if (typeof c.toMillis === "function") return c.toMillis();
+  if (typeof c === "number") return c;
+  if (typeof c === "string") { const t = Date.parse(c); return isNaN(t) ? 0 : t; }
+  const sec = c.seconds != null ? c.seconds : c._seconds;
+  return sec != null ? sec * 1000 : 0;
+}
+// Extra card badges (Admin → Product cards → "More card badges", all OFF by default).
+function extraBadges(p, cfg, comboIds) {
+  const out = [];
+  if (!cfg) return out;
+  if (cfg.lowOn && p.stock !== undefined && p.stock !== null && p.stock !== "") {
+    const n = Number(p.stock);
+    if (n > 0 && n <= (Number(cfg.lowAt) || 3) && p.tag !== "Sold Out") out.push({ t: `Only ${n} left`, bg: "#B3261E" });
+  }
+  if (cfg.newOn && p.tag !== "New") {
+    const t = createdMs(p), days = Math.max(1, Number(cfg.newDays) || 14);
+    if (t && Date.now() - t >= 0 && Date.now() - t <= days * 864e5) out.push({ t: "New", bg: "#2F6B4F" });
+  }
+  if (cfg.comboOn && comboIds && comboIds.has(String(p.id))) out.push({ t: "In a combo offer", bg: COLORS.navy });
+  return out;
+}
+function BadgeStack({ items, ready }) {
+  if (!items.length && !ready) return null;
+  const pill = { fontSize: 11, fontWeight: 800, letterSpacing: 0.2, borderRadius: 999, padding: "4px 10px", boxShadow: "0 1px 4px rgba(0,0,0,0.2)", color: "#fff", whiteSpace: "nowrap" };
+  return (
+    <>
+      {items.length > 0 && (
+        <div style={{ position: "absolute", top: 8, left: 8, zIndex: 3, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4, pointerEvents: "none", maxWidth: "70%" }}>
+          {items.map((b, i) => <span key={i} style={{ ...pill, background: b.bg }}>{b.t}</span>)}
+        </div>
+      )}
+      {ready && <span style={{ ...pill, position: "absolute", bottom: 8, left: 8, zIndex: 3, background: "rgba(251,246,240,0.95)", color: COLORS.maroonDark, pointerEvents: "none" }}>⏱ {ready}</span>}
+    </>
+  );
+}
+
 function HeartBtn({ wish, id, t }) {
   if (!wish || !wish.on) return null;
   const saved = wish.has(id);
@@ -99,9 +148,11 @@ const descStyle = { fontSize: 13, color: "#7A6E64", margin: "6px 0 10px", lineHe
 const cardRadius = "var(--ttc-card-radius, 18px)";
 
 export default function ProductCard(props) {
-  const { p, layout = 1, selectedIndex, onSelect, onOpen, onAdd, onBuy, reviews, href, wish, t } = props;
+  const { p, layout = 1, selectedIndex, onSelect, onOpen, onAdd, onBuy, reviews, href, wish, t, saveBadge, cardBadges, comboIds } = props;
   const media = <Media p={p} selectedIndex={selectedIndex} onSelect={onSelect} onOpen={onOpen} />;
-  const heart = <HeartBtn wish={wish} id={p.id} t={t} />;
+  const heart = <><HeartBtn wish={wish} id={p.id} t={t} /><BadgeStack items={[...(saveText(p, saveBadge) ? [{ t: saveText(p, saveBadge), bg: COLORS.maroon }] : []), ...extraBadges(p, cardBadges, comboIds)]} ready={cardBadges && cardBadges.readyOn && p.readyIn ? String(p.readyIn).slice(0, 40) : ""} /></>;
+  // Admin → Product cards → Save badge → "show the old price crossed out" (OFF by default).
+  const oldEl = saveBadge && saveBadge.showOld && Number(p.oldPrice) > Number(p.price) ? <s style={{ fontSize: "0.72em", fontWeight: 500, color: "#8A7E74", marginLeft: 8 }}>Rs{p.oldPrice}</s> : null;
   const mediaBox = (
     <div style={{ position: "relative" }}>
       {media}
@@ -128,7 +179,7 @@ export default function ProductCard(props) {
           <RatingSummary reviews={reviews} />
           <div style={descStyle}>{p.desc}</div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <span style={priceStyle}>Rs{p.price}</span>
+            <span style={priceStyle}>Rs{p.price}{oldEl}</span>
             {addBtn()}
           </div>
           {buyBtn()}
@@ -144,7 +195,7 @@ export default function ProductCard(props) {
         {mediaBox}
         <div style={{ marginTop: 10, textAlign: "center" }}>
           <NameLink p={p} href={href} onOpen={onOpen} style={{ fontSize: 15 }} />
-          <div style={{ ...priceStyle, margin: "4px 0 10px" }}>Rs{p.price}</div>
+          <div style={{ ...priceStyle, margin: "4px 0 10px" }}>Rs{p.price}{oldEl}</div>
           <div style={{ display: "flex", gap: 8 }}>
             {addBtn({ flex: 1, padding: "8px 6px" })}
             {buyBtn({ flex: 1, width: "auto", padding: "8px 6px" })}
@@ -167,7 +218,7 @@ export default function ProductCard(props) {
           <NameLink p={p} href={href} onOpen={onOpen} />
           <RatingSummary reviews={reviews} />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "8px 0 10px" }}>
-            <span style={priceStyle}>Rs{p.price}</span>
+            <span style={priceStyle}>Rs{p.price}{oldEl}</span>
             {addBtn()}
           </div>
           {buyBtn()}
@@ -186,7 +237,7 @@ export default function ProductCard(props) {
           <NameLink p={p} href={href} onOpen={onOpen} />
           <RatingSummary reviews={reviews} />
           <div style={descStyle}>{p.desc}</div>
-          <div style={{ ...priceStyle, marginBottom: 10 }}>Rs{p.price}</div>
+          <div style={{ ...priceStyle, marginBottom: 10 }}>Rs{p.price}{oldEl}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {addBtn()}
             {buyBtn()}
@@ -207,7 +258,7 @@ export default function ProductCard(props) {
           <RatingSummary reviews={reviews} />
           <div style={descStyle}>{p.desc}</div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <span style={priceStyle}>Rs{p.price}</span>
+            <span style={priceStyle}>Rs{p.price}{oldEl}</span>
             {addBtn({ borderColor: COLORS.maroon, color: COLORS.maroon })}
           </div>
           {buyBtn({ background: COLORS.maroon })}
@@ -225,7 +276,7 @@ export default function ProductCard(props) {
           <NameLink p={p} href={href} onOpen={onOpen} style={{
             fontSize: 14.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
           }} />
-          <div style={{ ...priceStyle, margin: "4px 0 8px" }}>Rs{p.price}</div>
+          <div style={{ ...priceStyle, margin: "4px 0 8px" }}>Rs{p.price}{oldEl}</div>
           {addBtn({ width: "100%" })}
           <button onClick={onBuy} style={{ marginTop: 6, width: "100%", background: "none", border: "none", color: COLORS.navy, fontSize: 12, fontWeight: 700, textDecoration: "underline" }}>
             {t("shop.buyNow")}
@@ -242,7 +293,7 @@ export default function ProductCard(props) {
         {mediaBox}
         <div style={{ marginTop: 10, textAlign: "center" }}>
           <NameLink p={p} href={href} onOpen={onOpen} style={{ fontFamily: "'Caveat', cursive", fontSize: 21, fontWeight: 600 }} />
-          <div style={{ ...priceStyle, margin: "2px 0 10px" }}>Rs{p.price}</div>
+          <div style={{ ...priceStyle, margin: "2px 0 10px" }}>Rs{p.price}{oldEl}</div>
           <div style={{ display: "flex", gap: 8 }}>
             {addBtn({ flex: 1, padding: "8px 6px" })}
             {buyBtn({ flex: 1, width: "auto", padding: "8px 6px" })}
@@ -262,7 +313,7 @@ export default function ProductCard(props) {
             position: "absolute", top: 8, left: 8, zIndex: 3, background: COLORS.maroon, color: COLORS.cream,
             fontFamily: serif, fontWeight: 600, fontSize: 13.5, borderRadius: 999, padding: "4px 11px",
           }}>
-            Rs{p.price}
+            Rs{p.price}{oldEl}
           </span>
           {heart}
         </div>
@@ -295,7 +346,7 @@ export default function ProductCard(props) {
         <div style={{ marginTop: 12, textAlign: "center" }}>
           <NameLink p={p} href={href} onOpen={onOpen} />
           <RatingSummary reviews={reviews} style={{ justifyContent: "center" }} />
-          <div style={{ ...priceStyle, fontSize: 19, margin: "4px 0 10px" }}>Rs{p.price}</div>
+          <div style={{ ...priceStyle, fontSize: 19, margin: "4px 0 10px" }}>Rs{p.price}{oldEl}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {addBtn()}
             {buyBtn()}
@@ -345,7 +396,7 @@ export default function ProductCard(props) {
         <NameLink p={p} href={href} onOpen={onOpen} style={{ fontSize: 17 }} />
         <div style={{ width: 36, height: 1, background: COLORS.gold, margin: "8px auto" }} />
         <div style={{ ...descStyle, margin: "0 0 10px" }}>{p.desc}</div>
-        <div style={{ ...priceStyle, fontSize: 18, marginBottom: 12 }}>Rs{p.price}</div>
+        <div style={{ ...priceStyle, fontSize: 18, marginBottom: 12 }}>Rs{p.price}{oldEl}</div>
         <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
           {addBtn({ flex: 1 })}
           {buyBtn({ flex: 1, width: "auto", padding: "8px 6px" })}

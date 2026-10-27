@@ -211,7 +211,8 @@
     "saveBadge": {
       "on": false,
       "style": "percent",
-      "min": 0
+      "min": 0,
+      "showOld": false
     },
     "sizeGuide": {
       "on": false,
