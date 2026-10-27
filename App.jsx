@@ -2832,6 +2832,17 @@ export default function App() {
             : { position: "fixed", inset: 0, zIndex: 55, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
             {!fullPage && <div className="ttc-backdrop" onClick={() => closeQuickView()} style={{ position: "absolute", inset: 0, background: "rgba(43,36,32,0.55)" }} />}
             {fullPage && (
+              <div style={{ position: "sticky", top: 0, zIndex: 5, margin: "0 -16px", padding: "10px 16px", background: "rgba(251,246,240,0.94)", backdropFilter: "blur(6px)", borderBottom: `1px solid ${COLORS.bgSoft}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                <button type="button" onClick={() => closeQuickView()} aria-label="Back to shop" style={{ display: "flex", alignItems: "center", gap: 4, background: "transparent", border: `1.3px solid ${COLORS.navy}`, color: COLORS.navy, borderRadius: 999, padding: "7px 14px 7px 9px", fontSize: 13, fontWeight: 700 }}>
+                  <ChevronLeft size={16} /> Back
+                </button>
+                <button type="button" onClick={() => closeQuickView()} aria-label="Home" style={{ background: "none", border: "none", padding: 0, display: "flex" }}><Logo size={36} scale={1} /></button>
+                <button type="button" onClick={() => { closeQuickView(); setDrawerOpen(true); }} aria-label="Cart" style={{ display: "flex", alignItems: "center", gap: 6, background: COLORS.navy, color: COLORS.cream, border: "none", borderRadius: 999, padding: "8px 14px", fontSize: 13, fontWeight: 700 }}>
+                  <ShoppingBag size={16} /> {cartCount > 0 ? `(${cartCount})` : ""}
+                </button>
+              </div>
+            )}
+            {fullPage && (
               <nav aria-label="Breadcrumb" style={{ maxWidth: 1040, margin: "0 auto", padding: "16px 4px 12px", fontSize: 12.5, color: "#7A6E64" }}>
                 <button type="button" onClick={() => closeQuickView()} style={{ background: "none", border: "none", color: COLORS.maroon, fontWeight: 700, cursor: "pointer", padding: 0, font: "inherit" }}>Home</button>
                 {" / "}
