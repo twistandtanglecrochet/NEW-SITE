@@ -1,1 +1,1 @@
-{"files": ["public/admin.html", "public/site-settings-defaults.json", "src/data/siteSettings.js"]}
+{"files": ["public/admin.html", "public/site-settings-defaults.json", "src/App.jsx", "src/components/ProductCard.jsx", "src/data/siteSettings.js"]}
