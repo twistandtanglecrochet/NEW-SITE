@@ -1470,7 +1470,6 @@ export default function App() {
     const signature = channel + "|" + buildOrderText();
     if (lastSavedOrderRef.current === signature) return;
     lastSavedOrderRef.current = signature;
-    metaTrack("Purchase", { ids: orderItemsForSave().map((x) => x.productId).filter(Boolean), num: orderItemsForSave().reduce((n, x) => n + (Number(x.qty) || 0), 0), value: checkoutTotal });
     addDoc(collection(db, "orders"), {
       items: orderItemsForSave(),
       subtotal: checkoutSubtotal,
@@ -1965,7 +1964,7 @@ export default function App() {
                 </h2>
               )}
               {settings.reviewsShuffle.on && settings.reviewsShuffle.layout === "stack" && homepageReviews.length > 0 ? (
-                <Suspense fallback={null}><ReviewDeck reviews={deckReviews} products={products} onOpen={(id) => openQuickView(id)} auto={!!settings.reviewsShuffle.auto} every={settings.reviewsShuffle.every} /></Suspense>
+                <Suspense fallback={null}><ReviewDeck reviews={deckReviews} products={products} onOpen={(id) => openQuickView(id)} auto every={settings.reviewsShuffle.auto ? settings.reviewsShuffle.every : 2} /></Suspense>
               ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
                 {reviewsShown.map((r, ri) => {
