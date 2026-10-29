@@ -1401,9 +1401,19 @@ export default function App() {
     return () => { document.title = oldTitle; if (hadMeta) meta.setAttribute("content", oldDesc); else meta.remove(); ld.remove(); };
   }, [quickViewId, settings.productPage.seo, products]); // eslint-disable-line
 
+  // Meta ViewContent: once per product page open (also for links straight to /product/...).
+  const viewedRef = useRef(null);
+  useEffect(() => {
+    if (!quickViewId) { viewedRef.current = null; return; }
+    if (viewedRef.current === quickViewId) return;
+    const p = products.find((pr) => pr.id === quickViewId);
+    if (!p) return;
+    viewedRef.current = quickViewId;
+    metaTrack("ViewContent", { ids: [p.id], name: p.name, value: Number(p.price) || 0 });
+  }, [quickViewId, products]);
+
   function openQuickView(id, push = true) {
     const p = products.find((pr) => pr.id === id);
-    if (p) metaTrack("ViewContent", { ids: [id], name: p.name, value: Number(p.price) || 0 });
     setQuickViewId(id);
     if (settings.recent.on) recentApi.push(id);
     setQuickViewQty(1);
@@ -1470,7 +1480,6 @@ export default function App() {
     const signature = channel + "|" + buildOrderText();
     if (lastSavedOrderRef.current === signature) return;
     lastSavedOrderRef.current = signature;
-    metaTrack("Purchase", { ids: orderItemsForSave().map((x) => x.productId).filter(Boolean), num: orderItemsForSave().reduce((n, x) => n + (Number(x.qty) || 0), 0), value: checkoutTotal });
     addDoc(collection(db, "orders"), {
       items: orderItemsForSave(),
       subtotal: checkoutSubtotal,
